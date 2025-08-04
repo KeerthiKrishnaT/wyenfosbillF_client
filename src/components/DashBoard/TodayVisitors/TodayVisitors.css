@@ -1,0 +1,55 @@
+/* Container Styles */
+.visitor-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-height: 400px;
+  width: 70%; /* Reduced from 90% */
+  max-width: 300px; /* Reduced from 400px */
+  margin: 0 auto; /* Center the card */
+  text-align: center;
+}
+
+/* Header Styles */
+.visitor-card h4 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Value Styles */
+.visitor-card p {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #374151;
+  text-align: center;
+}
+
+/* Animation for Widget */
+.visitor-animated {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.visitor-animated:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .visitor-card {
+    padding: 1.2rem;
+    width: 90%;
+    max-width: 100%; /* Allow full width on very small screens */
+  }
+
+  .visitor-card h4 {
+    font-size: 1.1rem;
+  }
+
+  .visitor-card p {
+    font-size: 1.8rem;
+  }
+}

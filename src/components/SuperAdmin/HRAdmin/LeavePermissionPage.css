@@ -1,0 +1,216 @@
+:root {
+  --primary-color: #b39eb5;
+  --primary-hover: #aa98a9;
+  --button-bg: #997a8d;
+  --button-hover-bg: #9b778e;
+  --success-bg: #e6ffed;
+  --error-bg: #ffe6e6;
+  --input-focus-bg: #fff;
+}
+
+.leave-permission-page {
+  padding: 20px;
+  background: linear-gradient(to right, #b39eb9, silver);
+  color: #333;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.leave-permission-page h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.crud-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.crud-form input,
+.crud-form select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex: 1;
+  min-width: 150px;
+  background-color: var(--input-focus-bg);
+}
+
+.add-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.save-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cancel-btn {
+  background-color: #997a8d;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.edit-btn {
+  background-color: #ffc107;
+  color: #000;
+  padding: 6px 12px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 6px 12px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.action-btn.approve {
+  background-color: #28a745;
+  color: white;
+  padding: 6px 12px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.action-btn.reject {
+  background-color: #dc3545;
+  color: white;
+  padding: 6px 12px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.add-btn:hover, .save-btn:hover, .cancel-btn:hover, .edit-btn:hover, .delete-btn:hover, .action-btn.approve:hover, .action-btn.reject:hover {
+  opacity: 0.9;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.data-table th,
+.data-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.data-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.data-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.badge-pending { background: #ffc107; color: #000; }
+.badge-approved { background: #28a745; color: white; }
+.badge-rejected { background: #dc3545; color: white; }
+/* Add these to your existing CSS */
+.view-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.toggle-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  background-color: #997a8d;
+  color: white;
+  cursor: pointer;
+}
+
+.toggle-btn.active {
+  background-color: #4CAF50;
+}
+
+.badge-absent {
+  background: #ff9800;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.8em;
+}
+
+.absence-reason-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+.loading-indicator {
+  text-align: center;
+  padding: 20px;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
+
+[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+@media (max-width: 768px) {
+  .crud-form input,
+  .crud-form select {
+    min-width: 100%;
+  }
+}

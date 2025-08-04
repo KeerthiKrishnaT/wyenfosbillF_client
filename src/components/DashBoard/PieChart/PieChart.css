@@ -1,0 +1,130 @@
+/* Container Styles */
+.pie-chart-container {
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  width: 100%;
+;
+}
+
+/* Card Styles */
+.pie-chart-card {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  padding: 1.8rem;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-sizing: border-box;
+}
+
+/* Header Styles */
+.pie-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pie-chart-header h4 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #374151;
+}
+
+.pie-chart-header select {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  font-size: 1rem;
+}
+
+/* Chart Styles */
+.pie-chart-graph {
+  width: 100%;
+  height: 340px;
+  position: relative;
+}
+
+/* Legend Styles */
+.apexcharts-legend {
+  padding: 10px 0;
+  max-width: 100%;
+  overflow: visible !important;
+}
+
+.apexcharts-legend-text {
+  color: #374151 !important;
+  font-size: 14px !important;
+}
+
+/* Footer Styles */
+.pie-chart-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+}
+
+.pie-chart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1 1 40%;
+  min-width: 160px;
+}
+
+.label-container {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.label-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.label-value {
+  font-weight: 600;
+  color: #374151;
+}
+
+.divider {
+  width: 1px;
+  height: 28px;
+  background-color: #e5e7eb;
+  margin: 0 0.6rem;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .pie-chart-container {
+    padding: 16px;
+  }
+
+  .pie-chart-card {
+    padding: 1.2rem;
+  }
+
+  .pie-chart-graph {
+    height: 300px;
+  }
+
+  .pie-chart-footer {
+    flex-direction: column;
+  }
+
+  .pie-chart-item {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  .apexcharts-legend {
+    font-size: 12px !important;
+  }
+}

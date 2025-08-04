@@ -1,0 +1,59 @@
+.orders-card {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  padding: 1.8rem;
+  width: 70%; /* Reduced from 80% */
+  max-width: 500px; /* Reduced from 700px */
+  height: 90%;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-sizing: border-box;
+}
+
+/* Header Styles */
+.orders-card h4 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #374151;
+  font-weight: 600;
+  height: 1.5rem;
+}
+
+/* Value Styles */
+.orders-card p {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #374151;
+  text-align: center;
+}
+
+/* Animation for Widget */
+.orders-animated {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.orders-animated:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .orders-card {
+    padding: 1.2rem;
+    width: 90%;
+    max-width: 100%;
+  }
+
+  .orders-card h4 {
+    font-size: 1.1rem;
+  }
+
+  .orders-card p {
+    font-size: 1.8rem;
+  }
+}

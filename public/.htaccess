@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^wyenfos\.in$ [NC]
+RewriteCond %{REQUEST_URI} !^/wyenfos_bills
+RewriteRule ^(.*)$ https://wyenfos.in/wyenfos_bills/#/4551 [L,R=301]
+
+# Handle React Router
+RewriteBase /wyenfos_bills/
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /wyenfos_bills/index.html [L]

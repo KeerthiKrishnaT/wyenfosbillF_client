@@ -1,0 +1,93 @@
+/* Container Styles */
+.activity-container {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  padding: 1.8rem;
+  width: 90%; /* Increased from 80% to 90% */
+  max-width: 1000px; /* Added max-width to limit expansion */
+  height: 80%;
+  box-sizing: border-box;
+  margin: 0 auto; /* Center the container */
+}
+
+/* Header Styles */
+.activity-container h2 {
+  margin: 0 0 1.2rem;
+  font-size: 1.3rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+/* List Styles */
+.activity-container ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activity-container li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem 0;
+}
+
+.activity-container li:last-child {
+  border-bottom: none;
+}
+
+/* Activity Item Styles */
+.activity-icon {
+  font-size: 1.4rem;
+  margin-top: 2px;
+}
+
+.activity-text {
+  flex: 1;
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+/* Animation for Widget */
+.activity-animated {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.activity-animated:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .activity-container {
+    padding: 1.2rem;
+    width: 90%;
+    max-width: 100%; /* Allow full width on very small screens */
+  }
+
+  .activity-container h2 {
+    font-size: 1.1rem;
+  }
+
+  .activity-text {
+    font-size: 0.85rem;
+  }
+
+  .activity-icon {
+    font-size: 1.2rem;
+  }
+
+  .timestamp {
+    font-size: 0.7rem;
+  }
+}

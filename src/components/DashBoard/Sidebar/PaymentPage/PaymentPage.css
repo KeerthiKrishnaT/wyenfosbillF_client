@@ -1,0 +1,51 @@
+.payment-page-container {
+    background-color: #f8f9fa;
+}
+
+.payment-page-title {
+    color: #e0687a;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.payment-page-btn-process {
+    background-color:#b76e79;
+    color: white;
+    border: none;
+}
+
+.payment-page-btn-process:hover {
+    background-color:#c05968;
+}
+
+.payment-page-btn-toggle {
+    background-color: #e9ecef;
+    color:#b76e79;
+    border: none;
+}
+
+.payment-page-btn-toggle:hover {
+    background-color: #dee2e6;
+}
+
+.payment-page-side-title {
+    color: #b76e79;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.payment-page-side-content {
+    max-block-size: 600px;
+    overflow-y: auto;
+}
+
+.payment-page-btn-download {
+    background-color: #e9ecef;
+    color:#b76e79;
+    border: none;
+    font-size: 0.875rem;
+}
+
+.payment-page-btn-download:hover {
+    background-color: #dee2e6;
+}

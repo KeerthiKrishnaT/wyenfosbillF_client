@@ -1,0 +1,168 @@
+.financial-page {
+  padding: 20px;
+  background: linear-gradient(to right, #997a8d, silver);
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  color: #333;
+}
+
+.financial-page h2 {
+  margin-bottom: 10px;
+  font-size: 28px;
+  color: #080808;
+}
+
+.financial-page p {
+  font-size: 14px;
+  color: #f0f0f0;
+  margin-bottom: 20px;
+}
+
+.bill-section {
+  margin-bottom: 30px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.bill-section h3 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #2c3e50;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 5px;
+}
+
+.bill-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.bill-table th,
+.bill-table td {
+  padding: 12px;
+  border: 1px solid #ccc;
+  text-align: left;
+  font-size: 14px;
+}
+
+.bill-table th {
+  background-color: #ffc107;
+  color: #000;
+  font-weight: bold;
+}
+
+.bill-table tr:nth-child(even) {
+  background-color: #fefae0;
+}
+
+.filters {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filters input {
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.filters button {
+  padding: 10px 16px;
+  border: none;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 10px;
+  margin-top: 5px;
+  transition: background-color 0.3s ease;
+}
+
+/* Action buttons */
+.excel-btn {
+  background-color: #2ecc71; /* SAVE */
+  color: white;
+}
+.excel-btn:hover{
+  background-color: #26b361; /* SAVE */
+  color: black;
+}
+.pdf-btn {
+  background-color: #ffc107; /* EDIT */
+  color: white;
+}
+.pdf-btn:hover{
+  background-color: #e1ab09; /* EDIT */
+  color: black;
+}
+.profit-btn {
+  background-color: #dc3545; /* DELETE */
+  color: white;
+}
+.profit-btn {
+  background-color: #c12e3d; /* DELETE */
+  color: black;
+}
+.back-btn {
+  background-color: #6c757d; /* BACK */
+  color: white;
+}
+.back-btn :hover{
+  background-color: #6c757d; /* BACK */
+  color: black;
+}
+.filters button:hover {
+  filter: brightness(0.95);
+}
+@media print {
+  .filters button,
+  .excel-btn,
+  .pdf-btn,
+  .profit-btn,
+  .back-btn {
+    display: none !important;
+  }
+
+   .button-group {
+    display: none !important;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .bill-table,
+  .bill-table thead,
+  .bill-table tbody,
+  .bill-table th,
+  .bill-table td,
+  .bill-table tr {
+    display: block;
+  }
+
+  .bill-table thead tr {
+    display: none;
+  }
+
+  .bill-table td {
+    position: relative;
+    padding-left: 50%;
+    border: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .bill-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #555;
+  }
+}

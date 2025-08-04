@@ -1,0 +1,271 @@
+:root {
+  --primary-color: #b39eb5;
+  --primary-hover: #aa98a9;
+  --button-bg: #997a8d;
+  --button-hover-bg: #9b778e;
+  --success-bg: #e6ffed;
+  --error-bg: #ffe6e6;
+  --input-focus-bg: #fff;
+}
+
+body {
+  font-family: "Ethnocentric", sans-serif;
+  background:white;
+  margin: 0;
+  padding: 0;
+}
+
+.add-company-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: linear-gradient(to right, #b39eb9,silver);  color: #333;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-left: 6px solid var(--primary-color);
+}
+
+h2, h3 {
+  color: #413b3e ;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.message {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.message.success {
+  background-color: var(--success-bg);
+  color: #2e7d32;
+}
+
+.message.error {
+  background-color: var(--error-bg);
+  color: #c62828;
+}
+
+.company-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.company-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.company-form input[type="text"],
+.company-form input[type="email"],
+.company-form input[type="file"],
+.company-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s, background 0.3s;
+  font-size: 1rem;
+}
+
+.company-form input:focus,
+.company-form textarea:focus {
+  border-color: var(--primary-color);
+  background: var(--input-focus-bg);
+  outline: none;
+}
+
+.logo-preview img {
+  height: 80px;
+  margin-top: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.formm-action {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center;      /* Align vertically (if needed) */
+  gap: 10px;                /* Space between buttons */
+  margin-top: 20px;         /* Optional spacing from top */
+}
+
+.save-btn,
+.remove-btn,
+.back-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.back-btn i {
+  margin-right: 5px;
+}
+.save-btn {
+  background-color: var(--button-bg);
+  color: #0e0e0e;
+}
+
+.save-btn:hover {
+  background-color: var(--button-hover-bg);
+  color: white;
+}
+
+.companies-list {
+  margin-top: 2rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  font-size: 1rem;
+}
+
+table th, table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+.remove-btn{
+  background: #dc3545;
+  color: #333;
+}
+.remove-btn:hover{
+  background: #e42a3d;
+  color: #f8f0f0;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 0.4rem 0.8rem;
+  margin-right: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.edit-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+.delete-btn {
+  background-color: #d9534f;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #c9302c;
+}
+
+.backbtn{
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color:#997a8d;
+}
+.backbtn:hover{
+ background-color:#996585;
+
+}
+.company-logo-small {
+  max-height: 50px;
+  max-width: 50px;
+  object-fit: contain;
+  margin-right: 10px;
+  border-radius: 4px;
+}
+.dual-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 2px solid #ccc;
+}
+.primary-details {
+  display: flex;
+  align-items: center;
+}
+.company-details {
+  margin-left: 12px;
+}
+.company-name {
+  font-size: 22px;
+  font-weight: bold;
+}
+.company-logo-img {
+  height: 40px;
+  width: auto;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 6px;
+}
+.preview-logo{
+  height: 60px;
+  width: 60px;
+}
+@media (max-width: 768px) {
+  .add-company-container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .formm-action {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  table, thead, tbody, th, td, tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    margin-bottom: 1rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border: none;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+
+  .company-logo-small {
+    height: 30px;
+  }
+
+  .edit-btn,
+  .delete-btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    margin-right: 0.3rem;
+  }
+}

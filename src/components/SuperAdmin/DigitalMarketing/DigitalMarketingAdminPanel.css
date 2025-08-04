@@ -1,0 +1,347 @@
+/* Base styles for the admin panel container */
+.digital-marketing-admin-panel {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Error and success messages */
+.error-message {
+  color: red;
+  background-color: #f8d7da;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+.success-message {
+  color: green;
+  background-color: #d4edda;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+/* Voucher toggle buttons */
+.toggle-button {
+  background-color: #e5e7eb; /* Inactive state */
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-button.active {
+  background-color:#b39eb5; /* Active state */
+  color: white;
+  border-color: #aa98a9;
+  box-shadow: 0 4px 8px rgba(242, 130, 121, 0.3);
+}
+
+.toggle-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(242, 130, 121, 0.3);
+}
+.toggle-button.active{
+   background: linear-gradient(to right, #806676, silver);
+  color: white;
+}
+.toggle-button.active{
+   background: linear-gradient(to right, #65535e, silver);
+  color: black;
+}
+.action-button {
+  background: linear-gradient(to right, #997a8d, silver);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(242, 130, 121, 0.4);
+  cursor: pointer;
+}
+
+.action-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(242, 130, 121, 0.6);
+  background: linear-gradient(to right, #806676, silver);
+  color: black;
+}
+
+.action-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(242, 130, 121, 0.3);
+}
+
+.action-button.edit-button {
+  background-color: #ffc107;
+}
+
+.action-button.edit-button:hover {
+ background-color: #ffc107;
+}
+
+.action-button.delete-button {
+  background: linear-gradient(135deg, #ef4444, #dc2626); /* Red gradient for Delete */
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+}
+
+.action-button.delete-button:hover {
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.6);
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+/* Tear button for Petty Cash Vouchers */
+.tear-button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 24px;
+  background: linear-gradient(to right, #997a8d, silver);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(242, 130, 121, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.tear-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(242, 130, 121, 0.6);
+  background: linear-gradient(to right, #997a8d, silver);
+}
+
+.tear-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(242, 130, 121, 0.3);
+}
+
+.tear-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 3h18M3 9l9 6 9-6"/></svg>') no-repeat center;
+  background-size: 16px;
+  opacity: 0.6;
+}
+
+.voucher-entry-box {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: visible;
+}
+
+/* Form styling (shared between create and edit forms) */
+.voucher-form {
+  display: grid;
+  gap: 16px;
+}
+
+.voucher-form input,
+.voucher-form select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.voucher-form input:focus,
+.voucher-form select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+.voucher-form input{
+  width: 97%;
+}
+.voucher-form.edit-voucher-form {
+  background-color: #f1f5f9; /* Light slate background to differentiate */
+  border: 2px dashed #94a3b8; /* Dashed border for emphasis */
+  padding: 16px;
+  border-radius: 6px;
+}
+
+/* Table styling for both Petty Vouchers and Petty Cash Vouchers */
+.voucher-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.voucher-table th,
+.voucher-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.voucher-table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #374151;
+}
+
+.voucher-table tr:last-child td {
+  border-bottom: none;
+}
+
+.voucher-table tr:hover {
+  background-color: #f9fafb;
+}
+.back-btn{
+  background-color: gray;
+  color: white;
+}
+/* Filter input and button */
+.flex.gap-4.mb-4 input {
+  font-size: 14px;
+}
+
+/* Tear effect for Petty Cash Vouchers */
+.tear-top {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+.tear-top svg {
+  display: block;
+}
+
+/* Print table styling */
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.print-table th,
+.print-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-size: 14px;
+  text-align: left;
+}
+
+.print-table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
+/* Headings */
+.text-lg {
+  text-align: center;
+}
+
+.text-2xl {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+@media print {
+  .page-break-after {
+    page-break-after: always;
+  }
+}
+
+/* Toggle visibility of sections */
+.book--petty-vouchers .petty-vouchers-section {
+  display: block;
+}
+
+.book--petty-vouchers .petty-cash-vouchers-section {
+  display: none;
+}
+
+.book--petty-cash-vouchers .petty-vouchers-section {
+  display: none;
+}
+
+.book--petty-cash-vouchers .petty-cash-vouchers-section {
+  display: block;
+}
+
+/* Print and Download buttons */
+.flex.gap-4.mt-4 button {
+  font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .digital-marketing-admin-panel {
+    padding: 16px;
+  }
+
+  .voucher-form {
+    grid-template-columns: 1fr;
+  }
+
+  .flex.gap-4.mb-4 {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .flex.gap-4.mt-4 {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .voucher-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .voucher-table th,
+  .voucher-table td {
+    min-width: 120px;
+  }
+
+  .print-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .print-table th,
+  .print-table td {
+    min-width: 120px;
+  }
+
+  .tear-button {
+    padding: 8px 20px;
+    font-size: 14px;
+  }
+}

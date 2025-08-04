@@ -1,0 +1,181 @@
+.accounts-sidebar-wrapper {
+  inline-size: 280px;
+  transition: inline-size 0.3s ease-in-out, visibility 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  overflow: hidden;
+  background-color: #fff;
+  position: fixed;
+  color: #000;
+  block-size: 100%;
+  z-index: 1000;
+}
+
+.accounts-sidebar-wrapper.closed {
+  inline-size: 0;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.accounts-sidebar-wrapper.open {
+  inline-size: 280px;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.accounts-sidebar {
+  block-size: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  inline-size: 280px;
+}
+.accounts-profile-section {
+  text-align: center;
+  margin-block-end: 10px;
+}
+
+.accounts-profile-pic {
+  inline-size: 80px;
+  block-size: 80px;
+  border-radius: 50%;
+  margin: auto;
+  background-color: #ccc;
+  background-size: cover;
+  background-position: center;
+}
+
+.accounts-profile-name {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+
+.accounts-profile-summary {
+  text-align: center;
+  font-size: 13px;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.accounts-profile-summary p {
+  margin: 4px 0;
+}
+
+.accounts-menu-label {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 10px 0;
+  color: #666;
+  text-transform: uppercase;
+  text-align:center ;
+  background: linear-gradient(to right, #997a8d, silver);
+  width: 82%;
+  border-radius: 12px;
+}
+
+.accounts-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.accounts-sidebar li {
+  padding: 10px 15px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 70%;
+  border-radius: 8px;
+
+}
+/* SideBar.css (add or modify these styles) */
+.accounts-sidebar {
+  block-size: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  inline-size: 280px;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 100vh; /* Ensure sidebar doesn't exceed viewport height */
+}
+
+.scroll-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.scroll-btn {
+  background: #f0f0f0;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.scroll-btn:hover {
+  background: #e0e0e0;
+}
+
+.scroll-btn:active {
+  background: #d0d0d0;
+}
+
+.accounts-profile-pic {
+  inline-size: 80px;
+  block-size: 80px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e0e0e0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.accounts-profile-pic:hover {
+  opacity: 0.9;
+}
+
+.accounts-profile-pic span {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+}
+.logoutbtn{
+ background: #dc3545 
+}
+.logoutbtn:hover{
+ background: #b12b38 
+}
+@media (max-width: 768px) {
+  .accounts-sidebar-wrapper.open {
+    inline-size: 250px;
+  }
+  .accounts-sidebar {
+    inline-size: 250px;
+  }
+}
+.accounts-sidebar li:hover,
+.accounts-sidebar li.active {
+  background-color:#b39eb5;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .accounts-sidebar-wrapper {
+    inline-size: 250px;
+  }
+  .accounts-sidebar {
+    inline-size: 250px;
+    padding: 15px;
+  }
+}

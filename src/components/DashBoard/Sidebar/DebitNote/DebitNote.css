@@ -1,0 +1,830 @@
+:root {
+  --primary-color: #b39eb5;
+  --primary-hover: #aa98a9;
+  --button-bg: #997a8d;
+  --button-hover-bg: #9b778e;
+  --success-bg: #e6ffed;
+  --error-bg: #ffe6e6;
+  --input-focus-bg: #fff;
+  --background-color: #ecdcdc;
+  --text-color: #333;
+  --border-color: #ddd;
+}
+
+body {
+  margin: 0;
+  font-family: "Ethnocentric", sans-serif;
+}
+
+.page-wrapper {
+  padding: 20px;
+  background-color: #b39eb5;
+  width: 100%;
+}
+
+.content-container {
+  inline-size: 100%;
+  width: 98%;
+  margin: 0 auto;
+  position: relative;
+  background-color: #b39eb5;
+  padding: 20px;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.watermark {
+  position: fixed;
+  top: 70%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.3;
+  z-index: -1;
+}
+
+.watermark img {
+  width: 300px;
+  height: 300px;
+}
+
+.cancelled-watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  opacity: 0.5;
+  z-index: 10;
+}
+
+.cancelled-watermark img {
+  width: 200px;
+  height: 200px;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.company-header-wrapper {
+  display: block;
+}
+
+.company-info {
+  display: flex;
+  align-items: center;
+}
+
+.company-logo {
+  width: 80px; /* Smaller for responsiveness */
+  height: auto;
+  margin-right: 10px;
+}
+
+.items-section h3 {
+  font-size: 18px;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.business-name {
+  font-size: 20px; /* Slightly smaller */
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.business-address {
+  font-size: 14px;
+  color: var(--text-color);
+  line-height: 1.4;
+}
+
+.note-info {
+  text-align: right;
+}
+
+.note-info h2 {
+  font-size: 24px; /* Adjusted for smaller screens */
+  color: black;
+  margin: 0;
+}
+
+.note-info div {
+  font-size: 14px; /* Adjusted for readability */
+  color: var(--text-color);
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--text-color);
+  margin: 5px 0;
+}
+
+.invoice-heading {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.invoice-heading h2 {
+  font-size: 22px; 
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.Debitsection-title {
+  font-size: 20px; 
+  font-weight: bold;
+  color: black;
+  margin: 10px 0;
+}
+
+.customer-info-group {
+  margin-bottom: 20px;
+}
+
+.info-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.input-group {
+  flex: 1 1 300px; /* Flexible for smaller screens */
+  min-width: 250px;
+  max-width: 100%;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px; /* Smaller for mobile */
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 5px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px 12px; /* Reduced padding */
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: "Ethnocentric", sans-serif;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.input-field:focus {
+  background-color: var(--input-focus-bg);
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.address-display {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.address-display p {
+  margin: 5px 0;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.tax-options {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.tax-options label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.items-sectionn {
+  width: 100%;
+  overflow-x: auto; /* Enable horizontal scrolling on small screens */
+}
+
+.items-sectionn h3 {
+  font-size: 18px;
+  color:black;
+  margin-bottom: 10px;
+}
+
+.item-headerr,
+.item-row,
+.credit-bill-row {
+  display: grid;
+  grid-template-columns:  80px 300px 250px 250px 200px 200px 200px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  background-color: #9b778e;
+  color: white;
+  /* min-width: 748px; */
+}
+
+.item-subheader {
+  display: grid;
+  grid-template-columns: 80px 180px 100px 100px 100px 100px 80px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  background-color: #f9f9f9;
+  font-weight: bold;
+  min-width: 748px;
+}
+
+.search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.search-input {
+  padding: 8px;
+  font-size: 14px;
+}
+
+.credit-bill-select {
+  padding: 8px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.item-headerr {
+  background-color: #997a8d;
+  color: white;
+  font-weight: bold;
+  border-radius: 4px 4px 0 0;
+}
+
+.item-row,
+.credit-bill-row {
+  border-block-end: 1px solid var(--border-color);
+}
+
+.item-headerr div,
+.item-row div,
+.credit-bill-row div,
+.item-subheader div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 14px;
+}
+
+.item-row input,
+.item-row select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.add-item-btn {
+  padding: 8px 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.add-item-btn:hover {
+  background-color: #218838;
+}
+
+.remove-item-btn {
+  padding: 6px 10px;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  width: 100%;
+}
+
+.remove-item-btn:hover {
+  background-color: #cc0000;
+}
+
+.totals-heading,
+.remaining-amount-heading,
+.remaining-balance-section {
+  margin-top: 20px;
+}
+
+.totals-heading h3,
+.remaining-amount-heading h3,
+.remaining-balance-section h3 {
+  font-size: 18px;
+  color:black;
+  margin-bottom: 10px;
+}
+
+.remaining-amount-heading .input-group {
+  flex: 1 1 250px;
+  min-width: 200px;
+}
+
+.totals-section {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.amount-details {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.amount-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.total-amount {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.payment-receipt-link {
+  margin-top: 10px;
+}
+
+.payment-receipt-link a,
+.payment-receipt-link .btn-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.payment-receipt-link a:hover,
+.payment-receipt-link .btn-link:hover {
+  text-decoration: underline;
+}
+
+.remarks-section {
+  margin-top: 20px;
+}
+
+.remarks-section label {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--text-color);
+  display: block;
+  margin-bottom: 5px;
+}
+
+.remarks-section textarea {
+  width: 100%;
+  height: 120px;
+  resize: vertical;
+  background-color: #fff;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: "Ethnocentric", sans-serif;
+}
+
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.debitsave-btn,
+.debitdownload-btn,
+.debitprint-btn,
+.debitemail-btn,
+.debitdelete-btn,
+.debitback-btn {
+  padding: 8px 16px;
+  background: #71606b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: "Ethnocentric", sans-serif;
+  transition: background-color 0.2s;
+}
+
+.debitsave-btn:hover,
+.debitdownload-btn:hover,
+.debitprint-btn:hover,
+.debitemail-btn:hover,
+.debitdelete-btn:hover,
+.debitback-btn:hover {
+  background: #9c8292;
+}
+
+.note-list {
+  margin-top: 20px;
+}
+
+.note-list h3 {
+  font-size: 18px;
+  color: black;
+}
+
+.notes-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  table-layout: fixed;
+}
+
+.notes-table th,
+.notes-table td {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  text-align: left;
+  word-wrap: break-word;
+}
+
+.notes-table th {
+ background-color: #997a8d;
+ color: white; 
+  font-weight: bold;
+}
+
+.notes-table th:nth-child(1),
+.notes-table td:nth-child(1) {
+  width: 150px; /* Adjusted for responsiveness */
+}
+
+.notes-table th:nth-child(2),
+.notes-table td:nth-child(2) {
+  width: 200px;
+}
+
+.notes-table th:nth-child(3),
+.notes-table td:nth-child(3) {
+  width: 120px;
+}
+
+.notes-table th:nth-child(4),
+.notes-table td:nth-child(4) {
+  width: 120px;
+}
+
+.notes-table th:nth-child(5),
+.notes-table td:nth-child(5) {
+  width: 100px;
+}
+
+.notes-table th:nth-child(6),
+.notes-table td:nth-child(6) {
+  width: 150px;
+}
+
+.notes-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.notes-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.edit-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #45a049;
+}
+
+.delete-btn {
+  background-color: #ff4444;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #cc0000;
+}
+
+.footerr {
+  margin-top: 20px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 10px;
+}
+
+.footerr h4 {
+  font-size: 16px;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.footerr p {
+  font-size: 12px;
+  color: var(--text-color);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.sign {
+  margin-top: 15px;
+  font-size: 14px;
+  color: var(--text-color);
+  text-align: right;
+}
+
+.sign strong {
+  font-weight: bold;
+}
+
+.company-name-wrapper {
+  margin-bottom: 5px;
+}
+
+.company-name-wrapper p {
+  font-size: 12px;
+  color: var(--text-color);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Tablet (768px–1024px) */
+@media (max-width: 1024px) {
+  .content-container {
+    min-width: 0;
+    padding: 15px;
+  }
+
+  .company-logo {
+    width: 60px;
+  }
+
+  .business-name {
+    font-size: 18px;
+  }
+
+  .business-address {
+    font-size: 12px;
+  }
+
+  .note-info h2 {
+    font-size: 22px;
+  }
+
+  .note-info div {
+    font-size: 13px;
+  }
+
+  .input-group {
+    flex: 1 1 250px;
+    min-width: 200px;
+  }
+
+  .item-header,
+  .item-row,
+  .credit-bill-row,
+  .item-subheader {
+    grid-template-columns: 70px 200px 150px 150px 150px 120px 70px;
+    min-width: 667px;
+  }
+
+  .notes-table th,
+  .notes-table td {
+    padding: 8px 10px;
+  }
+  .notes-table th{
+    background-color: #997a8d;
+    color: white;
+  }
+
+  .notes-table th:nth-child(1),
+  .notes-table td:nth-child(1) {
+    width: 120px;
+  }
+
+  .notes-table th:nth-child(2),
+  .notes-table td:nth-child(2) {
+    width: 180px;
+  }
+
+  .notes-table th:nth-child(3),
+  .notes-table td:nth-child(3) {
+    width: 100px;
+  }
+
+  .notes-table th:nth-child(4),
+  .notes-table td:nth-child(4) {
+    width: 100px;
+  }
+
+  .notes-table th:nth-child(5),
+  .notes-table td:nth-child(5) {
+    width: 80px;
+  }
+
+  .notes-table th:nth-child(6),
+  .notes-table td:nth-child(6) {
+    width: 120px;
+  }
+}
+
+/* Mobile (<768px) */
+@media (max-width: 768px) {
+  .content-container {
+    padding: 10px;
+  }
+
+  .note-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .note-info {
+    text-align: left;
+    margin-top: 10px;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-group {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  .item-header,
+  .item-row,
+  .credit-bill-row,
+  .item-subheader {
+    grid-template-columns: 1fr;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .item-header div,
+  .item-row div,
+  .credit-bill-row div,
+  .item-subheader div {
+    justify-content: flex-start;
+    padding: 5px 0;
+  }
+
+  .items-section {
+    overflow-x: auto;
+  }
+
+  .tax-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .totals-section {
+    justify-content: flex-start;
+  }
+
+  .button-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .save-btn,
+  .download-btn,
+  .print-btn,
+  .email-btn,
+  .delete-btn,
+  .back-btn {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .notes-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .notes-table th,
+  .notes-table td {
+    min-width: 100px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .page-wrapper {
+    background-color: #fff;
+    padding: 10mm;
+  }
+
+  .content-container {
+    background-color: #fff;
+    padding: 0;
+    border-radius: 0;
+    min-width: 0;
+    max-width: 190mm; /* Fit A4 */
+  }
+
+  .watermark {
+    opacity: 0.2;
+  }
+
+  .watermark img {
+    width: 150mm;
+    height: 150mm;
+  }
+
+  .cancelled-watermark {
+    opacity: 0.4;
+  }
+
+  .cancelled-watermark img {
+    width: 100mm;
+    height: 100mm;
+  }
+
+  .button-group,
+  .note-list {
+    display: none; /* Hide buttons and saved debit notes */
+  }
+
+  .item-header,
+  .item-row,
+  .credit-bill-row,
+  .item-subheader {
+    grid-template-columns: 20mm 40mm 25mm 25mm 25mm 25mm 20mm; /* Adjusted for A4 */
+    font-size: 10pt;
+    padding: 2mm;
+  }
+
+  .items-section {
+    overflow-x: visible;
+  }
+
+  .input-field,
+  .search-input,
+  .credit-bill-select,
+  .add-item-btn,
+  .remove-item-btn {
+    display: none; /* Hide interactive elements */
+  }
+
+  .item-row div,
+  .credit-bill-row div,
+  .item-subheader div {
+    border: 0.5pt solid #000; /* Add borders for clarity */
+    padding: 1mm;
+  }
+
+  .totals-section {
+    justify-content: flex-end;
+    font-size: 10pt;
+  }
+
+  .footer {
+    page-break-before: avoid;
+  }
+
+  .footer p,
+  .company-name-wrapper p {
+    font-size: 9pt;
+  }
+}

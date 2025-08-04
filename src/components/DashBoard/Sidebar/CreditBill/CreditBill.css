@@ -1,0 +1,1043 @@
+:root {
+  --primary-color: #b39eb5;
+  --primary-hover: #aa98a9;
+  --button-bg: #997a8d;
+  --button-hover-bg: #775c6d;
+  --success-bg: #e6ffed;
+  --error-bg: #ffe6e6;
+  --input-focus-bg: #fff;
+  --font-family: 'Ethnocentric', sans-serif;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.credit-bill-wrapper {
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  margin: 1.5rem;
+  max-width: 1200px;
+  background-color: var(--primary-color);
+  font-family: var(--font-family);
+  position: relative;
+  z-index: 1;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.invoice-container {
+  position: relative;
+  background: #c1b8c1;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+  margin: 1rem;
+}
+
+.header-right {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.creditbill-info {
+  text-align: right;
+}
+
+.creditbill-info h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: clamp(1.5rem, 5vw, 1.75rem);
+}
+
+.creditbill-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bill-details-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: clamp(0.85rem, 3vw, 0.9rem);
+  gap: 0.5rem;
+}
+
+.bill-details-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.bill-details-value {
+  font-weight: bold;
+  color: #111;
+}
+
+.tax-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+  /* padding: 1rem; */
+  border-radius: var(--border-radius);
+  background-color: #f5f0f5;
+  width: 50%;
+}
+
+.tax-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tax-input {
+  padding: 0.5rem;
+  font-size: clamp(0.85rem, 3vw, 0.9rem);
+  border: 1px solid #999;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 200px;
+}
+.totals-section {
+  background: #f9f6fa;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  /* margin: 1.5rem 0; */
+  box-shadow: var(--box-shadow);
+}
+
+.totals-section h3 {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  font-size: 1.5rem;
+  color: var(--text-dark);
+  border-bottom: 1px solid #e0dae0;
+  padding-bottom: 0.5rem;
+}
+
+.totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.totals-row.highlight {
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-bottom: 2px solid #ddd;
+}
+
+.credittotals-section {
+  background: #f6f2f7;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin-top: 1.5rem;
+  box-shadow: var(--box-shadow);
+  text-align: right;
+}
+
+.credittotals-section h3 {
+  margin-bottom: 0.75rem;
+  font-size: clamp(1.125rem, 4vw, 1.25rem);
+  color: #222;
+}
+
+.credittotals-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: clamp(0.85rem, 3vw, 0.9rem);
+  margin-bottom: 0.5rem;
+}
+
+.credit-bill-items h3 {
+  font-size: clamp(1.125rem, 4vw, 1.25rem);
+  margin-bottom: 0.75rem;
+  color: #222;
+}
+
+.credit-bill-table,
+.saved-bills-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  color: #000;
+}
+
+.credit-bill-table th,
+.saved-bills-table th {
+  background-color: var(--button-bg);
+  color: white;
+  font-weight: bold;
+  padding: 0.75rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.credit-bill-table th,
+.credit-bill-table td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: center;
+  vertical-align: middle;
+  font-size: clamp(0.8rem, 2.5vw, 0.85rem);
+}
+
+.credit-bill-table thead {
+  background-color: var(--button-hover-bg);
+}
+
+.credit-bill-table th:nth-child(1),
+.credit-bill-table td:nth-child(1) {
+  width: 5%;
+}
+
+.credit-bill-table th:nth-child(2),
+.credit-bill-table td:nth-child(2) {
+  width: 10%;
+}
+
+.credit-bill-table th:nth-child(3),
+.credit-bill-table td:nth-child(3) {
+  width: 15%;
+}
+
+.credit-bill-table th:nth-child(4),
+.credit-bill-table td:nth-child(4) {
+  width: 20%;
+}
+
+.credit-bill-table th:nth-child(5),
+.credit-bill-table td:nth-child(5),
+.credit-bill-table th:nth-child(6),
+.credit-bill-table td:nth-child(6),
+.credit-bill-table th:nth-child(7),
+.credit-bill-table td:nth-child(7),
+.credit-bill-table th:nth-child(8),
+.credit-bill-table td:nth-child(8),
+.credit-bill-table th:nth-child(9),
+.credit-bill-table td:nth-child(9),
+.credit-bill-table th:nth-child(10),
+.credit-bill-table td:nth-child(10) {
+  width: 10%;
+}
+
+.credit-bill-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+  background-color: white;
+  color: black;
+}
+/* Items Section */
+.credit-bill-items {
+  margin: 20px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.billitems-section {
+  display: grid;
+  grid-template-columns: 50px 100px 1fr 100px 80px 80px 100px 80px 50px;
+  gap: 10px;
+  padding: 10px 0;
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
+}
+
+.itemm-row {
+  display: grid;
+  grid-template-columns: 50px 100px 1fr 100px 80px 80px 100px 80px 50px;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+  align-items: center;
+}
+
+/* Input styling */
+.credit-bill-items input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.read-only {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+}
+
+.error-border {
+  border-color: #dc3545 !important;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* Product search */
+.product-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.product-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.product-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s;
+}
+
+.product-option:hover {
+  background-color: #f5f5f5;
+}
+
+.product-option.no-products {
+  color: #666;
+  font-style: italic;
+  cursor: default;
+}
+
+/* Add item button */
+.add-itemm-btn {
+  margin-top: 15px;
+  padding: 8px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-itemm-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.billremove-item-btn:disabled,
+.add-item-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+}
+
+input[type="checkbox"]:focus {
+  outline: 2px solid var(--primary-hover);
+}
+
+.add-item-btn,
+.billremove-item-btn,
+.edit-bill-btn,
+.save-bill-btn,
+.update-bill-btn,
+.send-email-btn,
+.print-bill-btn,
+.reset-form-btn,
+.back-btn,
+.generate-pdf-btn {
+  background: var(--button-bg);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: clamp(0.85rem, 3vw, 0.9rem);
+  transition: background-color 0.3s ease;
+  touch-action: manipulation;
+}
+
+.add-item-btn:hover,
+.billremove-item-btn:hover,
+.edit-bill-btn:hover,
+.save-bill-btn:hover,
+.update-bill-btn:hover,
+.send-email-btn:hover,
+.print-bill-btn:hover,
+.reset-form-btn:hover,
+.back-btn:hover,
+.generate-pdf-btn:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.cancelled-watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.4;
+  z-index: 10;
+}
+
+.cancelled-watermark img {
+  width: 400px;
+  height: 400px;
+}
+
+.watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  background-image: url('../../../../assets/images/watermark.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.sectionn-title,
+.creditsection-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  font-size: clamp(0.7rem, 2.5vw, 0.75rem);
+  font-weight: 600;
+  border-radius: 12px;
+  color: white;
+}
+
+.badge.pending {
+  background-color: #ff9800;
+}
+
+.badge.cancelled {
+  background-color: #f44336;
+}
+
+.badge.success {
+  background-color: #4caf50;
+}
+/* Due Dates Section */
+.due-dates-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.due-date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #f0eaf0;
+  border-radius: var(--border-radius);
+}
+
+.due-date-row label {
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.editable-date {
+  cursor: pointer;
+  padding: 0.5rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  min-width: 150px;
+  display: inline-block;
+}
+
+.editable-date:hover {
+  background-color: #f8f8f8;
+}
+
+.reminder-btn {
+  padding: 0.5rem 1rem;
+  background: #e6e6fa;
+  color: #6a5acd;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.reminder-btn.active {
+  background: #d8bfd8;
+  color: #483d8b;
+}
+
+.reminder-btn:hover {
+  background: #d8d8f0;
+}
+
+.reminder-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.add-due-date-btn {
+  align-self: flex-start;
+  padding: 0.75rem 1.5rem;
+  background: var(--button-bg);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+  margin-top: 0.5rem;
+}
+
+.add-due-date-btn:hover {
+  background: var(--button-hover-bg);
+}
+/* Add to existing CSS */
+.error-border {
+  border: 2px solid var(--danger-color) !important;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+}
+
+.due-date-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.due-date-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.ok-due-date-btn,
+.cancel-due-date-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.ok-due-date-btn {
+  background-color: var(--success-color);
+  color: white;
+  border: none;
+}
+
+.ok-due-date-btn:hover {
+  background-color: #27ae60;
+}
+
+.cancel-due-date-btn {
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+}
+
+.cancel-due-date-btn:hover {
+  background-color: #d0d0d0;
+}
+
+.editable-date {
+  cursor: pointer;
+  padding: 0.5rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  min-width: 150px;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.editable-date:hover {
+  background-color: #f8f8f8;
+}
+
+.loading-message {
+  font-size: 0.9rem;
+  color: #888;
+  margin-top: 4px;
+}
+/* Add to your CreditBill.css */
+.product-search-container {
+  position: relative;
+}
+
+.product-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  z-index: 100;
+  max-height: 200px;
+}
+
+.product-option {
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.product-option:hover {
+  background-color: #f5f5f5;
+}
+
+.customer-id-display {
+  margin-top: 5px;
+  font-size: 0.8rem;
+  color: #666;
+}
+.product-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.product-search-container input {
+  width: 100%;
+}
+
+datalist {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+datalist option {
+  padding: 8px;
+  cursor: pointer;
+}
+
+datalist option:hover {
+  background-color: #f5f5f5;
+}
+.bank-details-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.bank-info {
+  flex: 1;
+}
+.qr-code {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border: 1px solid #ddd;
+  padding: 5px;
+  background: white;
+}
+/* Customer Search */
+.customer-search {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.search-input-group {
+  display: flex;
+  gap: 5px;
+}
+
+.search-results {
+  position: absolute;
+  z-index: 100;
+  background: white;
+  border: 1px solid #ddd;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.search-result-item:hover {
+  background-color: #f5f5f5;
+}
+
+.btn-create-customer {
+  margin-top: 5px;
+  padding: 8px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Product Search */
+.product-search-container {
+  position: relative;
+}
+
+.product-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.product-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.product-dropdown::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.product-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.product-option {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.product-option:hover {
+  background-color: #f5f5f5;
+}
+
+.product-option:focus {
+  outline: none;
+  background-color: #e0e0e0;
+}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .due-date-edit-container {
+    flex-direction: column;
+  }
+  
+  .due-date-buttons {
+    width: 100%;
+  }
+  
+  .ok-due-date-btn,
+  .cancel-due-date-btn {
+    flex: 1;
+  }
+}
+.remarks-section{
+    width: 97%;
+}
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.footer h4 {
+  color: black;
+  margin-bottom: 0.5rem;
+}
+
+.terms-and-conditions,
+.bank-details {
+  margin-bottom: 1rem;
+}
+
+.signature {
+  text-align: right;
+  margin-top: 1rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .credit-bill-wrapper {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+
+  .invoice-container {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+
+  .header-right {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .creditbill-info h2 {
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+  }
+
+  .bill-details-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .tax-options {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .tax-options label {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .credit-bill-table,
+  .saved-bills-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: clamp(0.75rem, 2.5vw, 0.8rem);
+  }
+
+  .credit-bill-table th,
+  .credit-bill-table td {
+    padding: 0.4rem;
+  }
+
+  .credit-bill-input {
+    padding: 0.4rem;
+    font-size: clamp(0.75rem, 2.5vw, 0.8rem);
+  }
+
+  .add-item-btn,
+  .billremove-item-btn {
+    padding: 0.5rem 1rem;
+    font-size: clamp(0.75rem, 2.5vw, 0.8rem);
+  }
+
+  .credittotals-section {
+    text-align: left;
+  }
+
+  .credittotals-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .signature {
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .creditbill-info h2 {
+    font-size: clamp(1.125rem, 4vw, 1.25rem);
+  }
+
+  .credit-bill-table,
+  .saved-bills-table {
+    font-size: clamp(0.7rem, 2.5vw, 0.75rem);
+  }
+
+  .credit-bill-input,
+  .tax-input {
+    padding: 0.3rem;
+    font-size: clamp(0.7rem, 2.5vw, 0.75rem);
+  }
+
+  .action-buttons {
+    gap: 0.5rem;
+  }
+
+  .cancelled-watermark img,
+  .watermark {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+@media (min-width: 768px) {
+  .action-buttons {
+    position: sticky;
+    bottom: 0;
+    background-color: #fff;
+    padding: 1rem;
+    z-index: 99;
+    border-top: 1px solid #ddd;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .credit-bill-wrapper,
+  .invoice-container {
+    margin: 0;
+    padding: 1rem;
+    background: #fff;
+    box-shadow: none;
+    max-width: none;
+  }
+  input[type="checkbox"],
+  .tax-options input,
+  .add-due-date-btn,
+  .action-buttons,
+  .add-item-btn,
+  .billremove-item-btn,
+  .save-bill-btn,
+  .update-bill-btn,
+  .generate-pdf-btn,
+  .send-email-btn,
+  .print-bill-btn,
+  .reset-form-btn,
+  .back-btn,
+  .edit-bill-btn,
+  .saved-bills,
+  .no-print {
+    display: none !important;
+  }
+  .print-only { display: block; }
+
+  .credit-bill-table,
+  .saved-bills-table {
+    table-layout: fixed;
+    width: 100%;
+    font-size: 10pt;
+    overflow: visible !important;
+  }
+
+  .credit-bill-table th,
+  .credit-bill-table td {
+    padding: 0.5rem;
+    border: 1px solid #000;
+    word-wrap: break-word; 
+    max-width: 0;
+  }
+  .credit-bill-table th:nth-child(n),
+  .credit-bill-table td:nth-child(n) {
+    width: auto !important;
+    min-width: 50px !important;
+  }
+  .credittotals-section {
+    text-align: right;
+    background: none;
+    box-shadow: none;
+    padding: 0.5rem;
+  }
+
+  .credittotals-row {
+    font-size: 10pt;
+    justify-content: space-between;
+  }
+
+  .watermark {
+    opacity: 0.1;
+  }
+
+  .cancelled-watermark {
+    opacity: 0.3;
+  }
+
+  .tax-options {
+    display: none;
+  }
+
+  .creditbill-info h2 {
+    font-size: 16pt;
+  }
+
+  .bill-details-row {
+    font-size: 10pt;
+  }
+
+  .section-titlebill,
+  .creditsection-title {
+    font-size: 12pt;
+  }
+
+  .footer {
+    page-break-inside: avoid;
+  }
+ .bank-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.bank-details p {
+  margin: 0;
+  flex: 1;
+}
+.qr-code {
+  width: 100px;
+  height: 100px;
+  margin-left: 20px;
+}
+  .signature {
+    text-align: right;
+  }
+
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+}

@@ -1,0 +1,313 @@
+:root {
+ 
+  --primary-color: #5a4371; /* Darker purple for better contrast */
+  --primary-hover: #7c5a8c; /* Lighter hover for interaction */
+  --secondary-color: #3b2a5e; /* Deep purple for secondary elements */
+  --button-bg: #4a3c4e; /* Consistent button background */
+  --button-hover-bg: #6a5373; /* Lighter hover for buttons */
+  --success-bg: #c8e6c9; /* Softer green for success */
+  --success-color: #388e3c; /* Darker green for text/icons */
+  --error-bg: #ffebee; /* Softer red for errors */
+  --error-color: #c62828; /* Darker red for text/icons */
+  --warning-bg: #fff3e0; /* Softer warning background */
+  --warning-color: #f57c00; /* Vibrant orange for warnings */
+  --input-bg: #ffffff; /* Clean white for inputs */
+  --input-focus-bg: #f5f5f5; /* Subtle focus background */
+  --border-color: #c4c4c4; /* Slightly darker borders */
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Stronger shadow for depth */
+  --text-color: #2d2d2d; /* Darker text for readability */
+  --text-secondary: #5f5f5f; /* For placeholders and secondary text */
+  --light-bg: #fafafa; /* Clean background for containers */
+  --background-gradient: linear-gradient(135deg, #b39eb9 0%, #d3d3d3 100%); /* Enhanced gradient */
+  --disabled-bg: #e0e0e0; /* Disabled state background */
+  --disabled-text: #8d8d8d; /* Disabled state text */
+  --border-radius: 6px; /* Consistent border radius */
+  --transition: all 0.3s ease; /* Smooth transitions */
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--light-bg);
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+.appointments-page {
+  padding: 1.5rem;
+  max-width: 1280px;
+  margin: 2rem auto;
+  background: var(--background-gradient);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.back-button {
+  background: var(--button-bg);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.back-button:hover {
+  background: var(--button-hover-bg);
+  transform: translateY(-1px);
+}
+
+.appointments-page h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.error-message {
+  background: var(--error-bg);
+  color: var(--error-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-left: 4px solid var(--error-color);
+}
+
+.appointment-form {
+  background: var(--input-bg);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  background: var(--input-bg);
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: var(--input-focus-bg);
+  box-shadow: 0 0 0 3px rgba(90, 67, 113, 0.2);
+}
+
+.form-group input::placeholder,
+.form-group select::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.submit-button {
+  grid-column: 1 / -1;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.submit-button:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
+  cursor: not-allowed;
+}
+.appoiment-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  margin: left 20px;;
+}
+
+.appointment-table thead {
+  background-color: #f1f1f1;
+}
+
+.appointment-table th,
+.appointment-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: 1px solid #ddd;
+  white-space: nowrap;
+  color: #000;
+}
+
+.appointment-table tr:nth-child(even) {
+  background-color: #fafafa;
+}
+.no-data {
+  text-align: center;
+  padding: 1rem;
+  color: #999;
+}
+
+/* Status coloring */
+.status-pending {
+  color: orange;
+  font-weight: 600;
+}
+
+.status-confirmed {
+  color: green;
+  font-weight: 600;
+}
+
+.status-cancelled {
+  color: red;
+  font-weight: 600;
+}
+
+/* Actions buttons */
+.actions button {
+  margin-right: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.actions .edit {
+  background-color: #ffc107;
+  color: white;
+}
+
+.actions .edit:hover {
+  background-color: #e9b107;
+  color: rgb(0, 0, 0);
+}
+
+.actions .delete {
+  background-color: #dc3545;
+  color: white;
+}
+
+.actions .delete:hover {
+  background-color: #cb3141;
+  color: rgb(0, 0, 0);
+}
+
+.actions .save {
+  background-color: #28a745;
+  color: white;
+}
+
+.actions .cancel {
+  background-color: #6c757d;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .appointments-list table {
+    min-width: 768px;
+  }
+
+  .appointments-list {
+    overflow-x: auto;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+   .appointment-table {
+    font-size: 0.85rem;
+  }
+
+  .appointment-table th,
+  .appointment-table td {
+    padding: 0.4rem 0.5rem;
+  }
+  .appointment-form {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .back-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 1024px) {
+  .appointments-page {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .appointment-form {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+
+  table {
+    min-width: 700px;
+  }
+}
+
+@media (max-width: 480px) {
+  th, td {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  button.edit,
+  button.delete,
+  button.save,
+  button.cancel {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+}

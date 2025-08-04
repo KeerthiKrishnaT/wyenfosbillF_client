@@ -1,0 +1,194 @@
+/* AccountsAdminPanel.css */
+.accounts-admin-panel {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(to right, #997a8d, silver);
+  color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.main-content.with-sidebar {
+  margin-left: 280px;
+}
+
+.main-content.without-sidebar {
+  margin-left: 0;
+}
+
+.sidebar-toggle-btn {
+  font-size: 20px;
+  background: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1100;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.tab-list {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tab,
+.active-tab {
+  padding: 8px 16px;
+  border: none;
+  background-color: #ddd;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.active-tab {
+  background-color: #ffc107;
+  font-weight: bold;
+}
+
+button {
+  cursor: pointer;
+  padding: 6px 12px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+}
+
+button.edit-btn {
+  background-color: #ffc107; /* EDIT */
+}
+
+button.delete-btn {
+  background: #dc3545; /* DELETE */
+}
+
+button.save-btn {
+  background-color: #2ecc71; /* SAVE */
+}
+
+button.back-btn {
+  background-color: #6c757d; /* BACK */
+}
+
+.notification-button {
+  position: relative;
+  background: transparent;
+  font-size: 18px;
+  border: none;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #dc3545;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+.notification-dropdown {
+  position: absolute;
+  background: white;
+  color: black;
+  padding: 10px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.15);
+  width: 300px;
+  z-index: 10;
+}
+
+.message.success {
+  background-color: #2ecc71;
+  color: white;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.message.error {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.8);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.data-table,
+.summary-cards,
+.distribution-details,
+.staff-list {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.data-table th,
+.data-table td {
+  padding: 8px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.chart-container {
+  width: 100%;
+  height: 400px;
+  margin-top: 15px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 6px;
+  width: 90%;
+  max-width: 800px;
+}
+
+.staff-profile-pic {
+  width: 100px;
+  height: 100px;
+  background-color: #eee;
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

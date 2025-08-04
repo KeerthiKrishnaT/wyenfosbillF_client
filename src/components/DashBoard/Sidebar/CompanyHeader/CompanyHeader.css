@@ -1,0 +1,165 @@
+.company-header-container {
+  position: relative;
+  font-family: "Ethnocentric", sans-serif;
+  width: 100%;
+}
+
+.company-header-modern {
+  border-radius: 12px;
+  padding: 1.5rem;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.header-content-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  position: relative;
+}
+
+.logo-and-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.company-main-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.company-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary, #2c3e50);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.company-address {
+  font-size: 1.1rem;
+  color: var(--text-secondary, #555);
+  margin-bottom: 0.5rem;
+}
+
+.company-contact-info {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #555);
+}
+
+.company-contact-info p {
+  margin-bottom: 0.3rem;
+}
+
+.cashbill-header-info {
+  text-align: right;
+  min-width: 200px;
+}
+
+.cashbill-header-info h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.bill-number {
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+.date {
+  font-size: 0.9rem;
+}
+
+.modern-logo {
+  border-radius: 50%;
+  border: 3px solid #b39eb5;
+  padding: 6px;
+  background-color: white;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.secondary-logo-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.secondary-logo-img {
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: contain;
+  opacity: 0.8;
+}
+/* Add these styles */
+.qr-code-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.qr-code-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.qr-code-label {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* Update the bank details section */
+.company-contact-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.bank-details-section {
+  flex: 1;
+  min-width: 250px;
+}
+
+@media (max-width: 768px) {
+  .header-content-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .cashbill-header-info {
+    text-align: left;
+    width: 100%;
+  }
+  
+  .company-name {
+    font-size: 1.5rem;
+  }
+  
+  .modern-logo {
+    width: 100px;
+    height: 100px;
+  }
+    .qr-code-section {
+    justify-content: center;
+  }
+  
+  .bank-details-section, .qr-code-container {
+    width: 100%;
+  }
+}

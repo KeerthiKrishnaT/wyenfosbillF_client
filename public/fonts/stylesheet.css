@@ -1,0 +1,18 @@
+@font-face {
+    font-family: 'Ethnocentric';
+    src: url('Ethnocentric-Italic.woff2') format('woff2'),
+        url('Ethnocentric-Italic.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ethnocentric';
+    src: url('Ethnocentric-Regular.woff2') format('woff2'),
+        url('Ethnocentric-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
