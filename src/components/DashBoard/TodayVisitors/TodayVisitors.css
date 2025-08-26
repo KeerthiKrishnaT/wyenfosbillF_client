@@ -4,9 +4,9 @@
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   min-height: 400px;
-  width: 70%; /* Reduced from 90% */
-  max-width: 300px; /* Reduced from 400px */
-  margin: 0 auto; /* Center the card */
+  width: 100%; /* Use full width */
+  max-width: 100%; /* Allow full width */
+  margin: 0; /* Remove auto margin */
   text-align: center;
 }
 
@@ -41,7 +41,7 @@
 @media (max-width: 600px) {
   .visitor-card {
     padding: 1.2rem;
-    width: 90%;
+    width: 100%;
     max-width: 100%; /* Allow full width on very small screens */
   }
 

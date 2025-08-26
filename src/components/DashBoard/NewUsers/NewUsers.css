@@ -1,0 +1,93 @@
+.newwuser-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+.newwuser-card h4 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.recent-customers-list {
+  margin-top: 20px;
+}
+
+.recent-customers-list h5 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.customers-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.customer-item {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 4px solid #007bff;
+  transition: all 0.2s ease;
+}
+
+.customer-item:hover {
+  background: #e9ecef;
+  transform: translateX(4px);
+}
+
+.customer-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+  font-size: 0.95rem;
+}
+
+.customer-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.customer-details span {
+  background: rgba(0, 123, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #007bff;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+  font-style: italic;
+}
+
+/* Scrollbar styling */
+.customers-grid::-webkit-scrollbar {
+  width: 4px;
+}
+
+.customers-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.customers-grid::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+.customers-grid::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

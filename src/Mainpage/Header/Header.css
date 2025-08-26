@@ -9,8 +9,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color:#b39eb5;
-  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+  background: linear-gradient(to right, #b39eb9,silver); 
   position: sticky;
   inset-block-start: 0;
   z-index: 1000;
@@ -50,18 +49,75 @@
   border-radius: 4px;
   font-size: 1rem;
   font-weight: 600;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
 }
 
 .auth-button:hover {
   background-color: var(--rose-gold-accent);
+  color: white;
   transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .auth-button:active {
   transform: translateY(0);
 }
+
+/* Mobile menu button - hidden by default */
+.mobile-menu-button {
+  display: none;
+  flex-direction: column;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  width: fit-content;
+}
+
+.mobile-menu-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.hamburger-line {
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  margin: 3px 0;
+  transition: 0.3s ease;
+  border-radius: 2px;
+}
+
+/* Hamburger animation when menu is open */
+.mobile-menu-button[aria-expanded="true"] .hamburger-line:nth-child(1) {
+  transform: rotate(-45deg) translate(-6px, 6px);
+}
+
+.mobile-menu-button[aria-expanded="true"] .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-button[aria-expanded="true"] .hamburger-line:nth-child(3) {
+  transform: rotate(45deg) translate(-6px, -6px);
+}
+
+/* Enhanced focus states for accessibility */
+.auth-button:focus,
+.mobile-menu-button:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.auth-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.mobile-menu-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
 #google_translate_element {
   background-color: #f5f5f5;
   float: inline-end;
@@ -71,14 +127,36 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-container {
-    flex-direction: column;
-    gap: 1rem;
+    position: relative;
     padding: 1rem;
   }
 
-  .logo-title-container {
+  .mobile-menu-button {
+    display: flex;
+  }
+  
+  .auth-buttons {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--rose-gold-primary);
+    width: 100%;
     flex-direction: column;
-    text-align: center;
+    display: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    gap: 0.5rem;
+    z-index: 999;
+  }
+  
+  .auth-buttons.mobile-open {
+    display: flex;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .logo-title-container {
+    gap: 0.75rem;
   }
 
   .logo {
@@ -89,23 +167,34 @@
     font-size: 1.5rem;
   }
 
-  .auth-buttons {
-    flex-direction: column;
-    inline-size: 100%;
-    gap: 0.5rem;
-  }
-
   .auth-button {
-    inline-size: 100%;
+    width: 100%;
     text-align: center;
     padding: 0.75rem;
-    background-color:white;
+    background-color: white;
+    margin: 0;
+  }
+
+  .auth-button:hover {
+    background-color: var(--rose-gold-accent);
+    color: white;
+    transform: none;
   }
 }
 
 @media (max-width: 480px) {
+  .header-container {
+    padding: 0.75rem;
+    width: fit-content;
+  }
+
+  .logo-title-container {
+    gap: 0.5rem;
+  }
+
   .header-title {
     font-size: 1.2rem;
+    letter-spacing: 0.5px;
   }
 
   .logo {
@@ -115,5 +204,64 @@
   .auth-button {
     font-size: 0.9rem;
     padding: 0.6rem;
+  }
+
+  .mobile-menu-button {
+    padding: 0.4rem;
+  }
+
+  .hamburger-line {
+    width: 20px;
+    height: 2px;
+    margin: 2px 0;
+  }
+}
+
+/* Animation for mobile menu */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    z-index: -1;
+    display: none;
+  
+  }
+
+  .header-container:has(.auth-buttons.mobile-open)::after {
+    display: block;
+  }
+}
+
+@media print {
+  .header-container {
+    position: static;
+    box-shadow: none;
+    background: white !important;
+    color: black !important;
+  }
+
+  .header-title {
+    color: black !important;
+  }
+
+  .auth-buttons,
+  .mobile-menu-button {
+    display: none !important;
   }
 }

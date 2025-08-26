@@ -1,78 +1,132 @@
-import React, { useRef } from 'react';
-import HTMLFlipBook from 'react-pageflip';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CustomerForm from './CustomerForm';
 import CustomerList from './CustomerList';
 import CustomerSelect from './CustomerSelect';
 import './customer.css';
 
 function ManageCustomers() {
-  const bookRef = useRef();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const totalPages = 3;
+  const navigate = useNavigate();
 
-  const handleCornerClick = (direction) => {
-    if (direction === 'left' && bookRef.current.pageFlip().getCurrentPageIndex() > 0) {
-      bookRef.current.pageFlip().flipPrev();
-    } else if (direction === 'right' && bookRef.current.pageFlip().getCurrentPageIndex() < bookRef.current.pageFlip().getPageCount() - 1) {
-      bookRef.current.pageFlip().flipNext();
+  const triggerRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const goToPage = (pageIndex) => {
+    if (pageIndex >= 0 && pageIndex < totalPages) {
+      setCurrentPage(pageIndex);
     }
+  };
+
+  const handleEditCustomer = (customerId) => {
+    setSelectedCustomerId(customerId);
+    setIsEditMode(true);
+    goToPage(2); // Navigate to customer select page
+  };
+
+  const handleCustomerSelect = (customerId) => {
+    setSelectedCustomerId(customerId);
+    if (isEditMode) {
+      // Navigate to edit form or show edit interface
+      // You can add navigation to edit form here if needed
+    }
+  };
+
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
   };
 
   return (
     <div className="manage-customers-container">
-      <div className="manage-customers-title">
-        Manage Customers (Book Flip)
+      <div className="manage-customers-header">
+        <button 
+          onClick={handleBackToDashboard}
+          className="bk-button"
+          title="Back to Dashboard"
+        >
+          ← Back to Dashboard
+        </button>
+        <div className="manage-customers-title">
+          Manage Customers
+        </div>
       </div>
 
       <div className="flip-book-container">
         <div className="flip-book-wrapper">
-          <HTMLFlipBook
-            width={800}
-            height={600}
-            size="fixed"
-            minWidth={315}
-            maxWidth={800}
-            minHeight={400}
-            maxHeight={800}
-            maxShadowOpacity={0.2}
-            showCover={false}
-            mobileScrollSupport={true}
-            ref={bookRef}
-            className="flip-book"
-            flippingTime={1000}
-            usePortrait={true}
-            clickEventForward={false}
-            onClick={(e) => e.stopPropagation()}
-            disableFlipByClick={true} // Explicitly disable flip by click
-          >
-            <div className="book-page">
-              <CustomerForm />
-            </div>
-            <div className="book-page">
-              <CustomerList />
-            </div>
-            <div className="book-page">
-              <CustomerSelect selectedId="" onChange={() => {}} />
-            </div>
-          </HTMLFlipBook>
-          <div
-            className="corner-flip left-bottom"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCornerClick('left');
-            }}
-          ></div>
-          <div
-            className="corner-flip right-bottom"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCornerClick('right');
-            }}
-          ></div>
+          <div className="book-page">
+            {currentPage === 0 && (
+              <>
+                <div className="page-header">
+                  <h2>📝 Add New Customer</h2>
+                  <p>Create a new customer with sequential ID</p>
+                </div>
+                <CustomerForm onCustomerAdded={triggerRefresh} />
+              </>
+            )}
+            
+            {currentPage === 1 && (
+              <>
+                <div className="page-header">
+                  <h2>📋 Customer List</h2>
+                  <p>View and manage all customers</p>
+                </div>
+                <CustomerList 
+                  refreshTrigger={refreshTrigger} 
+                  onEdit={handleEditCustomer}
+                />
+             </>
+            )}
+            
+            {currentPage === 2 && (
+              <>
+                <div className="page-header">
+                  <h2>🔍 Select Customer</h2>
+                  <p>{isEditMode ? "Select a customer to edit" : "Choose an existing customer"}</p>
+                </div>
+                <CustomerSelect 
+                  selectedId={selectedCustomerId} 
+                  onChange={handleCustomerSelect}
+                  isEditMode={isEditMode}
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="nav-buttons">
-        <button onClick={() => bookRef.current.pageFlip().flipPrev()} className="nav-button">← Previous</button>
-        <button onClick={() => bookRef.current.pageFlip().flipNext()} className="nav-button">Next →</button>
+        <button 
+          onClick={() => {
+            if (currentPage > 0) {
+              const targetPage = currentPage - 1;
+              goToPage(targetPage);
+            }
+          }} 
+          className="nav-button"
+          disabled={currentPage === 0}
+        >
+          ← Previous
+        </button>
+        
+
+        
+        <button 
+          onClick={() => {
+            if (currentPage < totalPages - 1) {
+              const targetPage = currentPage + 1;
+              goToPage(targetPage);
+            }
+          }} 
+          className="nav-button"
+          disabled={currentPage === totalPages - 1}
+        >
+          Next →
+        </button>
       </div>
     </div>
   );

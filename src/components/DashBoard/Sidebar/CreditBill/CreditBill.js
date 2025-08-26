@@ -2,28 +2,35 @@ import React, { useState, useEffect, useCallback, useMemo, useReducer, useRef } 
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import CompanyHeader from '../CompanyHeader/CompanyHeader.js';
+import ProductSelector from '../../../Product/ProductSelector.js';
 import cancelledWatermark from '../../../../assets/images/cancelled.png';
 import './CreditBill.css';
 import DOMPurify from 'dompurify';
 import { v4 as uuidv4 } from 'uuid';
 import debounce from 'lodash.debounce';
+import { getCompanyDetails } from '../utils/companyHelpers.js';
 
 const userEmail = localStorage.getItem('userEmail') || 'unknown@example.com';
+const userRole = localStorage.getItem('userRole') || 'staff';
 
 const companyPrefixes = {
   'WYENFOS INFOTECH': 'WIT',
-  'WYENFOS GOLD & DIAMONDS': 'WGD',
+  'WYENFOS GOLD AND DIAMONDS': 'WGD',
   'WYENFOS ADS': 'WAD',
   'WYENFOS CASH VAPASE': 'WCV',
+  'AYUR FOR HERBALS INDIA': 'ALH',
   'WYENFOS': 'WNF',
+  'WYENFOS PURE DROPS': 'WPD',
 };
 
 const validCompanies = [
   'WYENFOS INFOTECH',
-  'WYENFOS GOLD & DIAMONDS',
+  'WYENFOS GOLD AND DIAMONDS',
   'WYENFOS ADS',
   'WYENFOS CASH VAPASE',
+  'AYUR FOR HERBALS INDIA',
   'WYENFOS',
+  'WYENFOS PURE DROPS',
 ];
 
 const api = axios.create({
@@ -93,7 +100,33 @@ const formReducer = (state, action) => {
 
 const CreditBill = () => {
   const { state: locationState } = useLocation();
-  const selectedCompanyFromState = locationState?.selectedCompany || 'WYENFOS';
+  // Handle company selection from location state
+  let selectedCompanyFromState = 'WYENFOS';
+  
+  if (locationState?.selectedCompany) {
+    // If selectedCompany is an object, extract the name
+    if (typeof locationState.selectedCompany === 'object' && locationState.selectedCompany.name) {
+      selectedCompanyFromState = locationState.selectedCompany.name;
+    } else if (typeof locationState.selectedCompany === 'string') {
+      selectedCompanyFromState = locationState.selectedCompany;
+    }
+  }
+  
+  // Handle company name mapping for backward compatibility
+  if (selectedCompanyFromState === 'AYUR 4 LIFE HERBALS India') {
+    selectedCompanyFromState = 'AYUR FOR HERBALS INDIA';
+  }
+  
+  // Handle company name mapping for WYENFOS GOLD
+  if (selectedCompanyFromState === 'WYENFOS GOLD & DIAMONDS') {
+    selectedCompanyFromState = 'WYENFOS GOLD AND DIAMONDS';
+  }
+  
+  // Ensure selectedCompanyFromState is always a string
+  if (typeof selectedCompanyFromState !== 'string') {
+    console.warn('selectedCompanyFromState is not a string:', selectedCompanyFromState);
+    selectedCompanyFromState = 'WYENFOS';
+  }
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -106,24 +139,13 @@ const CreditBill = () => {
   const [products, setProducts] = useState([]);
   const [customerSearch, setCustomerSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [productSearchTerm, setProductSearchTerm] = useState('');
-  const [showProductDropdown, setShowProductDropdown] = useState(false);
+
   const [isCustomerLoading, setIsCustomerLoading] = useState(false);
 
   const sanitizeInput = useCallback((input) => DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }), []);
 
   const selectedCompanyDetails = useMemo(() => {
-    return {
-      name: selectedCompanyFromState,
-      address: 'Thekkekara Arcade, Chelakottukara, Thrissur, Kerala, 680001',
-      GSTIN: '32AAECW1234B1Z0',
-      state: 'Kerala',
-      stateCode: '32',
-      mobile: '',
-      email: '',
-      website: '',
-      logo: null,
-    };
+    return getCompanyDetails(selectedCompanyFromState);
   }, [selectedCompanyFromState]);
 
   const initialFormState = useMemo(
@@ -131,8 +153,9 @@ const CreditBill = () => {
       customerId: '',
       customerName: '',
       customerAddress: 'N/A',
-      customerGSTIN: '',
+      customerPhone: '',
       customerEmail: '',
+      customerGSTIN: '',
       customerContact: {},
       invoiceNo: '',
       date: new Date().toISOString().slice(0, 10),
@@ -169,13 +192,13 @@ const CreditBill = () => {
       company: {
         name: selectedCompanyDetails.name || selectedCompanyFromState,
         address: selectedCompanyDetails.address || 'Thekkekara Arcade, Chelakottukara, Thrissur, Kerala, 680001',
-        GSTIN: '32AAECW1234B1Z0',
-        state: 'Kerala',
-        stateCode: '32',
+        GSTIN: selectedCompanyDetails.GSTIN || '32AAECW1234B1Z0',
+        state: selectedCompanyDetails.state || 'Kerala',
+        stateCode: selectedCompanyDetails.stateCode || '32',
         mobile: selectedCompanyDetails.mobile || '',
         email: selectedCompanyDetails.email || '',
         website: selectedCompanyDetails.website || '',
-        logo: selectedCompanyDetails.logo || null,
+        logo: selectedCompanyDetails.logo || '/uploads/wyenfos.png',
       },
       createdBy: userEmail,
       lastUpdatedBy: userEmail,
@@ -184,6 +207,8 @@ const CreditBill = () => {
         status: 'Paid',
         dueDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().slice(0, 10),
       },
+      overallAmountToPay: '0',
+      overallRemainingBalance: '0',
     }),
     [selectedCompanyFromState, selectedCompanyDetails]
   );
@@ -193,6 +218,8 @@ const CreditBill = () => {
     customerId: '',
     customerName: '',
     customerAddress: '',
+    customerPhone: '',
+    customerEmail: '',
     customerGSTIN: '',
     invoiceNo: '',
     date: '',
@@ -200,64 +227,30 @@ const CreditBill = () => {
     dueDates: [],
     items: [],
   });
-  const searchCustomers = useCallback(async (query) => {
-    if (!query || query.length < 3) {
-      setSearchResults([]);
-      return;
-    }
-    setIsCustomerLoading(true);
-    try {
-      const response = await api.get('/customers/find', {
-        params: { query: sanitizeInput(query), company: selectedCompanyFromState },
-      });
-      setSearchResults(Array.isArray(response.data) ? response.data : []);
-    } catch (error) {
-      console.error('Failed to search customers:', error);
-      setSearchResults([]);
-    } finally {
-      setIsCustomerLoading(false);
-    }
-  }, [selectedCompanyFromState, sanitizeInput]);
 
-  const debouncedSearch = useRef(debounce(searchCustomers, 500)).current;
-
-  useEffect(() => {
-    if (customerSearch) {
-      debouncedSearch(customerSearch);
-    } else {
-      setSearchResults([]);
-    }
-    return () => debouncedSearch.cancel();
-  }, [customerSearch, debouncedSearch]);
-
-  const selectCustomer = useCallback((customer) => {
-    dispatch({
-      type: 'SET_FORM',
-      form: {
-        ...form,
-        customerId: customer.customerId || '',
-        customerName: customer.customerName || '',
-        customerAddress: customer.customerContact?.address || 'N/A',
-        customerGSTIN: customer.customerContact?.gstin || '',
-        customerEmail: customer.customerContact?.email || '',
-        customerContact: customer.customerContact || {}
-      }
-    });
-    setCustomerSearch('');
-    setSearchResults([]);
-  }, [form]);
-
-  const createNewCustomer = useCallback(async (name) => {
+  const createNewCustomer = useCallback(async (name, additionalDetails = {}) => {
     if (!name.trim()) {
       setMessage({ type: 'error', text: 'Customer name is required to create a new customer.' });
       setTimeout(() => setMessage(null), 3000);
       return '';
     }
+    
+    // Check if customer details are provided
+    const hasDetails = additionalDetails.address || additionalDetails.phone || additionalDetails.email || additionalDetails.gstin;
+    if (!hasDetails) {
+      setMessage({ type: 'warning', text: 'Creating customer with name only. Please fill in address, phone, email, or GSTIN for complete customer information.' });
+      setTimeout(() => setMessage(null), 5000);
+    }
     setLoading(true);
     try {
       const payload = {
         customerName: sanitizeInput(name),
-        customerContact: form.customerContact,
+        customerContact: {
+          address: additionalDetails.address || form.customerAddress || '',
+          phone: additionalDetails.phone || form.customerPhone || '',
+          email: additionalDetails.email || form.customerEmail || '',
+          gstin: additionalDetails.gstin || form.customerGSTIN || '',
+        },
         company: selectedCompanyFromState,
         createdBy: userEmail,
         lastUpdatedBy: userEmail,
@@ -270,13 +263,23 @@ const CreditBill = () => {
           ...form,
           customerId: newCustomer.customerId || '',
           customerName: newCustomer.customerName || '',
-          customerAddress: newCustomer.customerContact?.address || 'N/A',
-          customerGSTIN: newCustomer.customerContact?.gstin || '',
-          customerEmail: newCustomer.customerContact?.email || '',
+          customerAddress: newCustomer.customerContact?.address || form.customerAddress || '',
+          customerGSTIN: newCustomer.customerContact?.gstin || form.customerGSTIN || '',
+          customerEmail: newCustomer.customerContact?.email || form.customerEmail || '',
+          customerPhone: newCustomer.customerContact?.phone || form.customerPhone || '',
         }
       });
       setMessage({ type: 'success', text: `Customer created: ${newCustomer.customerName} (${newCustomer.customerId})` });
       setTimeout(() => setMessage(null), 3000);
+      
+      // If customer was created with minimal details, suggest updating
+      if (!hasDetails) {
+        setTimeout(() => {
+          setMessage({ type: 'info', text: 'Tip: You can update customer details later by editing the customer information.' });
+          setTimeout(() => setMessage(null), 4000);
+        }, 3000);
+      }
+      
       return newCustomer.customerId || '';
     } catch (err) {
       console.error('createNewCustomer Error:', err);
@@ -288,17 +291,83 @@ const CreditBill = () => {
     }
   }, [sanitizeInput, selectedCompanyFromState, form]);
 
+  const searchCustomers = useCallback(async (query) => {
+    if (!query || query.trim().length === 0) {
+      setSearchResults([]);
+      setMessage({ type: 'warning', text: 'Please enter a customer name to search' });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
+    
+    setIsCustomerLoading(true);
+    try {
+  
+      const response = await api.get('/customers/find', {
+        params: { query: sanitizeInput(query.trim()), company: selectedCompanyFromState },
+      });
+      const customers = Array.isArray(response.data) ? response.data : [];
+      
+      setSearchResults(customers);
+      
+      // If no customers found, offer to create new customer
+      if (customers.length === 0) {
+        setMessage({ type: 'info', text: `No customer found with name "${query}". Click "Create New Customer" to add them.` });
+        setTimeout(() => setMessage(null), 5000);
+      } else {
+        setMessage({ type: 'success', text: `Found ${customers.length} customer(s) matching "${query}"` });
+        setTimeout(() => setMessage(null), 3000);
+      }
+    } catch (error) {
+      console.error('Failed to search customers:', error);
+      setSearchResults([]);
+      setMessage({ type: 'error', text: 'Failed to search customers. Please try again.' });
+      setTimeout(() => setMessage(null), 3000);
+    } finally {
+      setIsCustomerLoading(false);
+    }
+  }, [selectedCompanyFromState, sanitizeInput]);
+
+  // Manual search only - no debouncing
+  const handleManualSearch = () => {
+    if (customerSearch.trim()) {
+      searchCustomers(customerSearch);
+    } else {
+      setMessage({ type: 'warning', text: 'Please enter a customer name to search' });
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  const selectCustomer = useCallback((customer) => {
+    dispatch({
+      type: 'SET_FORM',
+      form: {
+        ...form,
+        customerId: customer.customerId || '',
+        customerName: customer.customerName || '',
+        customerAddress: customer.customerContact?.address || 'N/A',
+        customerPhone: customer.customerContact?.phone || '',
+        customerEmail: customer.customerContact?.email || '',
+        customerGSTIN: customer.customerContact?.gstin || '',
+        customerContact: customer.customerContact || {}
+      }
+    });
+    setCustomerSearch('');
+    setSearchResults([]);
+  }, [form]);
+
   const getOrGenerateCustomerId = useCallback(async (name) => {
     if (!name.trim()) {
       setErrors((prev) => ({ ...prev, customerName: 'Customer name is required' }));
       return '';
     }
     const sanitizedName = sanitizeInput(name);
+    let customer = null;
     try {
-      const response = await api.get(`/customers/name/${encodeURIComponent(sanitizedName)}`, {
-        params: { company: selectedCompanyFromState }
+      const response = await api.get(`/customers/find`, {
+        params: { query: sanitizedName, company: selectedCompanyFromState }
       });
-      const customer = response.data;
+      const customers = response.data;
+      customer = customers && customers.length > 0 ? customers[0] : null;
       dispatch({
         type: 'SET_FORM',
         form: {
@@ -311,10 +380,24 @@ const CreditBill = () => {
           customerContact: customer.customerContact || {}
         }
       });
-      return customer.customerId || '';
+      return customer ? customer.customerId || '' : '';
     } catch (err) {
-      if (err.response?.status === 404) {
-        return createNewCustomer(sanitizedName);
+      if (err.response?.status === 404 || !customer) {
+        // No customer found - automatically create new customer with continuous ID
+        setMessage({ type: 'info', text: 'Customer not found. Creating new customer automatically...' });
+        setTimeout(() => setMessage(null), 3000);
+        
+        const newCustomerId = await createNewCustomer(sanitizedName, {
+          address: form.customerAddress || '',
+          phone: form.customerPhone || '',
+          email: form.customerEmail || '',
+          gstin: form.customerGSTIN || '',
+        });
+        if (newCustomerId) {
+          setMessage({ type: 'success', text: `New customer created automatically: ${name} (${newCustomerId})` });
+          setTimeout(() => setMessage(null), 3000);
+        }
+        return newCustomerId;
       }
       setMessage({ type: 'error', text: `Error fetching customer: ${err.response?.data?.message || err.message}` });
       setTimeout(() => setMessage(null), 3000);
@@ -322,11 +405,19 @@ const CreditBill = () => {
     }
   }, [sanitizeInput, createNewCustomer, selectedCompanyFromState, form]);
 
-  useEffect(() => {
-    if (form.customerName && !form.customerId) {
-      getOrGenerateCustomerId(form.customerName);
+  // Debounced customer ID generation to avoid creating customers for each character
+  const debouncedCustomerIdGeneration = useRef(debounce(async (customerName) => {
+    if (customerName && customerName.trim().length >= 3 && !form.customerId) {
+      await getOrGenerateCustomerId(customerName);
     }
-  }, [form, getOrGenerateCustomerId]);
+  }, 1000)).current;
+
+  useEffect(() => {
+    if (form.customerName && form.customerName.trim().length >= 3 && !form.customerId) {
+      debouncedCustomerIdGeneration(form.customerName);
+    }
+    return () => debouncedCustomerIdGeneration.cancel();
+  }, [form.customerName, form.customerId, debouncedCustomerIdGeneration]);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -360,7 +451,10 @@ const CreditBill = () => {
       const response = await api.get('/creditbills', {
         params: { company: selectedCompanyFromState }
       });
-      setSavedBills(response.data || []);
+
+      // Limit to latest 10 bills
+      const latestBills = (response.data?.data || []).slice(0, 10);
+      setSavedBills(latestBills);
     } catch (err) {
       console.error('Error fetching saved bills:', err);
       setSavedBills([]);
@@ -387,9 +481,11 @@ const CreditBill = () => {
       if (!latestInvoice) {
         return `${companyPrefixes[selectedCompanyFromState]}-1`; // Start with -1 if no bills exist
       }
-      const prefix = companyPrefixes[selectedCompanyFromState];
-      const numberPart = parseInt(latestInvoice.split('-')[1], 10) || 0;
-      return `${prefix}-${(numberPart + 1).toString()}`;
+      
+      // The server already returns the correct next invoice number
+      // No need to increment it again on the client side
+      
+      return latestInvoice;
     } catch (err) {
       console.error('Error generating invoice number:', err);
       return `${companyPrefixes[selectedCompanyFromState]}-1`; // Fallback to -1 on error
@@ -413,6 +509,14 @@ const CreditBill = () => {
     };
     initializeForm();
   }, [generateInvoiceNumber, selectedCompanyFromState]);
+
+  // Ensure invoice number is set when form is reset
+  useEffect(() => {
+    if (!form.invoiceNo || form.invoiceNo === '') {
+      const fallbackInvoiceNo = `${companyPrefixes[selectedCompanyFromState] || 'WNF'}-1`;
+      dispatch({ type: 'UPDATE_FIELD', field: 'invoiceNo', value: fallbackInvoiceNo });
+    }
+  }, [form.invoiceNo, selectedCompanyFromState]);
 
   const handleProductSelect = useCallback((product, itemIndex) => {
     if (!product) return;
@@ -446,8 +550,8 @@ const CreditBill = () => {
       field: 'rate',
       value: product.unitPrice ? product.unitPrice.toString() : '0'
     });
-    setShowProductDropdown(false);
-    setProductSearchTerm('');
+    // setShowProductDropdown(false);
+    // setProductSearchTerm('');
   }, []);
 
   const calculateTotals = useCallback(() => {
@@ -575,7 +679,17 @@ const CreditBill = () => {
     const { name, value, type, checked } = e.target;
     const sanitizedValue = sanitizeInput(value);
 
-    if (name === 'customerName') {
+    if (name === 'customerId') {
+      dispatch({ type: 'UPDATE_FIELD', field: name, value: sanitizedValue });
+      setErrors((prev) => ({
+        ...prev,
+        customerId: sanitizedValue.trim() ? '' : 'Customer ID is required',
+      }));
+      // Cancel any pending customer ID generation when user manually enters Customer ID
+      if (debouncedCustomerIdGeneration.cancel) {
+        debouncedCustomerIdGeneration.cancel();
+      }
+    } else if (name === 'customerName') {
       dispatch({ type: 'UPDATE_FIELD', field: name, value: sanitizedValue });
       setErrors((prev) => ({
         ...prev,
@@ -586,6 +700,22 @@ const CreditBill = () => {
       setErrors((prev) => ({
         ...prev,
         customerAddress: sanitizedValue.trim() ? '' : 'Customer address is required',
+      }));
+    } else if (name === 'customerPhone') {
+      dispatch({ type: 'UPDATE_FIELD', field: name, value: sanitizedValue });
+      setErrors((prev) => ({
+        ...prev,
+        customerPhone: sanitizedValue && !/^[0-9]{10}$/.test(sanitizedValue.replace(/\s/g, ''))
+          ? 'Invalid phone number format (10 digits required)'
+          : '',
+      }));
+    } else if (name === 'customerEmail') {
+      dispatch({ type: 'UPDATE_FIELD', field: name, value: sanitizedValue });
+      setErrors((prev) => ({
+        ...prev,
+        customerEmail: sanitizedValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedValue)
+          ? 'Invalid email format'
+          : '',
       }));
     } else if (name === 'customerGSTIN') {
       dispatch({ type: 'UPDATE_FIELD', field: name, value: sanitizedValue });
@@ -616,10 +746,50 @@ const CreditBill = () => {
         ...prev,
         paymentTerms: sanitizedValue ? '' : 'Payment terms are required',
       }));
+    } else if (name === 'overallAmountToPay') {
+      const amountToPay = parseFloat(sanitizedValue) || 0;
+      const currentTotals = calculateTotals();
+      const grandTotal = currentTotals.grandTotal || 0;
+      let remainingBalance = Math.max(0, grandTotal - amountToPay);
+      
+      // Apply round-off to remaining balance if round-off is enabled
+      if (form.applyRoundOff) {
+        remainingBalance = Math.round(remainingBalance);
+      }
+      
+      // Update the overall amount to pay and remaining balance
+      dispatch({ type: 'UPDATE_FIELD', field: 'overallAmountToPay', value: sanitizedValue });
+      dispatch({ type: 'UPDATE_FIELD', field: 'overallRemainingBalance', value: remainingBalance.toFixed(2) });
+      
+      // Update all items to reflect the overall amount distribution
+      form.items.forEach((item, index) => {
+        const itemTotal = parseFloat(item.total) || 0;
+        const itemRatio = grandTotal > 0 ? itemTotal / grandTotal : 0;
+        const itemAmountToPay = amountToPay * itemRatio;
+        let itemBalance = Math.max(0, itemTotal - itemAmountToPay);
+        
+        // Apply round-off to item balance if round-off is enabled
+        if (form.applyRoundOff) {
+          itemBalance = Math.round(itemBalance);
+        }
+        
+        dispatch({ 
+          type: 'UPDATE_ITEM', 
+          index, 
+          field: 'amountToPay', 
+          value: itemAmountToPay.toFixed(2) 
+        });
+        dispatch({ 
+          type: 'UPDATE_ITEM', 
+          index, 
+          field: 'balanceAmount', 
+          value: itemBalance.toFixed(2) 
+        });
+      });
     } else {
       dispatch({ type: 'UPDATE_FIELD', field: name, value: type === 'checkbox' ? checked : sanitizedValue });
     }
-  }, [sanitizeInput]);
+  }, [sanitizeInput, debouncedCustomerIdGeneration, calculateTotals, form]);
 
   const handleItemChange = useCallback((index, e) => {
     const { name, value } = e.target;
@@ -912,14 +1082,16 @@ const saveBill = useCallback(async () => {
   if (!validateForm()) return;
   setLoading(true);
   try {
+
     const totals = calculateTotals();
 
     // 🔒 Fix for Customer ID validation
     let finalCustomerId = form.customerId;
 
-    if (!/^CUST\d+$/.test(finalCustomerId)) {
+    // Updated regex to accept CUST-1, CUST-2, etc. format
+    if (!/^CUST-\d+$/.test(finalCustomerId)) {
       const newCustomerId = await getOrGenerateCustomerId(form.customerName);
-      if (!/^CUST\d+$/.test(newCustomerId)) {
+      if (!/^CUST-\d+$/.test(newCustomerId)) {
         setMessage({ type: 'error', text: 'Customer ID creation failed. Cannot save bill.' });
         setLoading(false);
         return;
@@ -927,8 +1099,17 @@ const saveBill = useCallback(async () => {
       finalCustomerId = newCustomerId;
     }
 
+    // Get fresh invoice number from server before saving
+    
+    const invoiceResponse = await api.get('/creditbills/latest-invoice', {
+      params: { company: selectedCompanyFromState }
+    });
+    const freshInvoiceNo = invoiceResponse.data?.data?.invoiceNo;
+    
+
     const payload = {
       ...form,
+      invoiceNo: freshInvoiceNo, // Use fresh invoice number from server
       customerId: finalCustomerId,
       totals: {
         totalTaxableValue: totals.totalTaxableValue,
@@ -937,7 +1118,8 @@ const saveBill = useCallback(async () => {
         totalIGST: totals.totalIGST,
         grandTotal: totals.grandTotal,
         roundOff: totals.roundOff,
-        amountToPay: form.items.reduce((sum, item) => sum + (parseFloat(item.amountToPay) || 0), 0),
+        amountToPay: parseFloat(form.overallAmountToPay) || 0,
+        remainingBalance: parseFloat(form.overallRemainingBalance) || 0,
         totalItemAmount: totals.totalTaxableValue,
         subtotal: totals.totalTaxableValue,
       },
@@ -952,7 +1134,7 @@ const saveBill = useCallback(async () => {
       lastUpdatedBy: userEmail,
     };
 
-    console.log("✅ Payload to backend:", payload);
+    
 
     await api.post('/creditbills', payload);
 
@@ -963,12 +1145,16 @@ const saveBill = useCallback(async () => {
       customerId: '',
       customerName: '',
       customerAddress: '',
+      customerPhone: '',
+      customerEmail: '',
       customerGSTIN: '',
       invoiceNo: '',
       date: '',
       paymentTerms: '',
       dueDates: [],
       items: [],
+      overallAmountToPay: '',
+      overallRemainingBalance: '',
     });
     fetchSavedBills();
   } catch (err) {
@@ -987,81 +1173,303 @@ const saveBill = useCallback(async () => {
 }, [form, selectedCompanyFromState, selectedCompanyDetails, validateForm, initialFormState, fetchSavedBills, calculateTotals, getOrGenerateCustomerId]);
 
 
-  const generatePDF = useCallback(async () => {
+
+
+  const sendEmail = useCallback(async () => {
+
+    
+    if (!form.customerEmail) {
+      setMessage({ type: 'error', text: 'Customer email required' });
+      return;
+    }
     if (!form.items.length) {
       setMessage({ type: 'error', text: 'Add at least one item' });
       setTimeout(() => setMessage(null), 3000);
       return;
     }
-
     if (!validateForm()) return;
 
+    
     setLoading(true);
+    
+    // Add timeout for the entire email process
+    const emailTimeout = setTimeout(() => {
+      setLoading(false);
+      setMessage({
+        type: 'error',
+        text: 'Email request timed out. Please try again.',
+      });
+      setTimeout(() => setMessage(null), 5000);
+    }, 30000); // 30 second timeout
+    
     try {
-      await saveBill();
-      const response = await api.get(`/creditbills/generate-pdf/${encodeURIComponent(form.invoiceNo)}`);
-      const pdfBase64 = response.data.data.pdf;
-      const link = document.createElement('a');
-      link.href = `data:application/pdf;base64,${pdfBase64}`;
-      link.download = `CreditBill_${sanitizeInput(form.customerName || 'Customer')}_${Date.now()}.pdf`;
-      link.click();
-      setMessage({ type: 'success', text: 'PDF generated' });
+
+      
+      // Prepare bill data without saving
+      const billData = {
+        ...form,
+        totals: calculateTotals(),
+        company: {
+          name: selectedCompanyFromState,
+          logo: selectedCompanyDetails?.logo,
+          qrCode: selectedCompanyDetails?.qrCode
+        }
+      };
+      
+      const pdfResponse = await Promise.race([
+        api.post('/creditbills/generate-pdf-unsaved', { billData }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('PDF generation timed out')), 15000)
+        )
+      ]);
+      
+      const pdfBase64 = pdfResponse.data.data.pdf;
+      const emailData = {
+        invoiceNo: form.invoiceNo,
+        customerEmail: form.customerEmail,
+        email: form.customerEmail,
+        emailTo: form.customerEmail,
+        subject: `Credit Bill #${form.invoiceNo} - ${selectedCompanyFromState || ''}`,
+        body: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #b39eb5; border-bottom: 2px solid #b39eb5; padding-bottom: 10px;">
+              Credit Bill from ${selectedCompanyFromState || ''}
+            </h2>
+            
+            <p>Dear ${form.customerName},</p>
+            
+            <p>Please find attached your credit bill for the purchased items.</p>
+            
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #333;">Bill Details:</h3>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Bill Number:</strong> ${form.invoiceNo}</li>
+                <li><strong>Customer ID:</strong> ${form.customerId}</li>
+                <li><strong>Customer Name:</strong> ${form.customerName}</li>
+                <li><strong>Date:</strong> ${form.date}</li>
+                <li><strong>Payment Terms:</strong> ${form.paymentTerms}</li>
+                <li><strong>Subtotal:</strong> ₹${calculateTotals().totalTaxableValue.toFixed(2)}</li>
+                <li><strong>CGST:</strong> ₹${calculateTotals().totalCGST.toFixed(2)}</li>
+                <li><strong>SGST:</strong> ₹${calculateTotals().totalSGST.toFixed(2)}</li>
+                <li><strong>Grand Total:</strong> ₹${calculateTotals().grandTotal.toFixed(2)}</li>
+                <li><strong>Status:</strong> ${form.cancelled ? 'Cancelled' : 'Active'}</li>
+              </ul>
+            </div>
+            
+            ${form.dueDates && form.dueDates.length > 0 ? `
+            <div style="background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #28a745;">Payment Due Dates:</h3>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                ${form.dueDates.map((due, index) => 
+                  `<li><strong>Due Date ${index + 1}:</strong> ${due.date}</li>`
+                ).join('')}
+              </ul>
+            </div>
+            ` : ''}
+            
+            <p><strong>Payment Instructions:</strong></p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              <li>Please make payment by the due dates mentioned above</li>
+              <li>Payment can be made through bank transfer or other agreed methods</li>
+              <li>For any queries regarding payment, please contact us immediately</li>
+            </ul>
+            
+            <p>If you have any questions, please don't hesitate to contact us.</p>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+              <p style="margin: 0;"><strong>Best regards,</strong><br>
+              ${selectedCompanyFromState || ''}<br>
+              Thekkekara Arcade, Chelakottukara, Thrissur, Kerala, 680001<br>
+              Mobile: 8547014116 | Email: wyenfos@gmail.com<br>
+              Website: www.wyenfos.com</p>
+            </div>
+          </div>
+        `,
+        pdfBase64: pdfBase64,
+      };
+      
+
+      
+      // Add timeout for the API request
+      await Promise.race([
+        api.post('/creditbills/send-email-unsaved', emailData),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Email request timed out')), 15000)
+        )
+      ]);
+      
+
+      clearTimeout(emailTimeout);
+      setMessage({ type: 'success', text: 'Credit bill emailed successfully!' });
     } catch (error) {
-      setMessage({ type: 'error', text: `PDF failed: ${error.response?.data?.message || error.message}` });
+      console.error('Failed to send email:', error);
+      clearTimeout(emailTimeout);
+      
+      // Get the actual error message from the server response
+      const errorMessage = error.response?.data?.message || error.message;
+      setMessage({
+        type: 'error',
+        text: `Failed to send email: ${errorMessage}`,
+      });
     } finally {
       setLoading(false);
-      setTimeout(() => setMessage(null), 3000);
+      setTimeout(() => setMessage(null), 5000);
     }
-  }, [form, saveBill, validateForm, sanitizeInput]);
+  }, [form, selectedCompanyFromState, selectedCompanyDetails?.logo, selectedCompanyDetails?.qrCode, validateForm, calculateTotals]);
 
-  const sendEmail = useCallback(async () => {
-    if (!form.customerEmail) {
-      setMessage({ type: 'error', text: 'Customer email required' });
+  const printBill = useCallback(async () => {
+
+    try {
+      if (!form.items.length) {
+        setMessage({ type: 'error', text: 'Add at least one item' });
+        setTimeout(() => setMessage(null), 3000);
+        return;
+      }
+      if (!validateForm()) return;
+
+      
+      setLoading(true);
+      
+      // Prepare bill data without saving
+      const billData = {
+        ...form,
+        totals: calculateTotals(),
+        company: {
+          name: selectedCompanyFromState,
+          logo: selectedCompanyDetails?.logo,
+          qrCode: selectedCompanyDetails?.qrCode
+        }
+      };
+      
+      
+      const pdfResponse = await Promise.race([
+        api.post('/creditbills/generate-pdf-unsaved', { billData }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('PDF generation timed out')), 30000)
+        )
+      ]);
+      
+      const pdfBase64 = pdfResponse.data.data.pdf;
+      
+
+      // Convert base64 to blob and create URL
+      const byteCharacters = atob(pdfBase64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+      const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+      
+      // Open PDF in new tab
+      const newWindow = window.open(pdfBlobUrl);
+      if (newWindow) {
+        // Wait for PDF to load then trigger print
+        setTimeout(() => {
+          newWindow.print();
+          // Clean up blob URL after printing
+          setTimeout(() => {
+            URL.revokeObjectURL(pdfBlobUrl);
+          }, 2000);
+        }, 1000);
+      }
+      
+      setMessage({ type: 'success', text: 'Print dialog opened!' });
+    } catch (error) {
+      console.error('Print error:', error);
+      setMessage({
+        type: 'error',
+        text: `Failed to generate print view: ${error.message}`,
+      });
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMessage(null), 5000);
+    }
+  }, [form, selectedCompanyFromState, selectedCompanyDetails?.logo, selectedCompanyDetails?.qrCode, validateForm, calculateTotals]);
+
+  const downloadPDF = useCallback(async () => {
+    if (!form.items.length) {
+      setMessage({ type: 'error', text: 'Add at least one item' });
+      setTimeout(() => setMessage(null), 3000);
       return;
     }
-    try {
-      const response = await api.post('/send-email', {
-        customerEmail: form.customerEmail,
-        invoiceData: { ...form },
-      });
-      setMessage({ type: 'success', text: response.data.message });
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Failed to send email' });
-    } finally {
-      setTimeout(() => setMessage(null), 3000);
-    }
-  }, [form]);
+    if (!validateForm()) return;
 
-  const printBill = useCallback(() => {
+
+    setLoading(true);
+    
     try {
-      setTimeout(() => window.print(), 300);
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Print failed' });
-      setTimeout(() => setMessage(null), 3000);
+
+      
+      // Prepare bill data without saving
+      const billData = {
+        ...form,
+        totals: calculateTotals(),
+        company: {
+          name: selectedCompanyFromState,
+          logo: selectedCompanyDetails?.logo,
+          qrCode: selectedCompanyDetails?.qrCode
+        }
+      };
+      
+      
+      const pdfResponse = await Promise.race([
+        api.post('/creditbills/generate-pdf-unsaved', { billData }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('PDF generation timed out')), 30000)
+        )
+      ]);
+      
+      const pdfBase64 = pdfResponse.data.data.pdf;
+      
+
+      // Download the PDF
+      const link = document.createElement('a');
+      link.href = `data:application/pdf;base64,${pdfBase64}`;
+      link.download = `CreditBill_${form.invoiceNo || 'Draft'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setMessage({ type: 'success', text: 'PDF downloaded successfully!' });
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+      setMessage({
+        type: 'error',
+        text: `Failed to download PDF: ${error.message}`,
+      });
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMessage(null), 5000);
     }
-  }, []);
+  }, [form, selectedCompanyFromState, selectedCompanyDetails?.logo, selectedCompanyDetails?.qrCode, validateForm, calculateTotals]);
 
   const resetForm = useCallback(async () => {
     try {
-      const newInvoiceNo = await generateInvoiceNumber(selectedCompanyFromState);
+      const newInvoiceNo = await generateInvoiceNumber();
       dispatch({ type: 'SET_FORM', form: { ...initialFormState, invoiceNo: newInvoiceNo } });
       setErrors({
         customerId: '',
         customerName: '',
         customerAddress: '',
+        customerPhone: '',
+        customerEmail: '',
         customerGSTIN: '',
         invoiceNo: '',
         date: '',
         paymentTerms: '',
         dueDates: [{ id: uuidv4(), date: '' }],
         items: [{ id: uuidv4(), code: '', description: '', hsnSac: '', quantity: '', rate: '', gstRate: '', amountToPay: '' }],
+        overallAmountToPay: '',
+        overallRemainingBalance: '',
       });
       setCurrentBillId(null);
     } catch (err) {
       setMessage({ type: 'error', text: 'Reset failed' });
       setTimeout(() => setMessage(null), 3000);
     }
-  }, [initialFormState, generateInvoiceNumber, selectedCompanyFromState]);
+  }, [initialFormState, generateInvoiceNumber]);
 
   const handleEdit = useCallback((bill) => {
     if (!bill) {
@@ -1079,8 +1487,9 @@ const saveBill = useCallback(async () => {
       customerId: bill.customerId || '',
       customerName: bill.customerName || '',
       customerAddress: bill.customerAddress || '',
-      customerGSTIN: bill.customerGSTIN || '',
+      customerPhone: bill.customerPhone || '',
       customerEmail: bill.customerEmail || '',
+      customerGSTIN: bill.customerGSTIN || '',
       invoiceNo: bill.invoiceNo || '',
       date: bill.date ? new Date(bill.date).toISOString().slice(0, 10) : '',
       dueDates: (bill.dueDates || []).map((d) => ({
@@ -1121,6 +1530,8 @@ const saveBill = useCallback(async () => {
         status: bill.paymentDetails?.status || 'Paid',
         dueDate: bill.paymentDetails?.dueDate || '',
       },
+      overallAmountToPay: bill.totals?.amountToPay?.toString() || '0',
+      overallRemainingBalance: bill.totals?.remainingBalance?.toString() || '0',
     };
 
     dispatch({ type: 'SET_FORM', form: updatedForm });
@@ -1130,6 +1541,8 @@ const saveBill = useCallback(async () => {
       customerId: '',
       customerName: '',
       customerAddress: '',
+      customerPhone: '',
+      customerEmail: '',
       customerGSTIN: '',
       invoiceNo: '',
       date: '',
@@ -1145,6 +1558,8 @@ const saveBill = useCallback(async () => {
         gstRate: '',
         amountToPay: '',
       })),
+      overallAmountToPay: '',
+      overallRemainingBalance: '',
     });
   }, [form, editPermissions]);
 
@@ -1164,23 +1579,21 @@ const requestEditPermission = useCallback(async () => {
   
   try {
     setLoading(true);
-    const response = await api.post('/permissions/request', {
-      type: 'edit',
+    const response = await api.post('/notifications/request-permission', {
+      type: 'edit_request',
+      billType: 'creditbill',
       billId: pendingEditBill._id,
-      billType: 'credit',
-      invoiceNo: pendingEditBill.invoiceNo,
+      billData: pendingEditBill,
       requestedBy: userEmail,
-      company: selectedCompanyFromState,
-      customerName: pendingEditBill.customerName,
-      amount: pendingEditBill.totals?.grandTotal || 0,
-      date: new Date().toISOString(),
+      requestedByRole: userRole,
+      reason: 'Staff requested permission to edit credit bill',
       status: 'pending'
     });
 
     if (response.data.success) {
       setMessage({ 
         type: 'success', 
-        text: `Edit request sent to admin for bill ${pendingEditBill.invoiceNo}` 
+        text: `Edit request sent to admin for bill ${pendingEditBill.invoiceNo}. You will be notified once approved.` 
       });
       return true;
     } else {
@@ -1200,30 +1613,28 @@ const requestEditPermission = useCallback(async () => {
     setLoading(false);
     setTimeout(() => setMessage(null), 3000);
   }
-}, [pendingEditBill, selectedCompanyFromState]);
+}, [pendingEditBill]);
 
 const requestDeletePermission = useCallback(async () => {
   if (!pendingEditBill) return false;
   
   try {
     setLoading(true);
-    const response = await api.post('/permissions/request', {
-      type: 'delete',
+    const response = await api.post('/notifications/request-permission', {
+      type: 'delete_request',
+      billType: 'creditbill',
       billId: pendingEditBill._id,
-      billType: 'credit',
-      invoiceNo: pendingEditBill.invoiceNo,
+      billData: pendingEditBill,
       requestedBy: userEmail,
-      company: selectedCompanyFromState,
-      customerName: pendingEditBill.customerName,
-      amount: pendingEditBill.totals?.grandTotal || 0,
-      date: new Date().toISOString(),
+      requestedByRole: userRole,
+      reason: 'Staff requested permission to delete credit bill',
       status: 'pending'
     });
 
     if (response.data.success) {
       setMessage({ 
         type: 'success', 
-        text: `Delete request sent to admin for bill ${pendingEditBill.invoiceNo}` 
+        text: `Delete request sent to admin for bill ${pendingEditBill.invoiceNo}. You will be notified once approved.` 
       });
       return true;
     } else {
@@ -1243,7 +1654,7 @@ const requestDeletePermission = useCallback(async () => {
     setLoading(false);
     setTimeout(() => setMessage(null), 3000);
   }
-}, [pendingEditBill, selectedCompanyFromState]);
+}, [pendingEditBill]);
 
   const handlePermissionResponse = useCallback((approved) => {
     if (approved && pendingEditBill) {
@@ -1257,6 +1668,9 @@ const requestDeletePermission = useCallback(async () => {
   }, [pendingEditBill, handleEdit]);
 
   const totals = calculateTotals();
+
+  // Debug logging to identify the issue
+
 
   return (
     <ErrorBoundary>
@@ -1294,32 +1708,27 @@ const requestDeletePermission = useCallback(async () => {
           )}
 
           <div className="bill-header">
-            <div className="header-left">
-           <CompanyHeader selectedCompany={selectedCompanyFromState} />
-         </div>
-            <div className="header-right">
-              {/* <div className="creditbill-info">
-                <h2>CREDIT BILL{form.cancelled ? ' (CANCELLED)' : ''}</h2>
-                <div className="creditbill-meta">
-                  <div className="bill-details-row">
-                    <span>Customer ID:</span>
-                    <strong>{form.customerId || 'Pending'}</strong>
-                  </div>
-                  <div className="bill-details-row">
-                    <span>Bill No:</span>
-                    <strong>{form.invoiceNo || 'Pending'}</strong>
-                  </div>
-                  <div className="bill-details-row">
-                    <span>Date:</span>
-                    <strong>
-                      {form.date
-                        ? new Date(form.date).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })
-                        : 'N/A'}
-                    </strong>
-                  </div>
-                </div>
-              </div> */}
-            </div>
+            <CompanyHeader 
+              billType="CREDIT_BILL"
+              billDetails={{
+                invoiceNumber: form.invoiceNo,
+                date: form.date,
+                isCancelled: form.cancelled
+              }}
+              selectedCompany={{
+                name: selectedCompanyFromState,
+                address: selectedCompanyDetails.address,
+                GSTIN: selectedCompanyDetails.GSTIN,
+                state: selectedCompanyDetails.state,
+                stateCode: selectedCompanyDetails.stateCode,
+                mobile: selectedCompanyDetails.mobile,
+                email: selectedCompanyDetails.email,
+                website: selectedCompanyDetails.website,
+                logo: selectedCompanyDetails.logo,
+                prefix: companyPrefixes[selectedCompanyFromState] || 'WNF'
+              }}
+              showBankDetails={true}
+            />
           </div>
 
           <hr className="invoice-divider" />
@@ -1329,23 +1738,23 @@ const requestDeletePermission = useCallback(async () => {
                 type="text"
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
-                placeholder="Search customers by ID, name, phone, or email"
+                  placeholder="Enter full customer name to search"
                 className="form-control credit-bill-input"
                 disabled={form.cancelled || loading}
               />
               <button
                 className="search-button no-print"
-                onClick={() => searchCustomers(customerSearch)}
-                disabled={customerSearch.length < 3 || loading}
+                onClick={handleManualSearch}
+                disabled={!customerSearch.trim() || loading}
               >
-                🔍
+                🔍 Search
               </button>
             </div>
             {searchResults.length > 0 && (
               <div className="search-results">
-                {searchResults.map((customer) => (
+                {searchResults.map((customer, index) => (
                   <div
-                    key={customer._id || customer.customerId}
+                    key={customer._id || customer.customerId || `customer-${index}`}
                     onClick={() => selectCustomer(customer)}
                     className="search-result-item"
                   >
@@ -1357,20 +1766,44 @@ const requestDeletePermission = useCallback(async () => {
               </div>
             )}
             {customerSearch.trim() && searchResults.length === 0 && (
+              <div className="create-customer-section">
+                <p className="no-customer-found">
+                  No customer found with name: <strong>{customerSearch}</strong>
+                </p>
               <button
                 className="btn-create-customer no-print"
-                onClick={() => createNewCustomer(customerSearch)}
+                onClick={() => createNewCustomer(customerSearch, {
+                  address: form.customerAddress || '',
+                  phone: form.customerPhone || '',
+                  email: form.customerEmail || '',
+                  gstin: form.customerGSTIN || '',
+                })}
                 disabled={loading}
               >
-                Create New Customer: {customerSearch}
+                  ➕ Create New Customer: {customerSearch}
               </button>
+              </div>
             )}
             {isCustomerLoading && <div className="loading-message">Loading customers...</div>}
           </div>
           <div className="section-title">Customer Information</div>
           <div className="customer-details">
             <div className="customer-form">
-              <div className="input-group">
+              <div className="credit-bill-input-group">
+                <label>Customer ID:</label>
+                <input
+                  type="text"
+                  name="customerId"
+                  value={form.customerId}
+                  onChange={handleChange}
+                  placeholder="Customer ID (e.g., CUST-1, CUST-2)"
+                  className={`credit-bill-input ${errors.customerId ? 'error-field' : ''}`}
+                  disabled={form.cancelled || loading || isCustomerLoading}
+                />
+                {errors.customerId && <div className="error-message">{errors.customerId}</div>}
+              </div>
+
+              <div className="credit-bill-input-group">
                 <label>Customer Name:</label>
                 <input
                   type="text"
@@ -1381,15 +1814,10 @@ const requestDeletePermission = useCallback(async () => {
                   className={`credit-bill-input ${errors.customerName ? 'error-field' : ''}`}
                   disabled={form.cancelled || loading || isCustomerLoading}
                 />
-                {form.customerId && (
-                  <div className="customer-id-display">
-                    Customer ID: {form.customerId}
-                  </div>
-                )}
                 {errors.customerName && <div className="error-message">{errors.customerName}</div>}
               </div>
 
-              <div className="input-group">
+              <div className="credit-bill-input-group">
                 <label>Date:</label>
                 <input
                   type="date"
@@ -1402,7 +1830,7 @@ const requestDeletePermission = useCallback(async () => {
                 {errors.date && <div className="error">{errors.date}</div>}
               </div>
 
-              <div className="input-group">
+              <div className="credit-bill-input-group">
                 <label>Address:</label>
                 <input
                   type="text"
@@ -1416,7 +1844,35 @@ const requestDeletePermission = useCallback(async () => {
                 {errors.customerAddress && <div className="error">{errors.customerAddress}</div>}
               </div>
 
-              <div className="input-group">
+              <div className="credit-bill-input-group">
+                <label>Phone:</label>
+                <input
+                  type="tel"
+                  name="customerPhone"
+                  value={form.customerPhone}
+                  onChange={handleChange}
+                  placeholder="Phone Number"
+                  className={`credit-bill-input ${errors.customerPhone ? 'error-border' : ''}`}
+                  disabled={form.cancelled || loading}
+                />
+                {errors.customerPhone && <div className="error">{errors.customerPhone}</div>}
+              </div>
+
+              <div className="credit-bill-input-group">
+                <label>Email:</label>
+                <input
+                  type="email"
+                  name="customerEmail"
+                  value={form.customerEmail}
+                  onChange={handleChange}
+                  placeholder="Email Address"
+                  className={`credit-bill-input ${errors.customerEmail ? 'error-border' : ''}`}
+                  disabled={form.cancelled || loading}
+                />
+                {errors.customerEmail && <div className="error">{errors.customerEmail}</div>}
+              </div>
+
+              <div className="credit-bill-input-group">
                 <label>GSTIN:</label>
                 <input
                   type="text"
@@ -1430,7 +1886,7 @@ const requestDeletePermission = useCallback(async () => {
                 {errors.customerGSTIN && <div className="error">{errors.customerGSTIN}</div>}
               </div>
 
-              <div className="input-group">
+              <div className="credit-bill-input-group">
                 <label>Payment Terms:</label>
                 <select
                   name="paymentTerms"
@@ -1445,6 +1901,19 @@ const requestDeletePermission = useCallback(async () => {
                 </select>
                 {errors.paymentTerms && <div className="error">{errors.paymentTerms}</div>}
               </div>
+            </div>
+          </div>
+
+          {/* Print-specific Due Dates Section */}
+          <div className="due-dates-section no-print">
+            <h3>Due Dates:</h3>
+            <div className="due-dates-list">
+              {form.dueDates.map((dueDate, index) => (
+                <div key={dueDate.id} className="due-date-item">
+                  <span>Due Date {index + 1}:</span>
+                  <span>{dueDate.date ? new Date(dueDate.date).toLocaleDateString('en-IN') : 'Not Set'}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -1554,7 +2023,15 @@ const requestDeletePermission = useCallback(async () => {
           </div>
 
         <div className="credit-bill-items">
+          <div className="items-header">
   <h3>ITEMS</h3>
+            <div className="items-instructions">
+              <span className="instruction-text">
+                💡 <strong>Product Edit Instructions:</strong> Use the search icon (🔍) to find products, or click the edit icon (✏️) to manually enter product details. 
+                Click the settings icon (⚙️) to open field editors for price, GST, HSN, and quantity. All fields in the table below are also directly editable to correct any purchase admin errors.
+              </span>
+            </div>
+          </div>
   <div className="billitems-section">
     <div className="col-sno">SI No</div>
     <div className="col-code">Item Code</div>
@@ -1568,7 +2045,7 @@ const requestDeletePermission = useCallback(async () => {
   </div>
 
   {form.items.map((item, index) => (
-    <div key={`item-${index}`} className="itemm-row">
+    <div key={item.id || `item-${index}`} className="itemm-row">
       <div className="col-sno">{index + 1}</div>
       <div className="col-code">
         <input
@@ -1582,27 +2059,16 @@ const requestDeletePermission = useCallback(async () => {
       </div>
       
       <div className="col-name">
-<input
-  type="text"
+        <ProductSelector
   value={item.description}
-  onChange={(e) => handleProductInput(e.target.value, index)}
-  onFocus={() => setShowProductDropdown(index)}
-  onBlur={() => setTimeout(() => setShowProductDropdown(null), 200)}
-  placeholder="Item Name"
-  list={`product-list-${index}`}
-  className={errors.items[index]?.description ? 'error-border' : ''}
+          onChange={(value) => handleProductInput(value, index)}
+          onProductSelect={(product) => handleProductSelect(product, index)}
+          placeholder="Search products..."
   disabled={form.cancelled || loading}
-/>
-<datalist id={`product-list-${index}`}>
-  {products.map((product) => (
-    <option key={product._id || product.itemCode} value={product.itemName}>
-      {product.itemCode} - {product.itemName}
-    </option>
-  ))}
-</datalist>
-
-          {errors.items[index]?.description && <div className="error">{errors.items[index].description}
-            </div>}
+          showEditMode={true}
+          showFieldEditors={true}
+        />
+        {errors.items[index]?.description && <div className="error">{errors.items[index].description}</div>}
       </div>
 
       <div className="col-hsn">
@@ -1719,14 +2185,23 @@ const requestDeletePermission = useCallback(async () => {
               </div>
               <div className="totals-row">
                 <span>Amount to Pay:</span>
-                <span>
-                  ₹{form.items.reduce((sum, item) => sum + (parseFloat(item.amountToPay) || 0), 0).toFixed(2)}
-                </span>
+                <input
+                  type="number"
+                  name="overallAmountToPay"
+                  value={form.overallAmountToPay || ''}
+                  onChange={handleChange}
+                  placeholder="Enter amount to pay"
+                  className="amount-to-pay-input"
+                  disabled={form.cancelled || loading}
+                  step="0.01"
+                  min="0"
+                  max={totals.grandTotal}
+                />
               </div>
               <div className="totals-row">
                 <span>Remaining Balance:</span>
                 <span>
-                  ₹{form.items.reduce((sum, item) => sum + (parseFloat(item.balanceAmount) || 0), 0).toFixed(2)}
+                  ₹{form.overallRemainingBalance}
                 </span>
               </div>
             </div>
@@ -1744,48 +2219,79 @@ const requestDeletePermission = useCallback(async () => {
             </label>
           </div>
 
-          <div className="action-buttons">
-            <button className="btn primary" onClick={saveBill} disabled={loading}>
+          <div className="action-buttons no-print">
+            <button className="btn primary no-print" onClick={saveBill} disabled={loading}>
               {loading ? 'Saving...' : 'Save Bill'}
             </button>
-            <button className="btn success" onClick={generatePDF} disabled={loading}>
+            <button className="btn success no-print" onClick={downloadPDF} disabled={loading}>
               {loading ? 'Generating...' : 'Download PDF'}
             </button>
-            <button className="btn success" onClick={sendEmail} disabled={loading || !form.customerEmail}>
-              {loading ? 'Sending...' : 'Email PDF'}
+            <button className="btn success no-print" onClick={sendEmail} disabled={loading || !form.customerEmail}>
+              {loading ? 'Sending...' : '📧 Email'}
             </button>
-            <button className="btn secondary" onClick={printBill} disabled={loading}>
-              Print
+            <button className="btn secondary no-print" onClick={printBill} disabled={loading}>
+            🖨️ Print
             </button>
-            <button className="btn warning" onClick={resetForm} disabled={loading}>
+            <button className="btn warning no-print" onClick={resetForm} disabled={loading}>
               Reset Form
             </button>
-            <button className="btn" onClick={() => navigate(-1)} disabled={loading}>
+            <button className="btn no-print" onClick={() => navigate(-1)} disabled={loading}>
               Back
             </button>
           </div>
 
-          <div className="footer">
+          <div className="futerr">
+            <div className="futer-content">
+              <div className="left-section">
+                <div className="terms-section">
             <h4>Terms & Conditions</h4>
+                  <div className="terms-content">
             <p>
               1. This credit bill is issued as per agreed terms.<br />
               2. Contact us within 7 days for discrepancies.<br />
               3. Amount credited can be adjusted against future invoices.
             </p>
-            <div className="signature">
-              <strong>Authorized Signatory</strong><br />
-              <strong>{selectedCompanyFromState}</strong>
             </div>
-            <div className="bank-details">
+                </div>
+                
+                <div className="bank-details-section">
               <h4>Bank Details</h4>
-              <p>
-                <strong>Company name:</strong> WYENFOS INFOTECH PRIVATE LIMITED<br />
-                <strong>Account number:</strong> 10192468394<br />
-                <strong>IFSC:</strong> IDFB0080732<br />
-                <strong>SWIFT code:</strong> IDFBINBBMUM<br />
-                <strong>Bank name:</strong> IDFC FIRST<br />
-                <strong>Branch:</strong> THRISSUR - EAST FORT THRISSUR BRANCH
-              </p>
+                  <div className="bank-container">
+                    <div className="bank-contentcashbill">
+                      <p><strong>Company name:</strong> {selectedCompanyFromState || 'WYENFOS INFOTECH PRIVATE LIMITED'}</p>
+                      <p><strong>Account number:</strong> 10192468394</p>
+                      <p><strong>IFSC:</strong> IDFB0080732</p>
+                      <p><strong>SWIFT code:</strong> IDFBINBBMUM</p>
+                      <p><strong>Bank name:</strong> IDFC FIRST</p>
+                      <p><strong>Branch:</strong> THRISSUR - EAST FORT THRISSUR BRANCH</p>
+                    </div>
+                    <div className="qr-code-section">
+                      <div className="qr-code-container">
+                        <img 
+                          src={selectedCompanyDetails.qrCode || '/uploads/bank-qr-codes/WYENFOS_QR_1755336487474.png'} 
+                          alt="QR Code for Payment" 
+                          className="qr-code-image"
+                          onError={(e) => {
+                            if (e.target) {
+                              e.target.style.display = 'none';
+                            }
+                            if (e.target && e.target.nextSibling) {
+                              e.target.nextSibling.style.display = 'block';
+                            }
+                          }}
+                        />
+                      
+                      </div>
+                      <p className="qr-code-label">Scan to Pay</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="signaturee">
+              <strong>Authorized Signatory</strong><br />
+              <strong>{selectedCompanyFromState || ''}</strong>
             </div>
           </div>
 
@@ -1801,17 +2307,31 @@ const requestDeletePermission = useCallback(async () => {
                       <th>Customer</th>
                       <th>Customer ID</th>
                       <th>Date</th>
+                      <th>Due Dates</th>
                       <th>Total</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {savedBills.map((bill) => (
-                      <tr key={bill._id} className={currentBillId === bill._id ? 'current-bill' : ''}>
+                    {savedBills.map((bill, index) => (
+                      <tr key={bill._id || `bill-${index}`} className={currentBillId === bill._id ? 'current-bill' : ''}>
                         <td>{bill.invoiceNo}</td>
                         <td>{bill.customerName}</td>
                         <td>{bill.customerId || 'N/A'}</td>
                         <td>{bill.date ? new Date(bill.date).toLocaleDateString('en-IN') : 'N/A'}</td>
+                        <td>
+                          {bill.dueDates && bill.dueDates.length > 0 ? (
+                            <div className="due-dates-display">
+                              {bill.dueDates.map((dueDate, idx) => (
+                                <div key={idx} className="due-date-display-item">
+                                  {dueDate.date ? new Date(dueDate.date).toLocaleDateString('en-IN') : 'Not Set'}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            'No Due Dates'
+                          )}
+                        </td>
                         <td>{bill.totals?.grandTotal ? '₹' + parseFloat(bill.totals.grandTotal).toFixed(2) : 'N/A'}</td>
                         <td>
                           {editPermissions[bill._id] ? (

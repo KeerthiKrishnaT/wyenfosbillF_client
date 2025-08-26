@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import './BillSummary.css';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const BillSummary = () => {
   const [cashBills, setCashBills] = useState([]);
@@ -8,21 +9,29 @@ const BillSummary = () => {
   const [creditNotes, setCreditNotes] = useState([]);
   const [loading, setLoading] = useState({ cash: false, credit: false, notes: false });
   const [errors, setErrors] = useState({ cash: null, credit: null, notes: null });
+  const { currentUser } = useAuth();
+  
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  
+  // Get Firebase ID token for API calls
+  const getAuthToken = useCallback(async () => {
+    if (!currentUser) {
+      throw new Error('No authenticated user');
+    }
+    return await currentUser.getIdToken(true);
+  }, [currentUser]);
 
-  // API configuration with auth token
+  // API configuration with Firebase auth token
   const api = useMemo(() => axios.create({
-    baseURL: 'http://localhost:5000/api',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    },
+    baseURL: `${API_BASE_URL}/api`,
     timeout: 10000,
-  }), []);
+  }), [API_BASE_URL]);
 
   api.interceptors.response.use(
     response => response,
     error => {
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
+        // Handle Firebase auth error
         window.location.href = '/login';
       }
       return Promise.reject(error);
@@ -31,10 +40,15 @@ const BillSummary = () => {
 
   // Fetch all bills/notes
   const fetchData = useCallback(async (endpoint, setData, type) => {
+    if (!currentUser) return;
+    
     setLoading(prev => ({ ...prev, [type]: true }));
     setErrors(prev => ({ ...prev, [type]: null }));
     try {
-      const response = await api.get(endpoint);
+      const token = await getAuthToken();
+      const response = await api.get(endpoint, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (response.data.success) {
         setData(response.data.data || []);
       } else {
@@ -50,7 +64,7 @@ const BillSummary = () => {
     } finally {
       setLoading(prev => ({ ...prev, [type]: false }));
     }
-  }, [api]);
+  }, [api, currentUser, getAuthToken]);
 
   // Initialize data fetching
   useEffect(() => {

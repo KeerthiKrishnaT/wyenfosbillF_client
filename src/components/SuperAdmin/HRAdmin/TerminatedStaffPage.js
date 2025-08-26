@@ -3,6 +3,8 @@ import axios from 'axios';
 import './TerminatedStaffPage.css';
 import { FaEdit, FaTrash, FaSave, FaTimes, FaPlus } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
+
 
 const TerminatedStaffPage = () => {
   const [formData, setFormData] = useState({
@@ -25,40 +27,46 @@ const TerminatedStaffPage = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const { currentUser } = useAuth();
   const API_URL = 'http://localhost:5000/api';
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!token) {
-          navigate('/login');
+        if (!currentUser) {
           return;
         }
 
         setLoading(true);
         setError('');
 
+        const idToken = await currentUser.getIdToken(true);
         const headers = {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${idToken}`,
           'Content-Type': 'application/json',
         };
 
-        const [companiesRes, terminatedRes, departmentsRes] = await Promise.all([
-          axios.get(`${API_URL}/companies/names`, { headers }),
+        const [terminatedRes, departmentsRes, companiesRes] = await Promise.all([
           axios.get(`${API_URL}/terminated-staff`, { headers }),
-          axios.get(`${API_URL}/auth/all-departments`, { headers })
+          axios.get(`${API_URL}/auth/all-departments`, { headers }),
+          axios.get(`${API_URL}/companies`, { headers })
         ]);
 
-        setAllCompanies(companiesRes?.data || []);
-        setTerminatedStaff(terminatedRes?.data || []);
-        setDepartments(departmentsRes?.data || []);
+        // Extract company names from API data
+        const companyNames = companiesRes.data.map(company => ({
+          _id: company._id || company.id,
+          name: company.name || company.companyName || 'Unknown Company'
+        }));
+
+        setAllCompanies(companyNames);
+        setTerminatedStaff(Array.isArray(terminatedRes?.data) ? terminatedRes.data : []);
+        setDepartments(Array.isArray(departmentsRes?.data) ? departmentsRes.data : []);
       } catch (err) {
+        console.error('Error fetching data:', err);
         if (err.response?.status === 401) {
-          localStorage.removeItem('token');
           navigate('/login');
         } else {
-          setError(err.response?.data?.error || err.message);
+          setError(err.response?.data?.error || err.message || 'Failed to fetch data');
         }
       } finally {
         setLoading(false);
@@ -66,7 +74,7 @@ const TerminatedStaffPage = () => {
     };
 
     fetchData();
-  }, [token, navigate]);
+  }, [currentUser, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleInput = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -74,7 +82,7 @@ const TerminatedStaffPage = () => {
 
   const handleCreate = async () => {
     try {
-      if (!token) {
+      if (!currentUser) {
         navigate('/login');
         return;
       }
@@ -97,9 +105,10 @@ const TerminatedStaffPage = () => {
         exitInterview: formData.exitInterview
       };
 
+      const idToken = await currentUser.getIdToken(true);
       const response = await axios.post(`${API_URL}/terminated-staff`, terminationData, {
         headers: { 
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${idToken}`,
           'Content-Type': 'application/json'
         }
       });
@@ -108,7 +117,6 @@ const TerminatedStaffPage = () => {
       resetForm();
     } catch (err) {
       if (err.response?.status === 401) {
-        localStorage.removeItem('token');
         navigate('/login');
       } else {
         setError(err.response?.data?.error || err.message || 'Failed to create record');
@@ -118,7 +126,7 @@ const TerminatedStaffPage = () => {
 
   const handleUpdate = async (id) => {
     try {
-      if (!token) {
+      if (!currentUser) {
         navigate('/login');
         return;
       }
@@ -134,12 +142,13 @@ const TerminatedStaffPage = () => {
         exitInterview: formData.exitInterview
       };
 
+      const idToken = await currentUser.getIdToken(true);
       const response = await axios.put(
         `${API_URL}/terminated-staff/${id}`,
         updateData,
         { 
           headers: { 
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${idToken}`,
             'Content-Type': 'application/json'
           } 
         }
@@ -151,7 +160,6 @@ const TerminatedStaffPage = () => {
       resetForm();
     } catch (err) {
       if (err.response?.status === 401 || err.response?.status === 403) {
-        localStorage.removeItem('token');
         navigate('/login');
       } else {
         setError(err.response?.data?.error || 'Failed to update record');
@@ -161,7 +169,7 @@ const TerminatedStaffPage = () => {
 
   const handleDelete = async (id) => {
     try {
-      if (!token) {
+      if (!currentUser) {
         navigate('/login');
         return;
       }
@@ -170,9 +178,10 @@ const TerminatedStaffPage = () => {
         return;
       }
       
+      const idToken = await currentUser.getIdToken(true);
       await axios.delete(`${API_URL}/terminated-staff/${id}`, {
         headers: { 
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${idToken}`,
           'Content-Type': 'application/json'
         }
       });
@@ -180,7 +189,6 @@ const TerminatedStaffPage = () => {
       setTerminatedStaff(prev => prev.filter(item => item._id !== id));
     } catch (err) {
       if (err.response?.status === 401 || err.response?.status === 403) {
-        localStorage.removeItem('token');
         navigate('/login');
       } else {
         setError(err.response?.data?.error || 'Failed to delete record');
@@ -242,10 +250,10 @@ const TerminatedStaffPage = () => {
                 required
                 disabled={loading || editingId}
               >
-                <option value="">Select Company</option>
-                {allCompanies.map(company => (
-                  <option key={company._id} value={company._id}>{company.name}</option>
-                ))}
+                                 <option value="">Select Company</option>
+                 {Array.isArray(allCompanies) && allCompanies.map(company => (
+                   <option key={company._id || company.id || `company-${company.name}`} value={company._id || company.id}>{company.name}</option>
+                 ))}
               </select>
             </div>
 
@@ -275,10 +283,10 @@ const TerminatedStaffPage = () => {
                 value={formData.department}
                 onChange={(e) => handleInput('department', e.target.value)}
               >
-                <option value="">Select Department</option>
-                {departments.map(dept => (
-                  <option key={dept._id} value={dept._id}>{dept.name}</option>
-                ))}
+                                 <option value="">Select Department</option>
+                 {Array.isArray(departments) && departments.map(dept => (
+                   <option key={dept._id || dept.id || `dept-${dept.name}`} value={dept._id || dept.id}>{dept.name}</option>
+                 ))}
               </select>
             </div>
 
@@ -391,9 +399,9 @@ const TerminatedStaffPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {terminatedStaff.length > 0 ? (
-                    terminatedStaff.map(staff => (
-                      <tr key={staff._id}>
+                                     {terminatedStaff.length > 0 ? (
+                     terminatedStaff.map(staff => (
+                       <tr key={staff._id || staff.id || `staff-${staff.name}-${staff.terminationDate}`}>
                         <td>{staff.name}</td>
                         <td>{staff.role}</td>
                         <td>{staff.department || 'N/A'}</td>

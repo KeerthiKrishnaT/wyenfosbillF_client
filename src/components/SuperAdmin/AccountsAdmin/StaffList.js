@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Chart, registerables } from 'chart.js';
 import axios from 'axios';
 import './BillingDetails.css';
+import { useAuth } from '../../../contexts/AuthContext';
 
 Chart.register(...registerables);
 
@@ -14,20 +15,35 @@ const StaffList = () => {
   const [message, setMessage] = useState('');
   const [selectedStaffIds, setSelectedStaffIds] = useState([]);
   const [editStaff, setEditStaff] = useState(null);
-
+  const { currentUser } = useAuth();
+  
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  
+  // Get Firebase ID token for API calls
+  const getAuthToken = useCallback(async () => {
+    if (!currentUser) {
+      throw new Error('No authenticated user');
+    }
+    return await currentUser.getIdToken(true);
+  }, [currentUser]);
+  
   const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: `${API_BASE_URL}/api`,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('authToken')}`,
     },
   });
 
 useEffect(() => {
   const fetchStaff = async () => {
+    if (!currentUser) return;
+    
     setIsLoading(true);
     try {
-      const response = await api.get('/accounts/staff/list');
+      const token = await getAuthToken();
+              const response = await api.get('/accounts/staff/list', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
       setStaff(response.data);
     } catch (err) {
       setNotificationMessage({ type: 'error', text: `Failed to fetch staff list: ${err.message}` });
@@ -37,7 +53,7 @@ useEffect(() => {
     }
   };
   fetchStaff();
-}, []);
+}, [currentUser, getAuthToken, api]);
 
   useEffect(() => {
     const ctx = document.getElementById('roleDistributionChart')?.getContext('2d');
@@ -83,7 +99,10 @@ useEffect(() => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await api.post('/auth/staff/add', newStaff);
+      const token = await getAuthToken();
+      const response = await api.post('/auth/staff/add', newStaff, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setStaff([...staff, response.data]);
       setNewStaff({ name: '', email: '', password: '', role: 'Staff' });
       setNotificationMessage({ type: 'success', text: 'Staff added successfully.' });
@@ -100,7 +119,10 @@ useEffect(() => {
     if (!editStaff) return;
     setIsLoading(true);
     try {
-      const response = await api.put(`/auth/staff/${editStaff._id}`, editStaff);
+      const token = await getAuthToken();
+      const response = await api.put(`/auth/staff/${editStaff._id}`, editStaff, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setStaff(staff.map(s => s._id === editStaff._id ? response.data : s));
       setEditStaff(null);
       setNotificationMessage({ type: 'success', text: 'Staff updated successfully.' });
@@ -125,7 +147,10 @@ useEffect(() => {
     }
     setIsLoading(true);
     try {
-      await api.post('/auth/staff/send-message', { staffIds: selectedStaffIds, message });
+      const token = await getAuthToken();
+      await api.post('/auth/staff/send-message', { staffIds: selectedStaffIds, message }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setMessage('');
       setSelectedStaffIds([]);
       setNotificationMessage({ type: 'success', text: 'Message sent successfully.' });

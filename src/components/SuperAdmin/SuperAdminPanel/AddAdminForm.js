@@ -26,16 +26,16 @@ const AddAdminForm = () => {
   const navigate = useNavigate();
 
   const sections = [
-    'dashboard',
-    'inventory',
-    'orders',
-    'purchase',
-    'reporting',
-    'support',
-    'billing',
-    'customers',
-    'staff_management',
-    'vouchers',
+    { id: 'dashboard', name: 'Dashboard', category: 'core' },
+    { id: 'inventory', name: 'Inventory Management', category: 'operations' },
+    { id: 'orders', name: 'Order Management', category: 'operations' },
+    { id: 'purchase', name: 'Purchase Management', category: 'operations' },
+    { id: 'reporting', name: 'Reports & Analytics', category: 'analytics' },
+    { id: 'support', name: 'Customer Support', category: 'customer' },
+    { id: 'billing', name: 'Billing & Invoicing', category: 'finance' },
+    { id: 'customers', name: 'Customer Management', category: 'customer' },
+    { id: 'staff_management', name: 'Staff Management', category: 'hr' },
+    { id: 'vouchers', name: 'Voucher Management', category: 'finance' },
   ];
 
   const handleChange = (e) => {
@@ -43,13 +43,27 @@ const AddAdminForm = () => {
     setFormData({ ...formData, [id]: value });
   };
 
-  const handleSectionChange = (section) => {
+  const handleSectionChange = (sectionId) => {
     setFormData((prev) => {
-      const accessibleSections = prev.accessibleSections.includes(section)
-        ? prev.accessibleSections.filter((s) => s !== section)
-        : [...prev.accessibleSections, section];
+      const accessibleSections = prev.accessibleSections.includes(sectionId)
+        ? prev.accessibleSections.filter((s) => s !== sectionId)
+        : [...prev.accessibleSections, sectionId];
       return { ...prev, accessibleSections };
     });
+  };
+
+  const handleSelectAll = () => {
+    setFormData((prev) => ({
+      ...prev,
+      accessibleSections: sections.map(section => section.id)
+    }));
+  };
+
+  const handleSelectNone = () => {
+    setFormData((prev) => ({
+      ...prev,
+      accessibleSections: []
+    }));
   };
 
   const togglePasswordVisibility = () => {
@@ -60,17 +74,25 @@ const AddAdminForm = () => {
     setAdminLoading(true);
     try {
       const token = localStorage.getItem('token');
+      console.log('fetchAdmins: Token available:', !!token);
+      
       const response = await fetch('http://localhost:5000/api/auth/admins', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
+      console.log('fetchAdmins: Response status:', response.status);
+      console.log('fetchAdmins: Response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error(`Failed to fetch admins: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('fetchAdmins: Error response:', errorText);
+        throw new Error(`Failed to fetch admins: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log('fetchAdmins: Received data:', data);
       setAdmins(data);
     } catch (error) {
       console.error('Fetch admins error:', error);
@@ -93,7 +115,7 @@ const AddAdminForm = () => {
       setLoading(false);
       return;
     }
-    if (formData.password.length < 6) {
+    if (!isEditing && formData.password.length < 6) {
       setErrors([{ msg: 'Password must be at least 6 characters long.' }]);
       setLoading(false);
       return;
@@ -106,8 +128,14 @@ const AddAdminForm = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/admins', {
-        method: 'POST',
+      const url = isEditing 
+        ? `http://localhost:5000/api/auth/admins/${editAdminId}`
+        : 'http://localhost:5000/api/auth/admins';
+      
+      const method = isEditing ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -118,23 +146,30 @@ const AddAdminForm = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to add admin.');
+        throw new Error(result.error || result.message || `Failed to ${isEditing ? 'update' : 'add'} admin.`);
       }
 
       setSuccessMessage(result.message);
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        role: 'admin',
-        department: '',
-        accessibleSections: [],
-      });
+      
+      if (!isEditing) {
+        setFormData({
+          name: '',
+          email: '',
+          password: '',
+          role: 'admin',
+          department: '',
+          accessibleSections: [],
+        });
+      }
+
+      // Reset editing state
+      setIsEditing(false);
+      setEditAdminId(null);
 
       // Refresh admin list
       fetchAdmins();
     } catch (error) {
-      console.error('Add admin error:', error);
+      console.error(`${isEditing ? 'Update' : 'Add'} admin error:`, error);
       setErrors([{ msg: error.message || 'Network error, please try again.' }]);
     } finally {
       setLoading(false);
@@ -143,7 +178,7 @@ const AddAdminForm = () => {
 
   const handleEditAdmin = (admin) => {
   setIsEditing(true);
-  setEditAdminId(admin._id);
+  setEditAdminId(admin.id || admin._id);
   setFormData({
     name: admin.name,
     email: admin.email,
@@ -217,6 +252,16 @@ const AddAdminForm = () => {
           ← Back
         </button>
         <h2>Add New Admin</h2>
+        <div className="header-buttons">
+          <button 
+            onClick={fetchAdmins} 
+            className="refresh-button"
+            disabled={adminLoading}
+          >
+            {adminLoading ? '🔄 Loading...' : '🔄 Refresh'}
+          </button>
+
+        </div>
       </div>
 
       {successMessage && <div className="success-message">{successMessage}</div>}
@@ -302,7 +347,7 @@ const AddAdminForm = () => {
             >
               <option value="">Select Department</option>
               {departments.map((dept) => (
-                <option key={dept._id} value={dept.name}>
+                <option key={dept.id || dept._id} value={dept.name}>
                   {dept.name}
                 </option>
               ))}
@@ -312,41 +357,87 @@ const AddAdminForm = () => {
         )}
 
         <div className="form-group">
-          <label>Accessible Sections</label>
+          <div className="sections-header">
+            <label>Accessible Sections</label>
+            <div className="section-controls">
+              <button
+                type="button"
+                className="select-all-btn"
+                onClick={handleSelectAll}
+              >
+                Select All
+              </button>
+              <button
+                type="button"
+                className="select-none-btn"
+                onClick={handleSelectNone}
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
           <div className="checkbox-group">
             {sections.map((section) => (
-              <label key={section} className="checkbox-label">
+              <label key={section.id} className="checkbox-label">
                 <input
                   type="checkbox"
-                  checked={formData.accessibleSections.includes(section)}
-                  onChange={() => handleSectionChange(section)}
+                  checked={formData.accessibleSections.includes(section.id)}
+                  onChange={() => handleSectionChange(section.id)}
                 />
-                <span>{section.charAt(0).toUpperCase() + section.slice(1)}</span>
+                <span>{section.name}</span>
               </label>
             ))}
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="submit-btn"
-          disabled={loading || (formData.role === 'admin' && !formData.department)}
-        >
-          {loading ? (
-            <>
-              <span className="spinner"></span> Adding...
-            </>
-          ) : (
-            'Add Admin'
+        <div className="form-buttons">
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={loading || (formData.role === 'admin' && !formData.department)}
+          >
+            {loading ? (
+              <>
+                <span className="spinner"></span> {isEditing ? 'Updating...' : 'Adding...'}
+              </>
+            ) : (
+              isEditing ? 'Update Admin' : 'Add Admin'
+            )}
+          </button>
+          
+          {isEditing && (
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={() => {
+                setIsEditing(false);
+                setEditAdminId(null);
+                setFormData({
+                  name: '',
+                  email: '',
+                  password: '',
+                  role: 'admin',
+                  department: '',
+                  accessibleSections: [],
+                });
+              }}
+            >
+              Cancel
+            </button>
           )}
-        </button>
+        </div>
       </form>
       <div className="admin-list-section">
         <h3>Existing Admins</h3>
         {adminLoading ? (
           <div className="loading">Loading admins...</div>
         ) : admins.length === 0 ? (
-          <p>No admins found</p>
+          <div className="no-admins">
+            <p>No admins found</p>
+            <button onClick={fetchAdmins} className="retry-button">
+              🔄 Retry
+            </button>
+          </div>
         ) : (
           <table className="admin-table">
             <thead>
@@ -361,7 +452,7 @@ const AddAdminForm = () => {
             </thead>
             <tbody>
               {admins.map((admin) => (
-                <tr key={admin._id}>
+                <tr key={admin.id || admin._id}>
                   <td>{admin.name}</td>
                   <td>{admin.email}</td>
                   <td>{admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}</td>
@@ -388,7 +479,7 @@ const AddAdminForm = () => {
 
                     <button
                       className="action-btn delete-btn"
-                      onClick={() => handleDeleteAdmin(admin._id)}
+                      onClick={() => handleDeleteAdmin(admin.id || admin._id)}
                       title="Delete Admin"
                     >
                       <FaTrash />

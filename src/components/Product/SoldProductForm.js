@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './Products.css';
 
 const SoldProductForm = ({ onSuccess }) => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     itemCode: '',
     itemName: '',
@@ -32,7 +34,7 @@ const SoldProductForm = ({ onSuccess }) => {
   const fetchSoldItems = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await api.get('/sold-products/all-sold-items');
+      const response = await api.get('/sold-products');
       if (response.data.success) {
         setAllSoldItems(response.data.data);
       } else {
@@ -174,6 +176,25 @@ if (
 
   return (
     <div className="spf-wrapper">
+      <button 
+        className="bck-button" 
+        onClick={() => navigate(-1)}
+        style={{
+          backgroundColor: '#997a8d',
+          color: 'white',
+          border: 'none',
+          padding: '10px 20px',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+      >
+        ← Back
+      </button>
       <div className="spf-form-section">
         <h2>{editingProduct ? 'Edit Sale Record' : 'Record New Sale'}</h2>
         <form onSubmit={handleSubmit} className="spf-grid">
@@ -256,24 +277,33 @@ if (
               <tr>
                 <th>Item Code</th>
                 <th>Item Name</th>
-                <th>HSN</th>
+                <th>Unit Price (₹)</th>
                 <th>GST (%)</th>
-                <th>Unit Rate (₹)</th>
                 <th>Quantity</th>
-                <th>Source</th>
+                <th>Total Amount (₹)</th>
+                <th>GST Amount (₹)</th>
+                <th>Bill Type</th>
+                <th>Sold Date</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.map((item) => (
-                <tr key={item._id}>
+                <tr key={item.id || item._id}>
                   <td>{item.itemCode}</td>
                   <td>{item.itemName}</td>
-                  <td>{item.hsn}</td>
-                  <td>{item.gst}</td>
-                  <td>{item.unitRate}</td>
+                  <td>{item.unitPrice || item.unitRate}</td>
+                  <td>{item.gst}%</td>
                   <td>{item.quantity}</td>
-                  <td>{item.source}</td>
+                  <td>₹{item.totalAmount?.toFixed(2) || ((item.unitPrice || item.unitRate) * item.quantity).toFixed(2)}</td>
+                  <td>₹{item.gstAmount?.toFixed(2) || (((item.unitPrice || item.unitRate) * item.quantity * item.gst) / 100).toFixed(2)}</td>
+                  <td style={{ 
+                    color: item.billType === 'cash' ? 'green' : item.billType === 'credit' ? 'blue' : 'black',
+                    fontWeight: 'bold'
+                  }}>
+                    {item.billType || item.source || 'Manual'}
+                  </td>
+                  <td>{item.formattedSoldDate || (item.soldDate ? new Date(item.soldDate).toLocaleDateString() : 'N/A')}</td>
                   <td>
                     <button
                       className="spf-edit-btn"

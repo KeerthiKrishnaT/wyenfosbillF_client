@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import './AccountsAdminPanel.css';
 import { Chart, registerables } from 'chart.js';
 import SideBar from './SideBar.js';
+import BillDistribution from './BillDistribution.js';
+import PaymentHistory from './PaymentHistory.js';
 import axios from 'axios';
+import { useAuth } from '../../../contexts/AuthContext';
 
 Chart.register(...registerables);
 
@@ -13,15 +16,15 @@ const AccountsAdminPanel = () => {
   const [activeTab, setActiveTab] = useState('profit-analysis');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [billingData, setBillingData] = useState([]);
-  const [orderSummary, setOrderSummary] = useState({});
-  const [paymentSummary, setPaymentSummary] = useState({});
+
+  const [staffList, setStaffList] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [profitData, setProfitData] = useState({
-    cashBills: [1000, 1200, 800, 1500, 900, 1100],
-    creditBills: [500, 600, 400, 700, 300, 500],
-    creditNotes: [200, 100, 150, 300, 200, 100],
-    debitNotes: [50, 60, 40, 70, 30, 50],
-    expenses: [300, 400, 350, 500, 200, 300],
+    cashBills: [],
+    creditBills: [],
+    creditNotes: [],
+    debitNotes: [],
+    expenses: [],
   });
   const [billDistributionData, setBillDistributionData] = useState({
     cashBills: 0,
@@ -47,12 +50,10 @@ const AccountsAdminPanel = () => {
   const [chartType, setChartType] = useState('line');
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState([]);
-  const [userRole, setUserRole] = useState('');
-  const [userEmail, setUserEmail] = useState('');
+  // Removed unused state variables
   const [isLoading, setIsLoading] = useState(false);
   const [permissionRequests, setPermissionRequests] = useState([]);
   const [showStaffModal, setShowStaffModal] = useState(false);
-  const [staffList, setStaffList] = useState([]);
   const [newStaff, setNewStaff] = useState({ name: '', email: '', role: 'Staff', phone: '', photo: null });
   const [editingStaff, setEditingStaff] = useState(null);
   const [showMessageForm, setShowMessageForm] = useState(false);
@@ -63,8 +64,29 @@ const AccountsAdminPanel = () => {
   const [hasData, setHasData] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const { currentUser } = useAuth();
+  
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  
+  // Get Firebase ID token for API calls
+  const getAuthToken = useCallback(async () => {
+    if (!currentUser) {
+      throw new Error('No authenticated user');
+    }
+    try {
+      return await currentUser.getIdToken(true);
+    } catch (error) {
+      if (error.code === 'auth/quota-exceeded') {
+        console.warn('Firebase quota exceeded, using mock token for testing');
+        // Return a mock token for testing
+        return 'mock-token-for-testing';
+      }
+      throw error;
+    }
+  }, [currentUser]);
+  
   const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+    baseURL: `${API_BASE_URL}/api`,
     headers: {
       'Content-Type': 'application/json',
     },
@@ -74,21 +96,17 @@ const AccountsAdminPanel = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const fetchPermissionRequests = useCallback(async () => {
-    try {
-      const response = await api.get('/permission/requests');
-      setPermissionRequests(response.data);
-    } catch (error) {
-      console.error('Error fetching permission requests:', error);
-    }
-  }, [api]);
+  // Removed unused function
 
   const handlePermissionResponse = async (requestId, status) => {
     try {
+      const token = await getAuthToken();
       await api.put(`/permission/request/${requestId}`, {
         status,
-        processedBy: userEmail,
+        processedBy: localStorage.getItem('email') || 'unknown',
         processedAt: new Date().toISOString(),
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setPermissionRequests(permissionRequests.filter(req => req._id !== requestId));
       setNotificationMessage({ type: 'success', text: `Permission request ${status}` });
@@ -101,63 +119,100 @@ const AccountsAdminPanel = () => {
 
  useEffect(() => {
   const fetchAllData = async () => {
+    if (!currentUser) return;
+    
     setIsLoading(true);
-    const token = localStorage.getItem('authToken');
+    const token = await getAuthToken();
 
     try {
       const [
-        billingRes,
-        orderRes,
-        paymentRes,
-        profitRes,
+        cashBillsRes,
+        creditBillsRes,
+        creditNotesRes,
+        debitNotesRes,
         distributionRes,
         comparisonRes,
         staffRes,
       ] = await Promise.all([
-        fetch('http://localhost:5000/api/accounts/billing', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('http://localhost:5000/api/accounts/order-summary', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('http://localhost:5000/api/accounts/payment-summary', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('http://localhost:5000/api/accounts/profit-data', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('http://localhost:5000/api/accounts/bill-distribution', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('http://localhost:5000/api/accounts/comparison-data', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('http://localhost:5000/api/accounts/staff/list', { headers: { Authorization: `Bearer ${token}` } }), // Updated
+        fetch(`${API_BASE_URL}/api/cashbills`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/api/creditbills`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/api/creditnotes`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/api/debitnotes`, { headers: { Authorization: `Bearer ${token}` } }),
+
+        fetch(`${API_BASE_URL}/api/accounts/bill-distribution`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/api/accounts/comparison-data`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE_URL}/api/accounts/staff/list`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       const [
-        billingData,
-        orderData,
-        paymentData,
-        profitData,
+        cashBillsData,
+        creditBillsData,
+        creditNotesData,
+        debitNotesData,
         distributionData,
         comparisonData,
         staffData,
       ] = await Promise.all([
-        billingRes.ok ? billingRes.json() : Promise.reject(new Error('Failed to fetch billing data')),
-        orderRes.ok ? orderRes.json() : Promise.reject(new Error('Failed to fetch order summary')),
-        paymentRes.ok ? paymentRes.json() : Promise.reject(new Error('Failed to fetch payment summary')),
-        profitRes.ok ? profitRes.json() : Promise.reject(new Error('Failed to fetch profit data')),
+        cashBillsRes.ok ? cashBillsRes.json() : Promise.reject(new Error('Failed to fetch cash bills')),
+        creditBillsRes.ok ? creditBillsRes.json() : Promise.reject(new Error('Failed to fetch credit bills')),
+        creditNotesRes.ok ? creditNotesRes.json() : Promise.reject(new Error('Failed to fetch credit notes')),
+        debitNotesRes.ok ? debitNotesRes.json() : Promise.reject(new Error('Failed to fetch debit notes')),
+
         distributionRes.ok ? distributionRes.json() : Promise.reject(new Error('Failed to fetch bill distribution')),
         comparisonRes.ok ? comparisonRes.json() : Promise.reject(new Error('Failed to fetch comparison data')),
         staffRes.ok ? staffRes.json() : Promise.reject(new Error('Failed to fetch staff list')),
       ]);
 
-      setBillingData(billingData.bills || []);
-      setOrderSummary(orderData || {});
-      setPaymentSummary(paymentData || {});
-      setProfitData(profitData || {
-        cashBills: [],
-        creditBills: [],
-        creditNotes: [],
-        debitNotes: [],
-        expenses: [],
-      });
+      // Combine all billing data
+      const allBillingData = [
+        ...(cashBillsData || []),
+        ...(creditBillsData?.data || []),
+        ...(creditNotesData || []),
+        ...(debitNotesData || [])
+      ];
+      
+      setBillingData(allBillingData);
+      setStaffList(staffData || []);
+      
+
+      
+      // Calculate profit data from actual bills
+      const calculateMonthlyData = (bills, type) => {
+        const monthlyData = [0, 0, 0, 0, 0, 0]; // 6 months
+        bills.forEach(bill => {
+          const date = new Date(bill.date || bill.createdAt);
+          const month = date.getMonth();
+          if (month < 6) { // Only last 6 months
+            let amount = 0;
+            if (type === 'cashBills' || type === 'creditBills') {
+              amount = bill.totals?.grandTotal || 0;
+            } else if (type === 'creditNotes') {
+              amount = bill.totals?.rounded || 0;
+            } else if (type === 'debitNotes') {
+              amount = bill.totals?.totalAmount || 0;
+            }
+            monthlyData[month] += amount;
+          }
+        });
+        return monthlyData;
+      };
+
+      const realProfitData = {
+        cashBills: calculateMonthlyData(cashBillsData || [], 'cashBills'),
+        creditBills: calculateMonthlyData(creditBillsData?.data || [], 'creditBills'),
+        creditNotes: calculateMonthlyData(creditNotesData || [], 'creditNotes'),
+        debitNotes: calculateMonthlyData(debitNotesData || [], 'debitNotes'),
+        expenses: [0, 0, 0, 0, 0, 0], // Placeholder for expenses
+      };
+
+      setProfitData(realProfitData);
       setBillDistributionData(distributionData || {});
       setComparisonData(comparisonData || {});
 
       const staffWithDetails = await Promise.all(
         (staffData || []).map(async (staff) => {
           try {
-            const billDetailsRes = await fetch(`http://localhost:5000/api/accounts/staff/${staff._id}/bill-details`, { // Updated
+            const billDetailsRes = await fetch(`${API_BASE_URL}/api/accounts/staff/${staff._id}/bill-details`, {
               headers: { Authorization: `Bearer ${token}` },
             });
             if (!billDetailsRes.ok) throw new Error(`Failed to fetch bill details for ${staff.name}`);
@@ -172,12 +227,12 @@ const AccountsAdminPanel = () => {
       );
       setStaffList(staffWithDetails);
 
-      updateSummaryMetrics(profitData || {}, months.map((_, i) =>
-        (profitData.cashBills?.[i] || 0) +
-        (profitData.creditBills?.[i] || 0) -
-        (profitData.creditNotes?.[i] || 0) -
-        (profitData.expenses?.[i] || 0) +
-        (profitData.debitNotes?.[i] || 0)
+      updateSummaryMetrics(realProfitData, months.map((_, i) =>
+        (realProfitData.cashBills?.[i] || 0) +
+        (realProfitData.creditBills?.[i] || 0) -
+        (realProfitData.creditNotes?.[i] || 0) -
+        (realProfitData.expenses?.[i] || 0) +
+        (realProfitData.debitNotes?.[i] || 0)
       ));
     } catch (err) {
       setNotificationMessage({ type: 'error', text: `Failed to load data: ${err.message}` });
@@ -188,98 +243,7 @@ const AccountsAdminPanel = () => {
   };
 
   fetchAllData();
-}, [navigate]);
-
-  useEffect(() => {
-    const fetchAllData = async () => {
-      setIsLoading(true);
-      const token = localStorage.getItem('authToken');
-
-      try {
-        const [
-          billingRes,
-          orderRes,
-          paymentRes,
-          profitRes,
-          distributionRes,
-          comparisonRes,
-          staffRes,
-        ] = await Promise.all([
-          fetch('http://localhost:5000/api/auth/accounts/billing', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/auth/accounts/order-summary', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/auth/accounts/payment-summary', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/auth/accounts/profit-data', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/auth/accounts/bill-distribution', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/auth/accounts/comparison-data', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/staff/list', { headers: { Authorization: `Bearer ${token}` } }),
-        ]);
-
-        const [
-          billingData,
-          orderData,
-          paymentData,
-          profitData,
-          distributionData,
-          comparisonData,
-          staffData,
-        ] = await Promise.all([
-          billingRes.ok ? billingRes.json() : Promise.reject(new Error('Failed to fetch billing data')),
-          orderRes.ok ? orderRes.json() : Promise.reject(new Error('Failed to fetch order summary')),
-          paymentRes.ok ? paymentRes.json() : Promise.reject(new Error('Failed to fetch payment summary')),
-          profitRes.ok ? profitRes.json() : Promise.reject(new Error('Failed to fetch profit data')),
-          distributionRes.ok ? distributionRes.json() : Promise.reject(new Error('Failed to fetch bill distribution')),
-          comparisonRes.ok ? comparisonRes.json() : Promise.reject(new Error('Failed to fetch comparison data')),
-          staffRes.ok ? staffRes.json() : Promise.reject(new Error('Failed to fetch staff list')),
-        ]);
-
-        setBillingData(billingData.bills || []);
-        setOrderSummary(orderData || {});
-        setPaymentSummary(paymentData || {});
-        setProfitData(profitData || {
-          cashBills: [],
-          creditBills: [],
-          creditNotes: [],
-          debitNotes: [],
-          expenses: [],
-        });
-        setBillDistributionData(distributionData || {});
-        setComparisonData(comparisonData || {});
-
-        const staffWithDetails = await Promise.all(
-          (staffData || []).map(async (staff) => {
-            try {
-              const billDetailsRes = await fetch(`http://localhost:5000/api/staff/${staff._id}/bill-details`, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              if (!billDetailsRes.ok) throw new Error(`Failed to fetch bill details for ${staff.name}`);
-              const billDetails = await billDetailsRes.json();
-              return { ...staff, ...billDetails };
-            } catch (err) {
-              setNotificationMessage({ type: 'error', text: `Error fetching bill details for ${staff.name}: ${err.message}` });
-              setTimeout(() => setNotificationMessage(null), 3000);
-              return { ...staff, cashBill: 0, creditBill: 0, creditNote: 0, debitNote: 0 };
-            }
-          })
-        );
-        setStaffList(staffWithDetails);
-
-        updateSummaryMetrics(profitData || {}, months.map((_, i) =>
-          (profitData.cashBills?.[i] || 0) +
-          (profitData.creditBills?.[i] || 0) -
-          (profitData.creditNotes?.[i] || 0) -
-          (profitData.expenses?.[i] || 0) +
-          (profitData.debitNotes?.[i] || 0)
-        ));
-      } catch (err) {
-        setNotificationMessage({ type: 'error', text: `Failed to load data: ${err.message}` });
-        setTimeout(() => setNotificationMessage(null), 3000);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAllData();
-  }, [navigate]);
+}, [navigate, currentUser, getAuthToken, API_BASE_URL]);
 
   useEffect(() => {
     const profit = months.map((_, i) =>
@@ -331,9 +295,9 @@ const AccountsAdminPanel = () => {
   };
 
   const fetchDetailedBillData = async (type) => {
-    const token = localStorage.getItem('authToken');
     try {
-      const response = await fetch(`http://localhost:5000/api/auth/accounts/bill-details/${type}`, {
+      const token = await getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/api/auth/accounts/bill-details/${type}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error(`Failed to fetch ${type} details`);
@@ -358,9 +322,9 @@ const AccountsAdminPanel = () => {
       return;
     }
     setIsLoading(true);
-    const token = localStorage.getItem('authToken');
     try {
-      const response = await fetch(`http://localhost:5000/api/auth/accounts/filtered-data`, {
+      const token = await getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/api/auth/accounts/filtered-data`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -405,10 +369,10 @@ const AccountsAdminPanel = () => {
     setDateRange({ ...dateRange, [type]: selectedDate });
   };
 
-  const fetchMonthDetails = async (month, type) => {
-    const token = localStorage.getItem('authToken');
+  const fetchMonthDetails = useCallback(async (month, type) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/auth/accounts/month-details`, {
+      const token = await getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/api/auth/accounts/month-details`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -424,7 +388,7 @@ const AccountsAdminPanel = () => {
       setNotificationMessage({ type: 'error', text: `Error fetching ${month} ${type} details: ${err.message}` });
       setTimeout(() => setNotificationMessage(null), 3000);
     }
-  };
+  }, [getAuthToken, API_BASE_URL]);
 
   const exportChartAsImage = () => {
     const canvas = document.getElementById('profitChart');
@@ -466,23 +430,23 @@ const AccountsAdminPanel = () => {
       setTimeout(() => setNotificationMessage(null), 3000);
       return;
     }
-    const token = localStorage.getItem('authToken');
-    const formData = new FormData();
-    formData.append('name', newStaff.name);
-    formData.append('email', newStaff.email);
-    formData.append('role', newStaff.role);
-    formData.append('phone', newStaff.phone);
-    if (newStaff.photo) formData.append('photo', newStaff.photo);
-
     try {
-      const response = await fetch('http://localhost:5000/api/staff/add', {
+      const token = await getAuthToken();
+      const formData = new FormData();
+      formData.append('name', newStaff.name);
+      formData.append('email', newStaff.email);
+      formData.append('role', newStaff.role);
+      formData.append('phone', newStaff.phone);
+      if (newStaff.photo) formData.append('photo', newStaff.photo);
+
+      const response = await fetch(`${API_BASE_URL}/api/staff/add`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
       const data = await response.json();
       if (response.ok) {
-        const billDetailsRes = await fetch(`http://localhost:5000/api/staff/${data._id}/bill-details`, {
+        const billDetailsRes = await fetch(`${API_BASE_URL}/api/staff/${data._id}/bill-details`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!billDetailsRes.ok) throw new Error('Failed to fetch bill details for new staff');
@@ -511,16 +475,16 @@ const AccountsAdminPanel = () => {
   };
 
   const handleUpdateStaff = async (staff) => {
-    const token = localStorage.getItem('authToken');
-    const formData = new FormData();
-    formData.append('name', staff.name);
-    formData.append('email', staff.email);
-    formData.append('role', staff.role);
-    formData.append('phone', staff.phone);
-    if (staff.photo instanceof File) formData.append('photo', staff.photo);
-
     try {
-      const response = await fetch(`http://localhost:5000/api/staff/${staff._id}`, {
+      const token = await getAuthToken();
+      const formData = new FormData();
+      formData.append('name', staff.name);
+      formData.append('email', staff.email);
+      formData.append('role', staff.role);
+      formData.append('phone', staff.phone);
+      if (staff.photo instanceof File) formData.append('photo', staff.photo);
+
+      const response = await fetch(`${API_BASE_URL}/api/staff/${staff._id}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -558,9 +522,9 @@ const AccountsAdminPanel = () => {
       setTimeout(() => setNotificationMessage(null), 3000);
       return;
     }
-    const token = localStorage.getItem('authToken');
     try {
-      const response = await fetch('http://localhost:5000/api/staff/send-message', {
+      const token = await getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/api/staff/send-message`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -741,7 +705,7 @@ const AccountsAdminPanel = () => {
     });
 
     return () => profitChart.destroy();
-  }, [profitData, chartType, showComparison, comparisonData]);
+  }, [profitData, chartType, showComparison, comparisonData, fetchMonthDetails]);
 
   useEffect(() => {
     const ctx = document.getElementById('billDistributionChart')?.getContext('2d');
@@ -797,7 +761,9 @@ const AccountsAdminPanel = () => {
   }, [billDistributionData]);
 
   const handleAddFeature = () => {
-    if (userRole !== 'super_admin') {
+    // Check if user is super admin from localStorage or context
+    const userRole = localStorage.getItem('role');
+    if (userRole !== 'super_admin' && userRole !== 'superadmin') {
       setNotificationMessage({ type: 'error', text: 'Only Super Admins can add new features.' });
       setTimeout(() => setNotificationMessage(null), 3000);
       return;
@@ -818,6 +784,7 @@ const AccountsAdminPanel = () => {
           localStorage.removeItem('user');
           navigate('/login');
         }}
+        staffList={staffList}
       />
       <div className={`main-content ${isSidebarOpen ? 'with-sidebar' : 'without-sidebar'}`}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -895,23 +862,23 @@ const AccountsAdminPanel = () => {
             </button>
             <button
               role="tab"
-              id="order-summary-tab"
-              className={activeTab === 'order-summary' ? 'active-tab' : 'tab'}
-              onClick={() => setActiveTab('order-summary')}
-              aria-selected={activeTab === 'order-summary'}
-              aria-controls="order-summary-panel"
+              id="bill-distribution-tab"
+              className={activeTab === 'bill-distribution' ? 'active-tab' : 'tab'}
+              onClick={() => setActiveTab('bill-distribution')}
+              aria-selected={activeTab === 'bill-distribution'}
+              aria-controls="bill-distribution-panel"
             >
-              Order Summary
+              Bill Distribution
             </button>
             <button
               role="tab"
-              id="payment-summary-tab"
-              className={activeTab === 'payment-summary' ? 'active-tab' : 'tab'}
-              onClick={() => setActiveTab('payment-summary')}
-              aria-selected={activeTab === 'payment-summary'}
-              aria-controls="payment-summary-panel"
+              id="payment-history-tab"
+              className={activeTab === 'payment-history' ? 'active-tab' : 'tab'}
+              onClick={() => setActiveTab('payment-history')}
+              aria-selected={activeTab === 'payment-history'}
+              aria-controls="payment-history-panel"
             >
-              Payment Summary
+              Payment History
             </button>
             <button
               role="tab"
@@ -922,16 +889,6 @@ const AccountsAdminPanel = () => {
               aria-controls="profit-analysis-panel"
             >
               Profit Analysis
-            </button>
-            <button
-              role="tab"
-              id="bill-distribution-tab"
-              className={activeTab === 'bill-distribution' ? 'active-tab' : 'tab'}
-              onClick={() => setActiveTab('bill-distribution')}
-              aria-selected={activeTab === 'bill-distribution'}
-              aria-controls="bill-distribution-panel"
-            >
-              Bill Distribution
             </button>
           </div>
         </div>
@@ -976,55 +933,29 @@ const AccountsAdminPanel = () => {
             </div>
           )}
 
-          {activeTab === 'order-summary' && (
+          {activeTab === 'bill-distribution' && (
             <div
-              className="order-summary-section"
+              className="bill-distribution-section"
               role="tabpanel"
-              id="order-summary-panel"
-              aria-labelledby="order-summary-tab"
+              id="bill-distribution-panel"
+              aria-labelledby="bill-distribution-tab"
             >
-              <h3>Order Summary</h3>
-              <div className="summary-cards">
-                <div className="card">
-                  <h4>Total Orders</h4>
-                  <p>{orderSummary.totalOrders || 0}</p>
-                </div>
-                <div className="card">
-                  <h4>Pending Orders</h4>
-                  <p>{orderSummary.pendingOrders || 0}</p>
-                </div>
-                <div className="card">
-                  <h4>Completed Orders</h4>
-                  <p>{orderSummary.completedOrders || 0}</p>
-                </div>
-              </div>
+              <BillDistribution />
             </div>
           )}
 
-          {activeTab === 'payment-summary' && (
+          {activeTab === 'payment-history' && (
             <div
-              className="payment-summary-section"
+              className="payment-history-section"
               role="tabpanel"
-              id="payment-summary-panel"
-              aria-labelledby="payment-summary-tab"
+              id="payment-history-panel"
+              aria-labelledby="payment-history-tab"
             >
-              <h3>Payment Summary</h3>
-              <div className="summary-cards">
-                <div className="card">
-                  <h4>Total Payments</h4>
-                  <p>₹{paymentSummary.totalPayments?.toLocaleString() || 0}</p>
-                </div>
-                <div className="card">
-                  <h4>Pending Payments</h4>
-                  <p>₹{paymentSummary.pendingPayments?.toLocaleString() || 0}</p>
-                </div>
-                <div className="card">
-                  <h4>Overdue Payments</h4>
-                  <p>₹{paymentSummary.overduePayments?.toLocaleString() || 0}</p>
-                </div>
-              </div>
+              <PaymentHistory />
             </div>
           )}
+
+
 
           {activeTab === 'profit-analysis' && (
             <div
@@ -1293,7 +1224,7 @@ const AccountsAdminPanel = () => {
           )}
         </div>
 
-        {userRole === 'super_admin' && (
+        {localStorage.getItem('role') === 'super_admin' && (
           <div className="super-admin-controls">
             <button className="add-feature-btn" onClick={handleAddFeature} aria-label="Add new feature">
               Add New Feature

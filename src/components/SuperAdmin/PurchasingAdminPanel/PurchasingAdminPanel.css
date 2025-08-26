@@ -1243,3 +1243,40 @@ button:hover {
     font-size: 14px;
   }
 }
+
+/* Page Headings Styling */
+.page-heading {
+  font-family: "Ethnocentric", 'sans-serif';
+  color: #775c6d;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 20px 0 30px 0;
+  padding: 15px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(119, 92, 109, 0.1);
+  border-left: 5px solid #997a8d;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .page-heading {
+  color: #fff;
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  border-left-color: #997a8d;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.page-heading:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(119, 92, 109, 0.15);
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .page-heading {
+    font-size: 1.5rem;
+    margin: 15px 0 20px 0;
+    padding: 10px;
+  }
+}

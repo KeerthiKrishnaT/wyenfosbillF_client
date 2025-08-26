@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wyenfos Bills - Access Required</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            width: 150px;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            margin-bottom: 1rem;
+        }
+        p {
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .redirect-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .redirect-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/Wyenfos_bills_logo.png" alt="Wyenfos Bills" class="logo">
+        <h1>Access Required</h1>
+        <p>This application requires a specific access path. Please use the correct URL to access Wyenfos Bills.</p>
+        <a href="/wyenfos_bills/#/wyenfos/4551" class="redirect-btn">Access Wyenfos Bills</a>
+    </div>
+    <script>
+        // Auto-redirect after 5 seconds
+        setTimeout(() => {
+            window.location.href = '/wyenfos_bills/#/wyenfos/4551';
+        }, 5000);
+    </script>
+</body>
+</html>

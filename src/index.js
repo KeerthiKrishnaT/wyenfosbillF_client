@@ -1,12 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import AppWrapper from './App';
-import './index.css';
+import App from './App';
+import { HelmetProvider } from 'react-helmet-async';
 
-const container = document.getElementById('root');
-const root = createRoot(container);
+const root = createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <AppWrapper />
-  </React.StrictMode>
+  <HelmetProvider>
+    <App />
+  </HelmetProvider>
 );

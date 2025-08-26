@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './CreateDepartment.css';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const CreateDepartment = () => {
   const [departmentName, setDepartmentName] = useState('');
@@ -16,70 +16,77 @@ const CreateDepartment = () => {
   const [editingId, setEditingId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
+  const { currentUser, userProfile } = useAuth();
 
   const fetchDepartments = useCallback(async () => {
+    setIsRefreshing(true);
     try {
-      const token = localStorage.getItem('token');
+      if (!currentUser) {
+        setError('Please login to access this page.');
+        return;
+      }
+      
+      const token = await currentUser.getIdToken(true);
       const config = {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`
+        }
       };
-      const response = await axios.get('http://localhost:5000/api/departments', config);
-      setDepartments(response.data);
+      
+      const response = await axios.get(`http://localhost:5000/api/departments?t=${Date.now()}`, config);
+      const raw = Array.isArray(response.data)
+        ? response.data
+        : Array.isArray(response.data?.data)
+          ? response.data.data
+          : [];
+      
+      const normalized = raw.map((d, index) => ({
+        ...d,
+        id: d.id || d._id || `dept-${index}`,
+        contents: Array.isArray(d?.contents) ? d.contents : [],
+      }));
+      
+      setDepartments(normalized);
     } catch (err) {
       if (err.response?.status === 401) {
         setError('Session expired. Please log in again.');
-        localStorage.removeItem('token');
         navigate('/login');
       } else {
         setError(err.response?.data?.message || 'Failed to fetch departments');
       }
+    } finally {
+      setIsRefreshing(false);
     }
-  }, [navigate]);
+  }, [navigate, currentUser]);
 
-    useEffect(() => {
-    const validateTokenAndFetch = async () => {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        navigate('/login');
-        return;
-      }
+  useEffect(() => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
 
-      try {
-        const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
-        
-        if (decoded.exp < currentTime) {
-          throw new Error('Token expired');
-        }
-
-        setUserRole(decoded.role);
-        await fetchDepartments(); 
-        
-      } catch (err) {
-        console.error('Token validation error:', err);
-        localStorage.removeItem('token');
-        navigate('/login');
-      }
-    };
-
-    validateTokenAndFetch();
-  }, [navigate,fetchDepartments]);
+    if (userProfile) {
+      setUserRole(userProfile.role || '');
+      fetchDepartments();
+    }
+  }, [navigate, fetchDepartments, currentUser, userProfile]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (userRole !== 'super_admin') {
+    if (userRole !== 'superadmin' && userRole !== 'super_admin') {
       setError('Only Super Admins can manage departments');
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
+      if (!currentUser) {
         setError('Please log in');
         return;
       }
+      
+      const token = await currentUser.getIdToken(true);
 
       const data = {
         name: departmentName,
@@ -117,8 +124,7 @@ const CreateDepartment = () => {
         fetchDepartments();
       }
     } catch (err) {
-      console.error('Error:', err);
-      const errorMsg = err.response?.data?.error || err.response?.data?.message || err.response?.data?.msg || (editingId ? 'Failed to update department' : 'Failed to create department');
+      let errorMsg = err.response?.data?.error || err.response?.data?.message || err.response?.data?.msg || (editingId ? 'Failed to update department' : 'Failed to create department');
       setError(errorMsg);
     } finally {
       setTimeout(() => {
@@ -130,8 +136,9 @@ const CreateDepartment = () => {
 
   const handleEdit = (dept) => {
     setDepartmentName(dept.name);
-    setContents(dept.contents.join(', '));
-    setEditingId(dept._id);
+    const list = Array.isArray(dept.contents) ? dept.contents : [];
+    setContents(list.join(', '));
+    setEditingId(dept.id);
     window.scrollTo(0, 0);
   };
 
@@ -143,23 +150,30 @@ const CreateDepartment = () => {
     try {
       setIsDeleting(true);
       setDeleteId(id);
-      const token = localStorage.getItem('token');
-      if (!token) {
+      if (!currentUser) {
         setError('Please log in');
         return;
       }
+      
+      const token = await currentUser.getIdToken(true);
 
       await axios.delete(
         `http://localhost:5000/api/departments/${id}`,
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { 
+            Authorization: `Bearer ${token}`
+          }
         }
       );
 
       setMessage('Department deleted successfully');
-      fetchDepartments();
+      
+      // Force refresh the departments list
+      setDepartments([]);
+      // Add a small delay to ensure server has processed the deletion
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await fetchDepartments();
     } catch (err) {
-      console.error('Error deleting department:', err);
       const errorMsg = err.response?.data?.error || err.response?.data?.message || err.response?.data?.msg || 'Failed to delete department';
       setError(errorMsg);
     } finally {
@@ -193,11 +207,18 @@ const CreateDepartment = () => {
           &larr; Back
         </button>
         <h2>{editingId ? 'Edit Department' : 'Create Department'}</h2>
+        <button 
+          onClick={fetchDepartments} 
+          className="refresh-button"
+          disabled={(userRole !== 'superadmin' && userRole !== 'super_admin') || isRefreshing}
+        >
+          {isRefreshing ? '🔄 Refreshing...' : '🔄 Refresh'}
+        </button>
       </div>
       {message && <p className="message success">{message}</p>}
       {error && <p className="message error">{error}</p>}
       
-      {userRole !== 'super_admin' && (
+      {(userRole !== 'superadmin' && userRole !== 'super_admin') && (
         <div className="permission-warning">
           <p>⚠️ Only Super Admins can manage departments</p>
           <p>Your role: <strong>{userRole || 'Unknown'}</strong></p>
@@ -211,20 +232,20 @@ const CreateDepartment = () => {
           value={departmentName}
           onChange={(e) => setDepartmentName(e.target.value)}
           required
-          disabled={userRole !== 'super_admin'}
+          disabled={userRole !== 'superadmin' && userRole !== 'super_admin'}
         />
         <input
           type="text"
           placeholder="Contents (comma-separated)"
           value={contents}
           onChange={(e) => setContents(e.target.value)}
-          disabled={userRole !== 'super_admin'}
+          disabled={userRole !== 'superadmin' && userRole !== 'super_admin'}
         />
         <div className="form-buttons">
           <button 
             type="submit" 
             className="btn-primary"
-            disabled={userRole !== 'super_admin'}
+            disabled={userRole !== 'superadmin' && userRole !== 'super_admin'}
           >
             {editingId ? 'Update' : 'Create'}
           </button>
@@ -233,7 +254,7 @@ const CreateDepartment = () => {
               type="button" 
               className="btn btn-secondary"
               onClick={resetForm}
-              disabled={userRole !== 'super_admin'}
+              disabled={userRole !== 'superadmin' && userRole !== 'super_admin'}
             >
               Cancel
             </button>
@@ -247,29 +268,31 @@ const CreateDepartment = () => {
           <p>No departments created yet</p>
         ) : (
           <ul>
-            {departments.map(dept => (
-              <li key={dept._id}>
+            {departments.map((dept, index) => (
+              <li key={dept.id}>
                 <div className="department-header">
                   <strong>{dept.name}</strong>
-                  {userRole === 'super_admin' && (
+                  {(userRole === 'superadmin' || userRole === 'super_admin') && (
                     <div className="department-actions">
                       <button 
+                        key={`edit-${dept.id}`}
                         onClick={() => handleEdit(dept)}
                         className="btn-editt"
                       >
                         <FaEdit />
                       </button>
                       <button 
-                        onClick={() => handleDelete(dept._id)}
+                        key={`delete-${dept.id}`}
+                        onClick={() => handleDelete(dept.id)}
                         className="btn-delette"
-                        disabled={isDeleting && deleteId === dept._id}
+                        disabled={isDeleting && deleteId === dept.id}
                       >
-                        {isDeleting && deleteId === dept._id ? 'Deleting...' : <FaTrash />}
+                        {isDeleting && deleteId === dept.id ? 'Deleting...' : <FaTrash />}
                       </button>
                     </div>
                   )}
                 </div>
-                {dept.contents.length > 0 && (
+                {Array.isArray(dept.contents) && dept.contents.length > 0 && (
                   <div className="contents">
                     {dept.contents.join(', ')}
                   </div>

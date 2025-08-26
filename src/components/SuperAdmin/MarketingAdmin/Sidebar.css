@@ -1,6 +1,7 @@
 .map-sidebar {
   width: 250px;
-  background-color: #f28279;
+  background: linear-gradient(to right, #b39eb9,silver);
+    color: #686060;
   min-height: 100vh;
   padding: 20px;
   color: white;

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../../../contexts/AuthContext';
 import './customer.css';
 
 const API_BASE_URL = 'http://localhost:5000';
 
-function CustomerForm({ customerId }) {
+function CustomerForm({ customerId, customerToEdit, onCustomerAdded, isEditMode = false }) {
+  const { currentUser } = useAuth();
   const [form, setForm] = useState({
     customerName: '',
     customerContact: {
@@ -19,14 +21,21 @@ function CustomerForm({ customerId }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [showFirecracker, setShowFirecracker] = useState(false);
 
+  // Determine the customer ID to use (either from customerId prop or customerToEdit)
+  const targetCustomerId = customerId || (customerToEdit ? (customerToEdit.id || customerToEdit._id) : null);
+
   useEffect(() => {
-    if (customerId) {
+    if (customerToEdit) {
+      // If customerToEdit is provided, use it directly
+      setForm(customerToEdit);
+    } else if (targetCustomerId) {
+      // Otherwise, fetch the customer by ID
       const fetchCustomer = async () => {
         try {
-          const token = localStorage.getItem('token');
-          if (!token) throw new Error('No authentication token');
-          const res = await axios.get(`${API_BASE_URL}/api/customers/${customerId}`, {
-            headers: { Authorization: `Bearer ${token}` },
+          if (!currentUser) throw new Error('No authentication token');
+          const idToken = await currentUser.getIdToken(true);
+          const res = await axios.get(`${API_BASE_URL}/api/customers/${targetCustomerId}`, {
+            headers: { Authorization: `Bearer ${idToken}` },
           });
           setForm(res.data);
         } catch (err) {
@@ -35,7 +44,9 @@ function CustomerForm({ customerId }) {
       };
       fetchCustomer();
     }
-  }, [customerId]);
+  }, [customerToEdit, targetCustomerId, currentUser]);
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,8 +64,7 @@ function CustomerForm({ customerId }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation(); // Prevent event from bubbling to flip book
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!currentUser) {
       alert('Please log in to add a customer.');
       return;
     }
@@ -62,19 +72,28 @@ function CustomerForm({ customerId }) {
       const payload = {
         ...form,
         createdBy: form.createdBy || 'admin',
+        lastUpdatedBy: form.createdBy || 'admin',
         company: form.company || 'default_company',
       };
       console.log('Submitting payload:', payload);
-      if (customerId) {
-        await axios.put(`${API_BASE_URL}/api/customers/${customerId}`, payload, {
-          headers: { Authorization: `Bearer ${token}` },
+      const idToken = await currentUser.getIdToken(true);
+      if (targetCustomerId) {
+        await axios.put(`${API_BASE_URL}/api/customers/${targetCustomerId}`, payload, {
+          headers: { Authorization: `Bearer ${idToken}` },
         });
         setSuccessMessage('Customer updated successfully! 🎉');
+        if (onCustomerAdded) {
+          onCustomerAdded();
+        }
       } else {
-        await axios.post(`${API_BASE_URL}/api/customers`, payload, {
-          headers: { Authorization: `Bearer ${token}` },
+        const response = await axios.post(`${API_BASE_URL}/api/customers`, payload, {
+          headers: { Authorization: `Bearer ${idToken}` },
         });
-        setSuccessMessage('Customer added successfully! 🎉');
+        const createdCustomer = response.data;
+        setSuccessMessage(`Customer added successfully! 🎉 (ID: ${createdCustomer.customerId})`);
+        if (onCustomerAdded) {
+          onCustomerAdded();
+        }
       }
       setShowFirecracker(true);
       setTimeout(() => setShowFirecracker(false), 2000);
@@ -86,9 +105,10 @@ function CustomerForm({ customerId }) {
       });
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      const errorMessage = err.response?.data?.error || err.message;
-      alert(`Error saving customer: ${errorMessage}`);
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message;
       console.error('Submission error:', err);
+      console.error('Error response:', err.response?.data);
+      alert(`Error saving customer: ${errorMessage}`);
     }
   };
 
@@ -103,73 +123,114 @@ function CustomerForm({ customerId }) {
           <div className="firecracker-particle particle-5"></div>
         </div>
       )}
-      <div className="customer-form-card">
-        {successMessage && (
-          <div className="success-message">
-            <span>{successMessage}</span>
+      
+      {successMessage && (
+        <div className="success-message">
+          {successMessage}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="customer-form">
+        
+        {!targetCustomerId && (
+          <div className="form-group">
+            <label>Customer ID:</label>
+            <input
+              type="text"
+              value="Auto-generated by system"
+              readOnly
+              className="form-control"
+              style={{ backgroundColor: '#f8f9fa', color: '#6c757d' }}
+            />
+            <small className="form-text">Customer ID will be automatically generated (CUST-1, CUST-2, etc.)</small>
           </div>
         )}
-        <form className="customers-form" onSubmit={handleSubmit}>
-          <h3>{customerId ? 'Edit' : 'Add'} Customer</h3>
+
+        {targetCustomerId && (
+          <div className="form-group">
+            <label>Customer ID:</label>
+            <input
+              type="text"
+              value={form.customerId || 'N/A'}
+              readOnly
+              className="form-control"
+              style={{ backgroundColor: '#f8f9fa', color: '#6c757d' }}
+            />
+            <small className="form-text">Existing customer ID (cannot be changed)</small>
+          </div>
+        )}
+
+        <div className="form-group">
+          <label>Customer Name *</label>
           <input
+            type="text"
             name="customerName"
             value={form.customerName}
             onChange={handleChange}
-            placeholder="Customer Name"
+            className="form-control"
             required
-            autoFocus
-            onClick={(e) => e.stopPropagation()} // Prevent click from bubbling
           />
+        </div>
+
+        <div className="form-group">
+          <label>Phone</label>
           <input
+            type="tel"
             name="phone"
             value={form.customerContact.phone}
             onChange={handleChange}
-            placeholder="Phone"
-            required
-            onClick={(e) => e.stopPropagation()}
+            className="form-control"
           />
+        </div>
+
+        <div className="form-group">
+          <label>Email</label>
           <input
+            type="email"
             name="email"
             value={form.customerContact.email}
             onChange={handleChange}
-            placeholder="Email"
-            onClick={(e) => e.stopPropagation()}
+            className="form-control"
           />
-          <input
+        </div>
+
+        <div className="form-group">
+          <label>Address</label>
+          <textarea
             name="address"
             value={form.customerContact.address}
             onChange={handleChange}
-            placeholder="Address"
-            onClick={(e) => e.stopPropagation()}
+            className="form-control"
+            rows="3"
           />
+        </div>
+
+        <div className="form-group">
+          <label>GSTIN</label>
           <input
+            type="text"
             name="gstin"
             value={form.customerContact.gstin}
             onChange={handleChange}
-            placeholder="GSTIN"
-            onClick={(e) => e.stopPropagation()}
+            className="form-control"
           />
+        </div>
+
+        <div className="form-group">
+          <label>Company</label>
           <input
+            type="text"
             name="company"
             value={form.company}
             onChange={handleChange}
-            placeholder="Company"
-            required
-            onClick={(e) => e.stopPropagation()}
+            className="form-control"
           />
-          <input
-            name="createdBy"
-            value={form.createdBy}
-            onChange={handleChange}
-            placeholder="Created By"
-            required
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button type="submit" className='savebtn'onClick={(e) => e.stopPropagation()}>
-            {customerId ? 'Update' : 'Save'}
-          </button>
-        </form>
-      </div>
+        </div>
+
+        <button type="submit" className="submit-btn">
+          {targetCustomerId ? 'Update Customer' : 'Add Customer'}
+        </button>
+      </form>
     </div>
   );
 }

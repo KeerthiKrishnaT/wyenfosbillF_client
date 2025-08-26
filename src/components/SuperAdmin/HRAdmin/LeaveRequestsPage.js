@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './LeavePermissionPage.css';
-import { FaEdit, FaTrash, FaSave, FaTimes, FaPlus, FaUserClock, FaUserSlash } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSave, FaTimes, FaPlus } from 'react-icons/fa';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const LeavePermissionPage = () => {
   const [formData, setFormData] = useState({
@@ -13,26 +14,37 @@ const LeavePermissionPage = () => {
   });
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [activeStaff, setActiveStaff] = useState([]);
-  const [absentStaff, setAbsentStaff] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
-  const [viewMode, setViewMode] = useState('leave');
   const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState('staff');
   const [currentUserId, setCurrentUserId] = useState('');
   const [currentUserName, setCurrentUserName] = useState('');
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
-  const token = localStorage.getItem('token');
+  // Debug: Log state changes
+  useEffect(() => {
+    // State changes handled by fetchLeaveRequests
+  }, [leaveRequests]);
+
+  const { currentUser } = useAuth();
   const API_URL = 'http://localhost:5000/api';
 
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     try {
+      if (!currentUser) return;
+      
+      const idToken = await currentUser.getIdToken(true);
       const response = await axios.get(`${API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${idToken}` }
       });
       setUserRole(response.data.role || 'staff');
       setCurrentUserId(response.data._id);
       setCurrentUserName(response.data.name);
+      
+      // Check if user is Super Admin
+      const isSuperAdminUser = response.data.role === 'superadmin' || response.data.role === 'super_admin';
+      setIsSuperAdmin(isSuperAdminUser);
       
       // If user is not admin, pre-select their own ID in the form
       if (response.data.role !== 'admin') {
@@ -41,53 +53,70 @@ const LeavePermissionPage = () => {
     } catch (err) {
       console.error('Failed to fetch user info:', err);
     }
-  };
+  }, [currentUser]);
 
-  const fetchActiveStaff = async () => {
+  const fetchActiveStaff = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/staff/active-minimal`, {
-        headers: { Authorization: `Bearer ${token}` }
+      if (!currentUser) return [];
+      
+      const idToken = await currentUser.getIdToken(true);
+      const response = await axios.get(`${API_URL}/auth/users/all`, {
+        headers: { Authorization: `Bearer ${idToken}` }
       });
-      return response.data;
+      return response.data || [];
     } catch (error) {
       console.error('Failed to fetch staff:', error);
       return [];
     }
-  };
+  }, [currentUser]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
+      if (!currentUser) return;
+      
       setLoading(true);
       setError('');
-      const headers = { Authorization: `Bearer ${token}` };
+      const idToken = await currentUser.getIdToken(true);
+      const headers = { Authorization: `Bearer ${idToken}` };
       
-      const [staffData, leaveData, attendanceData] = await Promise.all([
+      const [staffData, leaveData] = await Promise.all([
         fetchActiveStaff(),
-        axios.get(`${API_URL}/leave-requests`, { headers }),
-        axios.get(`${API_URL}/attendance/today`, { headers }).catch(() => null)
+        axios.get(`${API_URL}/leave-requests`, { headers })
       ]);
 
-      setActiveStaff(staffData);
-      setLeaveRequests(leaveData.data);
-
-      if (attendanceData) {
-        const presentStaffIds = attendanceData.data.map(record => record.staffId._id);
-        const absent = staffData.filter(staff => !presentStaffIds.includes(staff._id));
-        setAbsentStaff(absent);
-      } else {
-        setAbsentStaff([]);
+      setActiveStaff(Array.isArray(staffData) ? staffData : []);
+      
+      // Fix: Check if leaveData.data exists and is an array
+      let leaveRequestsData = [];
+      
+      if (leaveData.data) {
+        if (Array.isArray(leaveData.data)) {
+          leaveRequestsData = leaveData.data;
+        } else if (leaveData.data.data && Array.isArray(leaveData.data.data)) {
+          // Handle nested data structure
+          leaveRequestsData = leaveData.data.data;
+        } else if (typeof leaveData.data === 'object') {
+          // Handle object with data property
+          leaveRequestsData = leaveData.data.data || [];
+        }
       }
+      
+      setLeaveRequests(leaveRequestsData);
+      
     } catch (err) {
+      console.error('Error fetching data:', err);
       setError(err.response?.data?.error || 'Failed to fetch data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, fetchActiveStaff]);
 
   useEffect(() => {
-    fetchUserInfo();
-    fetchData();
-  }, [token]);
+    if (currentUser) {
+      fetchUserInfo();
+      fetchData();
+    }
+  }, [currentUser, fetchUserInfo, fetchData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleInput = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -95,14 +124,16 @@ const LeavePermissionPage = () => {
 
   const handleCreate = async () => {
     try {
+      if (!currentUser) return;
       if (!formData.staffId) {
         throw new Error('Please select a staff member');
       }
 
+      const idToken = await currentUser.getIdToken(true);
       const response = await axios.post(
         `${API_URL}/leave-requests`,
         formData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${idToken}` } }
       );
       
       setLeaveRequests(prev => [...prev, response.data]);
@@ -114,20 +145,24 @@ const LeavePermissionPage = () => {
         leaveType: 'casual'
       });
     } catch (err) {
+      console.error('Error creating leave request:', err);
       setError(err.message || err.response?.data?.error || 'Failed to create leave request');
     }
   };
 
   const handleUpdate = async (id) => {
     try {
+      if (!currentUser) return;
+      
+      const idToken = await currentUser.getIdToken(true);
       const response = await axios.put(
         `${API_URL}/leave-requests/${id}`,
         formData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${idToken}` } }
       );
       
       setLeaveRequests(prev =>
-        prev.map(item => (item._id === id ? response.data : item))
+        prev.map(item => ((item._id || item.id) === id ? response.data : item))
       );
       resetForm();
     } catch (err) {
@@ -137,17 +172,20 @@ const LeavePermissionPage = () => {
 
   const handleDelete = async (id) => {
     try {
+      if (!currentUser) return;
+      
+      const idToken = await currentUser.getIdToken(true);
       await axios.delete(`${API_URL}/leave-requests/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${idToken}` },
       });
-      setLeaveRequests(prev => prev.filter(item => item._id !== id));
+      setLeaveRequests(prev => prev.filter(item => (item._id || item.id) !== id));
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to delete leave request');
     }
   };
 
   const handleEdit = (item) => {
-    setEditingId(item._id);
+    setEditingId(item._id || item.id);
     setFormData({ ...item });
   };
 
@@ -164,29 +202,22 @@ const LeavePermissionPage = () => {
 
   const handleLeaveAction = async (id, status) => {
     try {
+      if (!currentUser) return;
+      
+      const idToken = await currentUser.getIdToken(true);
       const response = await axios.put(
         `${API_URL}/leave-requests/${id}`,
         { status },
-        { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        { headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' } }
       );
-      setLeaveRequests(prev => prev.map(req => (req._id === id ? response.data : req)));
+      setLeaveRequests(prev => prev.map(req => ((req._id || req.id) === id ? response.data : req)));
     } catch (err) {
+      console.error('Error updating leave status:', err);
       setError(err.response?.data?.error || 'Failed to update leave status');
     }
   };
 
-  const markAbsence = async (staffId, reason) => {
-    try {
-      await axios.post(
-        `${API_URL}/attendance/absence`,
-        { staffId, reason },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchData();
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to mark absence');
-    }
-  };
+
 
   const renderStaffSelect = () => (
     <select
@@ -197,13 +228,13 @@ const LeavePermissionPage = () => {
     >
       <option value="">Select Staff</option>
       {userRole === 'admin' ? (
-        activeStaff.map(staff => (
-          <option key={staff._id} value={staff._id}>
-            {staff.name} ({staff.department || 'No Department'})
+        Array.isArray(activeStaff) && activeStaff.map(staff => (
+          <option key={staff._id || staff.id || `staff-${staff.name}-${staff.email}`} value={staff._id || staff.id}>
+            {staff.name} ({staff.role || 'Staff'}) - {staff.department || 'No Department'}
           </option>
         ))
       ) : (
-        <option value={currentUserId}>
+        <option key={currentUserId || 'current-user'} value={currentUserId}>
           {currentUserName} (Your Account)
         </option>
       )}
@@ -212,101 +243,119 @@ const LeavePermissionPage = () => {
 
   return (
     <div className="leave-permission-page">
-      <h2>Leave & Absence Management</h2>
-      {error && <p className="error-message">{error}</p>}
-      
-      <div className="view-toggle">
-        <button 
-          className={`toggle-btn ${viewMode === 'leave' ? 'active' : ''}`}
-          onClick={() => setViewMode('leave')}
-          disabled={loading}
-        >
-          Leave Requests
-        </button>
-        <button 
-          className={`toggle-btn ${viewMode === 'absence' ? 'active' : ''}`}
-          onClick={() => setViewMode('absence')}
-          disabled={loading}
-        >
-          Absence Tracking
-        </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2>Leave Request Management</h2>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            onClick={fetchData}
+            disabled={loading}
+            style={{ 
+              padding: '8px 16px', 
+              backgroundColor: '#007bff', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '4px',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? 'Loading...' : '🔄 Refresh'}
+          </button>
+        </div>
       </div>
+      {error && <p className="error-message">{error}</p>}
 
       {loading ? (
         <div className="loading-indicator">Loading data...</div>
-      ) : viewMode === 'leave' ? (
-        <>
-          <div className="crud-form">
-            {renderStaffSelect()}
+      ) : (
+        <div className="content-wrapper">
+          {/* Hide form for Super Admin - only HR Admin can add leave requests */}
+          {!isSuperAdmin && (
+            <div className="crud-form">
+              {renderStaffSelect()}
 
-            <select
-              value={formData.leaveType}
-              onChange={(e) => handleInput('leaveType', e.target.value)}
-              disabled={loading}
-            >
-              <option value="casual">Casual Leave</option>
-              <option value="sick">Sick Leave</option>
-              <option value="annual">Annual Leave</option>
-              <option value="maternity">Maternity Leave</option>
-              <option value="paternity">Paternity Leave</option>
-              <option value="unpaid">Unpaid Leave</option>
-              <option value="other">Other</option>
-            </select>
-
-            <input
-              type="date"
-              placeholder="Start Date"
-              value={formData.startDate}
-              onChange={(e) => handleInput('startDate', e.target.value)}
-              disabled={loading}
-              required
-            />
-
-            <input
-              type="date"
-              placeholder="End Date"
-              value={formData.endDate}
-              onChange={(e) => handleInput('endDate', e.target.value)}
-              disabled={loading}
-              required
-            />
-
-            <input
-              type="text"
-              placeholder="Reason"
-              value={formData.reason}
-              onChange={(e) => handleInput('reason', e.target.value)}
-              disabled={loading}
-              required
-            />
-
-            {editingId ? (
-              <>
-                <button 
-                  className="save-btn" 
-                  onClick={() => handleUpdate(editingId)}
-                  disabled={loading}
-                >
-                  <FaSave /> Save
-                </button>
-                <button 
-                  className="cancel-btn" 
-                  onClick={resetForm}
-                  disabled={loading}
-                >
-                  <FaTimes /> Cancel
-                </button>
-              </>
-            ) : (
-              <button 
-                className="add-btn" 
-                onClick={handleCreate}
-                disabled={loading || !formData.staffId}
+              <select
+                value={formData.leaveType}
+                onChange={(e) => handleInput('leaveType', e.target.value)}
+                disabled={loading}
               >
-                <FaPlus /> Add
-              </button>
-            )}
-          </div>
+                <option value="casual">Casual Leave</option>
+                <option value="sick">Sick Leave</option>
+                <option value="annual">Annual Leave</option>
+                <option value="maternity">Maternity Leave</option>
+                <option value="paternity">Paternity Leave</option>
+                <option value="unpaid">Unpaid Leave</option>
+                <option value="other">Other</option>
+              </select>
+
+              <input
+                type="date"
+                placeholder="Start Date"
+                value={formData.startDate}
+                onChange={(e) => handleInput('startDate', e.target.value)}
+                disabled={loading}
+                required
+              />
+
+              <input
+                type="date"
+                placeholder="End Date"
+                value={formData.endDate}
+                onChange={(e) => handleInput('endDate', e.target.value)}
+                disabled={loading}
+                required
+              />
+
+              <input
+                type="text"
+                placeholder="Reason"
+                value={formData.reason}
+                onChange={(e) => handleInput('reason', e.target.value)}
+                disabled={loading}
+                required
+              />
+
+              {editingId ? (
+                <>
+                  <button 
+                    className="save-btn" 
+                    onClick={() => handleUpdate(editingId)}
+                    disabled={loading}
+                  >
+                    <FaSave /> Save
+                  </button>
+                  <button 
+                    className="cancel-btn" 
+                    onClick={resetForm}
+                    disabled={loading}
+                  >
+                    <FaTimes /> Cancel
+                  </button>
+                </>
+              ) : (
+                <button 
+                  className="add-btn" 
+                  onClick={handleCreate}
+                  disabled={loading || !formData.staffId}
+                >
+                  <FaPlus /> Add
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Show info message for Super Admin */}
+          {isSuperAdmin && (
+            <div style={{ 
+              padding: '15px', 
+              backgroundColor: '#e3f2fd', 
+              border: '1px solid #2196f3', 
+              borderRadius: '4px', 
+              marginBottom: '20px',
+              color: '#1976d2'
+            }}>
+              <strong>Super Admin View:</strong> You can only approve or reject leave requests. HR Admin is responsible for adding new leave requests.
+            </div>
+          )}
 
           <table className="data-table">
             <thead>
@@ -320,123 +369,75 @@ const LeavePermissionPage = () => {
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {leaveRequests.length > 0 ? (
-                leaveRequests.map((req) => (
-                  <tr key={req._id}>
-                    <td>{req.staffId?.name || 'Unknown'}</td>
-                    <td>{req.leaveType}</td>
-                    <td>{new Date(req.startDate).toLocaleDateString()}</td>
-                    <td>{new Date(req.endDate).toLocaleDateString()}</td>
-                    <td>{req.reason}</td>
-                    <td>
-                      <span className={`badge-${req.status}`}>{req.status}</span>
-                    </td>
-                    <td>
-                      {(userRole === 'admin' || req.staffId?._id === currentUserId) && (
-                        <>
-                          <button 
-                            className="edit-btn action-btn" 
-                            onClick={() => handleEdit(req)}
-                            disabled={loading}
-                          >
-                            <FaEdit />
-                          </button>
-                          <button 
-                            className="delete-btn action-btn" 
-                            onClick={() => handleDelete(req._id)}
-                            disabled={loading}
-                          >
-                            <FaTrash />
-                          </button>
-                        </>
-                      )}
-                      {userRole === 'admin' && req.status === 'pending' && (
-                        <>
-                          <button
-                            className="action-btn approve"
-                            onClick={() => handleLeaveAction(req._id, 'approved')}
-                            disabled={loading}
-                          >
-                            Approve
-                          </button>
-                          <button
-                            className="action-btn reject"
-                            onClick={() => handleLeaveAction(req._id, 'rejected')}
-                            disabled={loading}
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7">No leave requests available.</td>
-                </tr>
-              )}
-            </tbody>
+                         <tbody>
+               {(() => {
+                 
+                 return leaveRequests.length > 0 ? (
+                   leaveRequests.map((req) => {
+                     const requestId = req._id || req.id;
+                     
+                     return (
+                     <tr key={requestId}>
+                       <td>{req.staffId?.name || 'Unknown'}</td>
+                       <td>{req.leaveType}</td>
+                       <td>{new Date(req.startDate).toLocaleDateString()}</td>
+                       <td>{new Date(req.endDate).toLocaleDateString()}</td>
+                       <td>{req.reason}</td>
+                       <td>
+                         <span className={`badge-${req.status}`}>{req.status}</span>
+                       </td>
+                       <td>
+                         {/* Show edit/delete only for HR Admin or the request owner */}
+                         {(!isSuperAdmin && (userRole === 'admin' || req.staffId?._id === currentUserId)) && (
+                           <>
+                             <button 
+                               className="edit-btn action-btn" 
+                               onClick={() => handleEdit(req)}
+                               disabled={loading}
+                             >
+                               <FaEdit />
+                             </button>
+                             <button 
+                               className="delete-btn action-btn" 
+                               onClick={() => handleDelete(requestId)}
+                               disabled={loading}
+                             >
+                               <FaTrash />
+                             </button>
+                           </>
+                         )}
+                         {/* Show approve/reject for Super Admin and HR Admin */}
+                         {(isSuperAdmin || userRole === 'admin') && req.status === 'pending' && (
+                           <>
+                             <button
+                               className="action-btn approve"
+                               onClick={() => handleLeaveAction(requestId, 'approved')}
+                               disabled={loading}
+                             >
+                               Approve
+                             </button>
+                             <button
+                               className="action-btn reject"
+                               onClick={() => handleLeaveAction(requestId, 'rejected')}
+                               disabled={loading}
+                             >
+                               Reject
+                             </button>
+                           </>
+                         )}
+                       </td>
+                     </tr>
+                   );
+                 })
+                                ) : (
+                   <tr>
+                     <td colSpan="7">No leave requests available.</td>
+                   </tr>
+                 );
+               })()}
+             </tbody>
           </table>
-        </>
-      ) : (
-        <>
-          {userRole === 'admin' ? (
-            <>
-              <h3>Today's Absent Staff ({new Date().toLocaleDateString()})</h3>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Staff Name</th>
-                    <th>Department</th>
-                    <th>Position</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {absentStaff.length > 0 ? (
-                    absentStaff.map((staff) => (
-                      <tr key={staff._id}>
-                        <td>{staff.name}</td>
-                        <td>{staff.department}</td>
-                        <td>{staff.position}</td>
-                        <td>
-                          <span className="badge-absent">Absent</span>
-                        </td>
-                        <td>
-                          <button 
-                            className="action-btn approve"
-                            onClick={() => markAbsence(staff._id, 'Late arrival')}
-                            disabled={loading}
-                          >
-                            <FaUserClock /> Mark Late
-                          </button>
-                          <button 
-                            className="action-btn reject"
-                            onClick={() => markAbsence(staff._id, 'Unauthorized absence')}
-                            disabled={loading}
-                          >
-                            <FaUserSlash /> Mark Absent
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5">All staff are present today.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </>
-          ) : (
-            <div className="access-denied">
-              <p>You don't have permission to view this section.</p>
-            </div>
-          )}
-        </>
+        </div>
       )}
     </div>
   );

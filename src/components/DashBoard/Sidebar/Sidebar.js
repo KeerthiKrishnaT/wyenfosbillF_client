@@ -1,12 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaCrown } from 'react-icons/fa';
-import ProfileSummary from '../ProfileSummary/ProfileSummary.js';
+import { FaCrown, FaUsers, FaFileInvoiceDollar, FaCreditCard, FaStickyNote, FaReceipt, FaFileAlt } from 'react-icons/fa';
+import { useAuth } from '../../../contexts/AuthContext';
+
 import defaultLogo from '../../../assets/images/wyenfos.png';
 import './Sidebar.css';
 import axios from 'axios';
+import { getLogoUrl } from './utils/companyHelpers.js';
 
 const Sidebar = ({ isOpen, toggleSidebar, onCompanySelect, selectedCompany }) => {
   const closeTimerRef = useRef(null);
@@ -14,51 +15,94 @@ const Sidebar = ({ isOpen, toggleSidebar, onCompanySelect, selectedCompany }) =>
   const [error, setError] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
-  const user = JSON.parse(localStorage.getItem('user')) || { role: 'admin' };
-  const navigate = useNavigate();
+  const { currentUser, userProfile } = useAuth();
+  
+  // Use Firebase user data instead of localStorage
+  const user = userProfile || { role: 'admin', name: 'User' };
+  
+  // Ensure user object has all required properties
+  const safeUser = {
+    role: user?.role || 'admin',
+    name: user?.name || 'User',
+    ...user
+  };
+
+  const fetchCompanyNames = useCallback(async () => {
+    if (!currentUser) return;
+
+    try {
+      setLoadingCompanies(true);
+      setError(null);
+
+      const token = await currentUser.getIdToken(true);
+      const response = await axios.get('/api/companies/names', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Ensure we get an array from the response
+      let fetchedCompanies = [];
+      if (response.data) {
+        // Handle different possible response structures
+        if (Array.isArray(response.data)) {
+          fetchedCompanies = response.data;
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          fetchedCompanies = response.data.data;
+        } else if (response.data.companies && Array.isArray(response.data.companies)) {
+          fetchedCompanies = response.data.companies;
+        }
+      }
+      
+      setCompanies(fetchedCompanies);
+
+      // Set initial company selection if none selected
+      if (!selectedCompany && fetchedCompanies.length > 0) {
+        onCompanySelect(fetchedCompanies[0]);
+      }
+    } catch (error) {
+      console.error('Sidebar: API Error:', error);
+      
+      // Fallback to test endpoint if authenticated endpoint fails
+      try {
+        const testResponse = await axios.get('/api/companies/test');
+        let testCompanies = [];
+        
+        if (testResponse.data) {
+          if (Array.isArray(testResponse.data)) {
+            testCompanies = testResponse.data;
+          } else if (testResponse.data.data && Array.isArray(testResponse.data.data)) {
+            testCompanies = testResponse.data.data;
+          }
+        }
+        
+        setCompanies(testCompanies);
+        
+        if (!selectedCompany && testCompanies.length > 0) {
+          onCompanySelect(testCompanies[0]);
+        }
+      } catch (testError) {
+        console.error('Sidebar: Test endpoint also failed:', testError);
+        setError('Failed to fetch company data');
+        setCompanies([]); // Ensure companies is always an array
+      }
+    } finally {
+      setLoadingCompanies(false);
+    }
+  }, [currentUser, selectedCompany, onCompanySelect]);
 
   useEffect(() => {
-    const fetchCompanyNames = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
+    if (currentUser) {
+      fetchCompanyNames();
+    } else {
+      setLoadingCompanies(false);
+    }
+  }, [currentUser, fetchCompanyNames]);
 
-        const response = await axios.get('/api/companies/names', {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 5000
-        });
-
-        if (!response.data || !response.data.success) {
-          throw new Error(response.data?.error || 'Invalid response from server');
-        }
-
-        setCompanies(response.data.data);
-        
-        if (!selectedCompany && response.data.data?.length > 0) {
-          onCompanySelect(response.data.data[0]);
-        }
-      } catch (err) {
-        console.error('API Error:', err);
-        setError(err.response?.data?.error || err.message);
-      } finally {
-        setLoadingCompanies(false);
-      }
-    };
-
-    fetchCompanyNames();
-  }, [selectedCompany, onCompanySelect]);
-
- const getLogoUrl = (logoPath) => {
-  if (!logoPath) return defaultLogo;
-  if (logoPath.startsWith('http')) return logoPath;
-  if (logoPath.startsWith('/Uploads')) return `http://localhost:5000${logoPath}`;
-  return logoPath;
-};
+  // Separate useEffect to handle initial company selection when companies change
+  useEffect(() => {
+    if (!selectedCompany && companies.length > 0) {
+      onCompanySelect(companies[0]);
+    }
+  }, [companies, selectedCompany, onCompanySelect]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -73,20 +117,49 @@ const Sidebar = ({ isOpen, toggleSidebar, onCompanySelect, selectedCompany }) =>
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const closeDropdown = () => setDropdownOpen(false);
 
-  const handleCompanyChange = (companyId) => {
+  const handleCompanyChange = async (companyId) => {
     const selected = companies.find(c => c._id === companyId);
-    onCompanySelect(selected);
+    
+    try {
+      // Fetch complete company details
+      const idToken = await currentUser.getIdToken(true);
+      const response = await axios.get(`/api/companies/details-by-name/${encodeURIComponent(selected.name)}`, {
+        headers: { 
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 5000
+      });
+
+      if (response.data && response.data.success) {
+        console.log('Sidebar: Complete company details fetched:', response.data.company);
+        onCompanySelect(response.data.company);
+      } else {
+        console.warn('Sidebar: Using basic company data as fallback');
+        onCompanySelect(selected);
+      }
+    } catch (error) {
+      console.error('Sidebar: Error fetching complete company details:', error);
+      console.warn('Sidebar: Using basic company data as fallback');
+      onCompanySelect(selected);
+    }
   };
 
   const handleClick = () => {
-  if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-  if (window.innerWidth <= 768) {
-    toggleSidebar(); 
-  }
-};
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    // Always toggle sidebar
+    toggleSidebar();
+  };
 
-  const greeting = `Good ${new Date().getHours() < 12 ? 'Morning' : 'Evening'}, ${user.name || 'User'}!`;
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
 
+  const greeting = `${getGreeting()}, ${safeUser.name}!`;
+  
   const linkVariants = {
     hover: { scale: 1.05, x: 5, transition: { duration: 0.2 } },
   };
@@ -97,16 +170,25 @@ const Sidebar = ({ isOpen, toggleSidebar, onCompanySelect, selectedCompany }) =>
     {error && <div className="alert alert-danger">{error}</div>}
       <div className={`sidebar-container ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-menu">
-          <ProfileSummary />
           <div className="greeting">
-            {greeting} {user.role === 'admin' && <FaCrown className="crown-icon" />}
+            <div className="greeting-text">
+              {greeting}
+              {safeUser.role === 'admin' && <FaCrown className="crown-icon" />}
+            </div>
+            <div className="greeting-time">
+              {new Date().toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+              })}
+            </div>
           </div>
 
           <div className="sidebar-company-selector">
             <div className="custom-company-dropdown">
               <button className="dropdown-toggle" onClick={toggleDropdown}>
                 <img
-                  src={getLogoUrl(selectedCompany?.logoUrl)}
+                  src={getLogoUrl(selectedCompany?.logoUrl, selectedCompany?.name)}
                   alt="Logo"
                   className="dropdown-logo"
                   onError={(e) => {
@@ -121,7 +203,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onCompanySelect, selectedCompany }) =>
                 <div className="dropdown-options">
                   {loadingCompanies ? (
                     <div className="dropdown-option loading">Loading companies...</div>
-                  ) : companies.length === 0 ? (
+                  ) : !companies || companies.length === 0 ? (
                     <div className="dropdown-option empty">No companies available</div>
                   ) : (
                     companies.map((company) => (
@@ -134,7 +216,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onCompanySelect, selectedCompany }) =>
                         }}
                       >
                         <img
-                          src={getLogoUrl(company.logoUrl)}
+                          src={getLogoUrl(company.logoUrl, company.name)}
                           alt={company.name}
                           className="dropdown-logo"
                           onError={(e) => {
@@ -160,7 +242,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onCompanySelect, selectedCompany }) =>
               transition={{ duration: 0.5 }}
             >
               <motion.img
-                src={getLogoUrl(selectedCompany.logoUrl)}
+                src={getLogoUrl(selectedCompany.logoUrl, selectedCompany.name)}
                 alt={`${selectedCompany.name} Logo`}
                 className="company-logo"
                 animate={{ rotate: [0, 5, -5, 0] }}
@@ -174,56 +256,72 @@ const Sidebar = ({ isOpen, toggleSidebar, onCompanySelect, selectedCompany }) =>
           )}
 
           <ul className="options">
-            {selectedCompany && (
+            {selectedCompany ? (
               <>
                 <motion.li variants={linkVariants} whileHover="hover">
                   <Link to="/customers" className="sidebar-link" onClick={handleClick}>
-                    Manage Customers
+                    <FaUsers className="sidebar-icon" />
+                    <span>Manage Customers</span>
                   </Link>
                 </motion.li>
                 <motion.li variants={linkVariants} whileHover="hover">
                   <Link to="/cash-bill" state={{ selectedCompany }} className="sidebar-link" onClick={handleClick}>
-                    Cash Bill
+                    <FaFileInvoiceDollar className="sidebar-icon" />
+                    <span>Cash Bill</span>
                   </Link>
                 </motion.li>
                 <motion.li variants={linkVariants} whileHover="hover">
                   <Link to="/credit-bill" state={{ selectedCompany }} className="sidebar-link" onClick={handleClick}>
-                    Credit Bill
+                    <FaCreditCard className="sidebar-icon" />
+                    <span>Credit Bill</span>
                   </Link>
                 </motion.li>
                 <motion.li variants={linkVariants} whileHover="hover">
                   <Link to="/credit-note" state={{ selectedCompany }} className="sidebar-link" onClick={handleClick}>
-                    Credit Note
+                    <FaStickyNote className="sidebar-icon" />
+                    <span>Credit Note</span>
                   </Link>
                 </motion.li>
                 <motion.li variants={linkVariants} whileHover="hover">
                   <Link to="/debit-note" state={{ selectedCompany }} className="sidebar-link" onClick={handleClick}>
-                    Debit Note
+                    <FaStickyNote className="sidebar-icon" />
+                    <span>Debit Note</span>
                   </Link>
                 </motion.li>
                 <motion.li variants={linkVariants} whileHover="hover">
                   <Link to="/payment-receipt" state={{ selectedCompany }} className="sidebar-link" onClick={handleClick}>
-                    Payment Receipt
+                    <FaReceipt className="sidebar-icon" />
+                    <span>Payment Receipt</span>
                   </Link>
                 </motion.li>
                 <motion.li variants={linkVariants} whileHover="hover">
                   <Link to="/quotation" state={{ selectedCompany }} className="sidebar-link" onClick={handleClick}>
-                    Quotation
+                    <FaFileAlt className="sidebar-icon" />
+                    <span>Quotation</span>
                   </Link>
                 </motion.li>
-                <motion.li variants={linkVariants} whileHover="hover" className="logout-item">
-                  <button
-                    className="signout-btn"
-                    onClick={() => {
-                      handleClick();
-                      window.location.href = '/signin';
-                    }}
-                  >
-                    Sign Out
-                  </button>
-                </motion.li>
               </>
+            ) : (
+              <motion.li variants={linkVariants} whileHover="hover">
+                <div className="sidebar-link disabled">
+                  <FaUsers className="sidebar-icon" />
+                  <span>Please select a company first</span>
+                </div>
+              </motion.li>
             )}
+            
+            <motion.li variants={linkVariants} whileHover="hover" className="logout-item">
+              <button
+                className="signout-btn"
+                onClick={() => {
+                  handleClick();
+                  window.location.href = '/signin';
+                }}
+              >
+                <FaCrown className="sidebar-icon" />
+                <span>Sign Out</span>
+              </button>
+            </motion.li>
           </ul>
         </div>
       </div>

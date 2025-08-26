@@ -1,0 +1,24 @@
+[build]
+  publish = "build"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/wyenfos_bills/#/wyenfos/4551"
+  status = 302
+
+[[redirects]]
+  from = "/wyenfos_bills/*"
+  to = "/wyenfos_bills/index.html"
+  status = 200
+
+[headers]
+  for = "/*"
+    [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

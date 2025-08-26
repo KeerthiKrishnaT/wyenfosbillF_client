@@ -1,17 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PurchasingAdminPanel.css';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const PriceListView = () => {
   const [lists, setLists] = useState([]);
   const [error, setError] = useState('');
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedList, setEditedList] = useState(null);
+  const { currentUser, userProfile } = useAuth();
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const navigate = useNavigate();
+
+  // Get Firebase ID token for API calls
+  const getAuthToken = useCallback(async () => {
+    if (!currentUser) {
+      throw new Error('No authenticated user');
+    }
+    return await currentUser.getIdToken(true);
+  }, [currentUser]);
 
   useEffect(() => {
     const fetchPriceLists = async () => {
+      if (!currentUser) return;
+      
+      // Check permissions - only Super Admin and Purchase Admin can access
+      if (!userProfile) {
+        setError('User profile not found. Please login again.');
+        return;
+      }
+
+      const userRole = userProfile.role?.toLowerCase();
+      const userDept = userProfile.department?.toLowerCase();
+      
+      if (userRole !== 'superadmin' && userRole !== 'super_admin' && 
+          !(userRole === 'admin' && userDept === 'purchase')) {
+        setError('Access denied. Only Super Admin and Purchase Admin can access Price Lists.');
+        return;
+      }
+      
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/price-lists', {
+        const token = await getAuthToken();
+        const response = await fetch(`${API_BASE_URL}/api/price-lists`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -31,7 +61,7 @@ const PriceListView = () => {
     };
 
     fetchPriceLists();
-  }, []);
+  }, [currentUser, userProfile, getAuthToken, API_BASE_URL]);
 
   const handleEdit = (index) => {
     setEditingIndex(index);
@@ -53,8 +83,8 @@ const PriceListView = () => {
 
   const handleSave = async (index) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/price-lists/${lists[index]._id}`, {
+      const token = await getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/api/price-lists/${lists[index]._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -82,8 +112,8 @@ const PriceListView = () => {
   const handleDelete = async (index) => {
     if (window.confirm('Are you sure you want to delete this price list?')) {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/price-lists/${lists[index]._id}`, {
+        const token = await getAuthToken();
+        const response = await fetch(`${API_BASE_URL}/api/price-lists/${lists[index]._id}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -105,7 +135,57 @@ const PriceListView = () => {
 
   return (
     <div className="price-list-view">
-      <h2>SAVED PRICE LISTS</h2>
+      <button 
+        className="bck-button" 
+        onClick={() => {
+          // Navigate back based on user role
+          if (userProfile?.role?.toLowerCase() === 'superadmin' || userProfile?.role?.toLowerCase() === 'super_admin') {
+            navigate('/super-admin');
+          } else {
+            navigate('/purchasing-admin');
+          }
+        }}
+        style={{
+          backgroundColor: '#997a8d',
+          color: 'white',
+          border: 'none',
+          padding: '10px 20px',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+      >
+        ← Back to Admin Panel
+      </button>
+      <div className="price-list-header">
+        <h2>SAVED PRICE LISTS</h2>
+        <button 
+          className="create-button" 
+          onClick={() => {
+            // Navigate based on user role
+            if (userProfile?.role?.toLowerCase() === 'superadmin' || userProfile?.role?.toLowerCase() === 'super_admin') {
+              navigate('/add-price-list');
+            } else {
+              navigate('/purchasing-admin/add-price-list');
+            }
+          }}
+          style={{
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            padding: '10px 20px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          Create New Price List
+        </button>
+      </div>
       {error && <p className="error">{error}</p>}
       {lists.length === 0 ? (
         <p>No price lists found.</p>

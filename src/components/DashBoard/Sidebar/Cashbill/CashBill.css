@@ -10,6 +10,8 @@
 
 body {
   margin: 0;
+  font-family: "Ethnocentric", sans-serif !important;
+
 }
 .cashbill-page-wrapper {
   position: relative;
@@ -118,7 +120,7 @@ body {
   border-color: #007bff;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
 }
-.cashbill-info h2{
+.cashbill-information h2{
   color: #000;
   font-size: 1.5rem;
 }
@@ -142,6 +144,36 @@ body {
   display: flex;
   gap: 20px;
   margin-bottom: 20px;
+}
+
+.items-header {
+  background-color: #f8f9fa;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ddd;
+  border-radius: 8px 8px 0 0;
+}
+
+.items-header h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.items-instructions {
+  background-color: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 6px;
+  padding: 10px 15px;
+}
+
+.instruction-text {
+  font-size: 13px;
+  color: #0056b3;
+  line-height: 1.4;
+}
+
+.instruction-text strong {
+  color: #004085;
 }
 
 .billitems-section {
@@ -299,11 +331,119 @@ body {
   background-color:#775c6d;
 
 }
-.footerr h4{
-  color: black;
+.futerr{
+  text-align: left;
+  align-content: left;
 }
+
+.futerr h4,p{
+  color: black;
+  text-align: left;
+  align-content: left;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.left-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.terms-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.terms-section h4 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-bottom: 3px solid #b39eb5;
+  padding-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.terms-content {
+  margin-top: 15px;
+  padding-left: 5px;
+}
+
+.terms-content p {
+  margin: 0;
+  line-height: 2.0;
+  font-size: 14px;
+  color: #495057;
+  text-align: justify;
+}
+
+.futerr .bank-details-section {
+  background: #f8f9fa !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+  border: 1px solid #e9ecef !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  margin-bottom: 20px !important;
+}
+
+.futerr .bank-details-section h4 {
+  margin: 0 0 20px 0 !important;
+  color: #030303 !important;
+  /* font-size: 1.2rem !important; */
+  font-weight: bold !important;
+  border-bottom: 3px solid #b39eb5 !important;
+  padding-bottom: 8px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  text-align: left !important;
+}
+
+.futerr .bank-container {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 20px !important;
+  margin-top: 15px !important;
+  width: 100% !important;
+}
+
+.futerr .bank-contentcashbill {
+  flex: 1 !important;
+  padding-left: 5px !important;
+  min-width: 0 !important;
+}
+
+.futerr .bank-contentcashbill p {
+  margin: 8px 0 !important;
+  line-height: 1.6 !important;
+  font-size: 14px !important;
+  color: #495057 !important;
+  text-align: left !important;
+}
+
+.right-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 160px;
+}
+
 .signaturee{
   text-align: end;
+  margin-top: 20px;
 }
 .customer-search .no-print{
   position: relative;
@@ -353,7 +493,14 @@ body {
 .search-result-item:hover {
   background: #f0f0f0;
 }
-
+.select-btn {
+  background-color: #ffc107;
+  color: #212529;
+}
+.select-btn :hover{
+  background-color: #e0a800;
+  color: #212529;
+}
 .btn-create-customer {
   margin-top: 5px;
   padding: 5px 10px;
@@ -363,7 +510,71 @@ body {
   border-radius: 4px;
   cursor: pointer;
 }
+.bank-detail{
+  text-align: left;
+}
 
+
+
+.futerr .qr-code-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 15px !important;
+  background: white !important;
+  border-radius: 8px !important;
+  border: 1px solid #b39eb5 !important;
+  min-width: 140px !important;
+  max-width: 160px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  flex-shrink: 0 !important;
+}
+
+.futerr .qr-code {
+  margin-bottom: 8px !important;
+}
+
+.futerr .qr-code-label {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #495057 !important;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+.futerr .qr-code-placeholder {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 120px !important;
+  height: 120px !important;
+}
+
+.futerr .qr-placeholder-box {
+  width: 100px !important;
+  height: 100px !important;
+  border: 2px dashed #ccc !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+}
+
+@media print {
+  .bank-details-container {
+    page-break-inside: avoid;
+  }
+  
+  .qr-code-section {
+    background: white;
+    border: 1px solid #000;
+  }
+}
 .btn-create-customer:disabled {
   background: #ccc;
   cursor: not-allowed;
@@ -421,6 +632,35 @@ body {
     padding: 0.4rem;
   }
 
+  .footer-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .futerr .bank-details-container {
+    flex-direction: column !important;
+    gap: 15px !important;
+    align-items: center !important;
+  }
+  
+  .futerr .bank-contentcashbill {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  
+  .futerr .qr-code-section {
+    align-self: center !important;
+  }
+
+  .right-section {
+    align-self: center;
+  }
+
+  .terms-section,
+  .bank-details-section {
+    padding: 10px;
+  }
+
 .search-button {
   background-color:#997a8d;
   color: white;
@@ -467,7 +707,7 @@ body {
     font-size: 0.7rem;
   }
 
-  .cashwatermark img,
+  .watermark img,
   .cashcancelled-watermark img {
     width: 200px;
     height: 200px;
@@ -483,53 +723,633 @@ body {
   }
 }
 @media print {
+  /* Reset everything for print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Hide all UI elements that shouldn't print */
   .no-print,
+  button,
   .add-itemm-btn,
   .remove-button,
   .print-button,
-  .itemm-row,
   .search-input-group,
    .search-button,
-   .tax-options
-   {
+  .action-buttons,
+  .permission-status,
+  .customer-search,
+  .search-results,
+  .btn-create-customer,
+  .saved-bills-section,
+  .modal,
+  .cashwatermark,
+  .cashcancelled-watermark,
+  .watermark,
+  .items-instructions,
+  .instruction-text {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
   }
 
-  body, html, #root {
-    background: #fff !important;
-    color: #000;
-    height: auto !important;
-    overflow: visible !important;
-  }
-
+  /* Print Layout Structure - Match PDF exactly */
   .cashbill-page-wrapper {
-    padding: 0;
-    background: white;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 5mm !important;
+    font-size: 10px !important;
+    font-family: Arial, sans-serif !important;
+    max-height: 297mm !important;
+    overflow: visible !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    min-height: 297mm !important;
   }
 
   .cashbillinvoice-container {
-    box-shadow: none;
-    border: none;
-    padding: 10mm;
-    background: white;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    max-height: 287mm !important;
+    overflow: visible !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    min-height: 287mm !important;
   }
 
- .billitems-section,
-  .itemm-row {
-    display: grid !important;
-    grid-template-columns: 20px 40px 140px 50px 40px 40px 50px 50px 50px 40px !important;
+  /* Print Header Layout - Match PDF Structure Exactly */
+  .bill-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 5px !important;
+    padding-bottom: 3px !important;
+    border-bottom: 1px solid #333 !important;
+  }
+
+  /* Company Header - Left Side with Logo and Details */
+  .company-header-container {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    flex: 1 !important;
+  }
+
+  .company-header-modern {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    background: white !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .header-content-wrapper {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+  }
+
+  .logo-and-info {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .modern-logo {
+    width: 50px !important;
+    height: 50px !important;
+    border: 1px solid #333 !important;
+    padding: 1px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .company-information {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+    flex: 1 !important;
+  }
+
+  .company-name {
+    font-size: 12px !important;
+    font-weight: bold !important;
+    color: black !important;
+    margin: 0 !important;
+  }
+
+  .company-address,
+  .contact-item {
+    font-size: 7px !important;
+    color: black !important;
+    margin: 0 !important;
+    line-height: 1.0 !important;
+  }
+
+  /* Invoice Details - Right Side - Moved further right to match PDF */
+  .cashbill-header-info {
+    text-align: right !important;
+    min-width: 120px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    margin-right: 20px !important; /* Added margin to match PDF positioning */
+  }
+
+  .cashbill-header-info h2 {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    color: black !important;
+    margin: 0 !important;
+    text-align: center !important;
+    display: block !important;
+    width: 100% !important;
+    page-break-after: avoid !important;
+  }
+
+  .bill-info-row {
+    display: flex !important;
     gap: 10px !important;
-    font-size: 12px;
-    text-align: center;
+    align-items: center !important;
+    margin: 1px 0 !important;
+  }
+
+  .bill-number {
+    font-size: 9px !important;
+    color: black !important;
+    margin: 0 !important;
+  }
+
+  .date {
+    font-size: 9px !important;
+    color: black !important;
+    margin: 0 !important;
+  }
+
+  /* CASH BILL Title - Match PDF Structure */
+  .bill-header + h2,
+  .bill-header + .cashbill-header-info h2,
+  .bill-header ~ h2 {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    color: black !important;
+    margin: 8px 0 5px 0 !important;
+    text-align: center !important;
+    display: block !important;
+    width: 100% !important;
+    page-break-after: avoid !important;
+  }
+
+  .bill-number {
+    font-size: 12px !important;
+    color: black !important;
+    margin: 0 !important;
+  }
+
+  .date {
+    font-size: 12px !important;
+    color: black !important;
+    margin: 0 !important;
+  }
+
+  /* Show bill header */
+  .bill-header {
+    display: block !important;
+    visibility: visible !important;
+    margin-bottom: 15px !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Company header styles for print */
+  .company-header-container {
+    display: block !important;
+    visibility: visible !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .company-header-modern {
+    display: block !important;
+    visibility: visible !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  .header-content-wrapper {
+    display: flex !important;
+    visibility: visible !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .company-name {
+    color: black !important;
+    font-size: 16px !important;
+  }
+
+  .company-address,
+  .contact-item {
+    color: black !important;
+    font-size: 10px !important;
+  }
+
+  .cashbill-header-info h2 {
+    color: black !important;
+    font-size: 14px !important;
+  }
+
+  .bill-number,
+  .date {
+    color: black !important;
+    font-size: 10px !important;
+  }
+
+  /* Customer Details Section - Match PDF Structure */
+  .customer-details {
+    display: block !important;
+    visibility: visible !important;
+    margin: 5px 0 !important;
+    border: 1px solid #333 !important;
+    padding: 3px !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .customer-details h3 {
+    font-size: 11px !important;
+    font-weight: bold !important;
+    color: black !important;
+    margin: 0 0 3px 0 !important;
+    border-bottom: 1px solid #333 !important;
+    padding-bottom: 2px !important;
+  }
+
+  .customer-details h3 {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    color: black !important;
+    margin: 0 0 10px 0 !important;
+    border-bottom: 1px solid #333 !important;
+    padding-bottom: 5px !important;
+  }
+
+  /* Compact Customer Form Layout */
+  .customer-details .cashbill-input {
+    display: block !important;
+    visibility: visible !important;
+    margin: 10px 0 !important;
+  }
+
+  .customer-details .input-group {
+    display: flex !important;
+    align-items: center !important;
+    margin: 5px 0 !important;
+    gap: 10px !important;
+  }
+
+  .customer-details .input-group label {
+    display: inline-block !important;
+    font-weight: bold !important;
+    color: black !important;
+    font-size: 11px !important;
+    min-width: 80px !important;
+    text-align: right !important;
+  }
+
+  .customer-details .input-group input,
+  .customer-details .input-group select {
+    display: inline-block !important;
+    flex: 1 !important;
+    padding: 3px 5px !important;
+    border: 1px solid #ccc !important;
+    background: white !important;
+    color: black !important;
+    font-size: 11px !important;
+    height: 20px !important;
+  }
+
+  /* Two-column layout for customer details */
+  .customer-details .cashbill-input {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+  }
+
+  /* Force all bill sections to be visible */
+  .cash-bill-items,
+  .items-header,
+  .items-instructions,
+  .instruction-text,
+  .amount-details,
+  .amount-row,
+  .totals-remarks-wrapper,
+  .bill-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Compact header */
+  .bill-header {
+    margin-bottom: 10px !important;
+    padding: 5px 0 !important;
+  }
+
+  /* Compact customer details */
+  .customer-details {
+    margin: 10px 0 !important;
+    padding: 5px 0 !important;
+  }
+
+  /* Compact items section */
+  .billitems-section {
+    margin: 10px 0 !important;
+    padding: 5px 0 !important;
+  }
+
+  /* Compact totals section */
+  .totals-section {
+    margin: 10px 0 !important;
+    padding: 5px 0 !important;
+  }
+
+  /* Compact footer */
+  .futerr {
+    margin: 10px 0 !important;
+    padding: 5px 0 !important;
+  }
+
+  /* Ensure the main container is visible */
+  .cashbillinvoice-container,
+  .print-content {
+    display: block !important;
+    visibility: visible !important;
+    background: white !important;
+    padding: 10mm !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+  }
+
+  /* Ensure the page wrapper is visible */
+  .cashbill-page-wrapper {
+    display: block !important;
+    visibility: visible !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+  }
+
+  /* Ensure customer details are visible */
+  .customer-form {
+    display: block !important;
+    margin: 20px 0 !important;
+  }
+
+  .customer-form .input-group {
+    display: block !important;
+    margin: 10px 0 !important;
+  }
+
+  .credit-bill-input-group {
+    display: block !important;
+    margin: 10px 0 !important;
+  }
+
+  .credit-bill-input-group label {
+    display: block !important;
+    font-weight: bold !important;
+    margin-bottom: 5px !important;
     color: #000 !important;
-    background:white;
+  }
+
+  .credit-bill-input-group input,
+  .credit-bill-input-group select {
+    display: block !important;
+    width: 100% !important;
+    padding: 5px !important;
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12px !important;
+  }
+
+  /* Show customer input groups */
+  .customer-details .input-group {
+    display: inline-block !important;
+    width: 48% !important;
+    margin: 5px 1% 5px 0 !important;
+    vertical-align: top !important;
+  }
+
+  .customer-details .input-group label {
+    display: block !important;
+    font-weight: bold !important;
+    margin-bottom: 3px !important;
+    color: black !important;
+    font-size: 11px !important;
+  }
+
+  .customer-details .input-group input,
+  .customer-details .input-group select {
+    display: block !important;
+    width: 100% !important;
+    padding: 5px !important;
+    border: 1px solid #ccc !important;
+    background: white !important;
+    color: black !important;
+    font-size: 11px !important;
+    height: 25px !important;
+  }
+
+  /* Show cashbill-input container */
+  .cashbill-input {
+    display: block !important;
+    margin: 10px 0 !important;
+  }
+
+  /* Force customer details to be visible */
+  .customer-details .cashbill-input {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Force all customer input groups to be visible */
+  .customer-details .input-group {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 5px 10px 5px 0 !important;
+    width: 45% !important;
+  }
+
+  /* Ensure form inputs show their values */
+  .cashbill-input input,
+  .cashbill-input select,
+  .cashbill-input textarea {
+    border: none !important;
+    background: transparent !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+    color: #000 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+
+  /* Show items section */
+  .cash-bill-items {
+    display: block !important;
+    visibility: visible !important;
+    margin: 8px 0 !important;
+  }
+
+  .items-header {
+    display: block !important;
+    visibility: visible !important;
+    margin-bottom: 5px !important;
+  }
+
+  .items-header h3 {
+    color: black !important;
+    font-size: 12px !important;
+    margin: 0 0 3px 0 !important;
+  }
+
+  .items-instructions {
+    display: none !important;
+  }
+
+  .cash-bill-items {
+    display: block !important;
+    visibility: visible !important;
+    margin: 8px 0 !important;
+  }
+
+  .items-header {
+    display: block !important;
+    visibility: visible !important;
+    margin-bottom: 5px !important;
+  }
+
+  .items-header h3 {
+    color: black !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    margin: 0 0 5px 0 !important;
+    text-align: center !important;
+    border-bottom: 1px solid #333 !important;
+    padding-bottom: 2px !important;
+  }
+
+  /* Compact Items Table - Match PDF Structure */
+  .billitems-section {
+    display: table !important;
+    width: 100% !important;
+    margin: 3px 0 !important;
+    border-collapse: collapse !important;
+    color: white !important;
+    font-weight: bold !important;
+    font-size: 7px !important;
+  }
+
+  .billitems-section > div {
+    display: table-row !important;
+  }
+
+  .billitems-section > div > div {
+    display: table-cell !important;
+    padding: 5px 3px !important;
+    text-align: center !important;
+    border: 1px solid #666 !important;
+  }
+
+  /* Item Rows */
+  .itemm-row {
+    display: table-row !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .itemm-row > div {
+    display: table-cell !important;
+    padding: 4px 3px !important;
+    text-align: center !important;
+    border: 1px solid #ccc !important;
+    font-size: 9px !important;
   }
 
   .itemm-row input {
     border: none !important;
     background: transparent !important;
-    font-size: 12px !important;
+    font-size: 9px !important;
     padding: 0 !important;
+    color: black !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Compact column widths */
+  /* .col-sno { width: 8% !important; }
+  .col-code { width: 12% !important; }
+  .col-name { width: 25% !important; }
+  .col-hsn { width: 12% !important; }
+  .col-qty { width: 8% !important; }
+  .col-rate { width: 12% !important; }
+  .col-total { width: 12% !important; }
+  .col-tax { width: 8% !important; }
+  .col-action { width: 3% !important; } */
+
+  /* Force items table to be visible */
+ .billitems-section,
+  .billitems-section > div,
+  .billitems-section .itemm-row {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Show items header */
+  .billitems-section > div {
+    display: grid !important;
+    grid-template-columns: 30px 80px 1fr 80px 60px 80px 80px 60px 50px 30px !important;
+    gap: 5px !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 5px !important;
+    /* background-color: #997a8d !important; */
+    color: #fff !important;
+    font-weight: bold !important;
+    font-size: 10px !important;
+  }
+
+  .itemm-row {
+    display: grid !important;
+    grid-template-columns: 30px 80px 1fr 80px 60px 80px 80px 60px 50px 30px !important;
+    gap: 5px !important;
+    font-size: 10px !important;
+    text-align: center !important;
+    color: #000 !important;
+    background: white !important;
+    border-bottom: 1px solid #ddd !important;
+    padding: 3px 0 !important;
+  }
+
+  .itemm-row input {
+    border: none !important;
+    background: transparent !important;
+    font-size: 10px !important;
+    padding: 0 !important;
+    color: #000 !important;
   }
 
   .itemm-row button {
@@ -538,12 +1358,893 @@ body {
 
   .itemm-row div {
     justify-content: center !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Show main bill section */
+  .main-bill-section {
+    display: block !important;
+    visibility: visible !important;
+    margin: 15px 0 !important;
+  }
+
+  .bill-content {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .totals-remarks-wrapper {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Totals Section */
+  .main-bill-section {
+    display: block !important;
+    visibility: visible !important;
+    margin: 20px 0 !important;
+  }
+
+  .bill-content {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .totals-remarks-wrapper {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .totals-section {
+    display: block !important;
+    margin: 5px 0 !important;
+    padding: 3px !important;
+    border: 1px solid #333 !important;
+    background: white !important;
+    color: black !important;
+    page-break-inside: avoid !important;
+  }
+
+  .totals-section h3 {
+    font-size: 11px !important;
+    font-weight: bold !important;
+    color: black !important;
+    margin: 0 0 3px 0 !important;
+    border-bottom: 1px solid #333 !important;
+    padding-bottom: 2px !important;
+  }
+
+  .totals-section h3 {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    color: black !important;
+    margin: 0 0 10px 0 !important;
+    border-bottom: 1px solid #333 !important;
+    padding-bottom: 5px !important;
+  }
+
+  .amount-details {
+    display: block !important;
+    margin: 10px 0 !important;
+  }
+
+  .amount-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin: 3px 0 !important;
+    font-size: 11px !important;
+    color: black !important;
+    padding: 2px 0 !important;
+  }
+
+  .total-amount-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin: 8px 0 !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    color: black !important;
+    padding: 4px 0 !important;
+    border-top: 2px solid #333 !important;
+  }
+
+  .totals-grid {
+    display: block !important;
+  }
+
+  .totals-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin: 3px 0 !important;
+    font-size: 10px !important;
+  }
+
+  /* Show amount details */
+  .amount-details {
+    display: block !important;
+    margin: 20px 0 !important;
+  }
+
+  .amount-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin: 5px 0 !important;
+    font-size: 12px !important;
+    color: #000 !important;
+  }
+
+  /* Show totals-remarks-wrapper */
+  .totals-remarks-wrapper {
+    display: block !important;
+    margin: 20px 0 !important;
+  }
+
+  /* Show bill-content */
+  .bill-content {
+    display: block !important;
+    margin: 20px 0 !important;
+  }
+
+  /* Show main-bill-section */
+  .main-bill-section {
+    display: block !important;
+    margin: 20px 0 !important;
+  }
+
+  /* Footer Section - Match PDF Structure */
+  .futerr {
+    display: block !important;
+    visibility: visible !important;
+    margin-top: 5px !important;
+    padding-top: 3px !important;
+    border-top: 1px solid #333 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .futer-content {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 30px !important;
+  }
+
+  .left-section {
+    flex: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  /* Terms Section */
+  .terms-section {
+    display: block !important;
+    visibility: visible !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    border: none !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .terms-section h4 {
+    color: black !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    margin: 0 0 10px 0 !important;
+    border-bottom: 1px solid #333 !important;
+    padding-bottom: 5px !important;
+  }
+
+  .terms-content {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .terms-content p {
+    margin: 3px 0 !important;
+    font-size: 9px !important;
+    color: black !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Bank Details Section - Match PDF exactly */
+  .bank-details-section {
+    display: block !important;
+    visibility: visible !important;
+    margin: 0 !important;
+    padding: 8px !important;
+    border: 1px solid #333 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .bank-details-section h4 {
+    color: black !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    margin: 0 0 10px 0 !important;
+    border-bottom: 1px solid #333 !important;
+    padding-bottom: 5px !important;
+  }
+
+  .bank-container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 20px !important;
+  }
+
+  .bank-contentcashbill {
+    flex: 1 !important;
+    display: block !important;
+    visibility: visible !important;
+    font-size: 10px !important;
+    color: black !important;
+  }
+
+  .bank-contentcashbill p {
+    margin: 2px 0 !important;
+    color: black !important;
+    line-height: 1.1 !important;
+    font-size: 9px !important;
+  }
+
+  .qr-code-section {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px !important;
+    background: white !important;
+    border: 1px solid #333 !important;
+    border-radius: 3px !important;
+    min-width: 100px !important;
+    margin-left: 20px !important;
+  }
+
+  .qr-code {
+    display: block !important;
+    visibility: visible !important;
+    max-width: 80px !important;
+    height: auto !important;
+  }
+
+  .qr-code-label {
+    display: block !important;
+    visibility: visible !important;
+    text-align: center !important;
+    margin-top: 5px !important;
+    font-size: 9px !important;
+    color: black !important;
+    font-weight: bold !important;
+  }
+
+  /* Signature Section - Match PDF exactly */
+  .signaturee {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    text-align: right !important;
+    margin-top: 30px !important;
+    font-size: 11px !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  .signaturee strong {
+    font-weight: bold !important;
+    color: black !important;
+  }
+
+  .futer-content {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .left-section {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Terms section */
+  .terms-section {
+    display: block !important;
+    visibility: visible !important;
+    margin: 15px 0 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .terms-section h4 {
+    color: black !important;
+    font-size: 12px !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  .terms-content {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .terms-content p {
+    margin: 3px 0 !important;
+    font-size: 10px !important;
+    color: black !important;
+  }
+
+  .futer-content {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .left-section {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Terms section */
+  .terms-section {
+    display: block !important;
+    visibility: visible !important;
+    margin: 15px 0 !important;
+  }
+
+  .terms-section h4 {
+    color: black !important;
+    font-size: 12px !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  .terms-content {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .terms-content p {
+    margin: 3px 0 !important;
+    font-size: 10px !important;
+    color: black !important;
+  }
+
+  /* Bank details section */
+  .bank-details-section {
+    display: block !important;
+    visibility: visible !important;
+    margin: 15px 0 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .bank-details-section h4 {
+    color: black !important;
+    font-size: 12px !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  .bank-container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+  }
+
+  .bank-contentcashbill {
+    display: block !important;
+    visibility: visible !important;
+    font-size: 10px !important;
+    color: black !important;
+  }
+
+  .bank-contentcashbill p {
+    margin: 3px 0 !important;
+    color: black !important;
+  }
+
+  .qr-code-section {
+    display: block !important;
+    visibility: visible !important;
+    text-align: center !important;
+  }
+
+  .qr-code {
+    display: block !important;
+    visibility: visible !important;
+    max-width: 80px !important;
+    height: auto !important;
+  }
+
+  .qr-code-label {
+    display: block !important;
+    visibility: visible !important;
+    text-align: center !important;
+    margin-top: 3px !important;
+    font-size: 8px !important;
+    color: black !important;
+  }
+
+  .bank-details-section h4 {
+    color: black !important;
+    font-size: 12px !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  .bank-container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+  }
+
+  .bank-contentcashbill {
+    display: block !important;
+    visibility: visible !important;
+    font-size: 10px !important;
+    color: black !important;
+  }
+
+  .bank-contentcashbill p {
+    margin: 3px 0 !important;
+    color: black !important;
+  }
+
+  .qr-code-section {
+    display: block !important;
+    visibility: visible !important;
+    text-align: center !important;
+  }
+
+  .qr-code {
+    display: block !important;
+    visibility: visible !important;
+    max-width: 80px !important;
+    height: auto !important;
+  }
+
+  .qr-code-label {
+    display: block !important;
+    visibility: visible !important;
+    text-align: center !important;
+    margin-top: 3px !important;
+    font-size: 8px !important;
+    color: black !important;
+  }
+
+  /* Remarks Section */
+  .remarks-section {
+    display: block !important;
+    margin: 20px 0 !important;
+    padding: 15px !important;
+    border: 1px solid #333 !important;
+    background: white !important;
+    color: black !important;
+    visibility: visible !important;
+  }
+
+  .remarks-section h3 {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    color: black !important;
+    margin: 0 0 10px 0 !important;
+    border-bottom: 1px solid #333 !important;
+    padding-bottom: 5px !important;
+  }
+
+  .remarks-section textarea {
+    display: block !important;
+    width: 100% !important;
+    padding: 10px !important;
+    border: 1px solid #ccc !important;
+    background: white !important;
+    color: black !important;
+    font-size: 11px !important;
+    min-height: 60px !important;
+    resize: none !important;
+  }
+
+  /* Force remarks to be visible */
+  .remarks-section,
+  .remarks-section textarea,
+  .remarks-section label {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .remarks-section textarea {
+    display: block !important;
+    width: 100% !important;
+    padding: 5px !important;
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12px !important;
+    min-height: 60px !important;
+  }
+
+  /* Show invoice-divider */
+  .invoice-divider {
+    display: block !important;
+    margin: 20px 0 !important;
+    border: 1px solid #ccc !important;
+    visibility: visible !important;
+  }
+
+  /* Show message */
+  .message {
+    display: none !important;
+  }
+
+  /* Ensure all text elements are visible */
+  p, span, h1, h2, h3, h4, h5, h6, label, input, textarea, select {
+    color: black !important;
+    visibility: visible !important;
+  }
+
+  /* Ensure all divs are visible */
+  div {
+    visibility: visible !important;
+  }
+
+  .bank-container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+  }
+
+  .bank-contentcashbill {
+    display: block !important;
+    font-size: 12px !important;
+  }
+
+  .qr-code-section {
+    display: block !important;
+    text-align: center !important;
+  }
+
+  .qr-code-image {
+    display: block !important;
+    max-width: 120px !important;
+    height: auto !important;
+  }
+
+  .qr-code {
+    display: block !important;
+    max-width: 80px !important;
+    height: auto !important;
+  }
+
+  .qr-code-section {
+    display: block !important;
+    text-align: center !important;
+  }
+
+  .qr-code-label {
+    display: block !important;
+    text-align: center !important;
+    margin-top: 3px !important;
+    font-size: 8px !important;
+    color: #000 !important;
+  }
+
+  .signaturee {
+    display: block !important;
+    visibility: visible !important;
+    text-align: right !important;
+    margin-top: 30px !important;
+    font-size: 11px !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  /* Show terms content */
+  .terms-content {
+    display: block !important;
+    margin: 5px 0 !important;
+  }
+
+  .terms-content p {
+    margin: 3px 0 !important;
+    font-size: 10px !important;
+    color: #000 !important;
+  }
+
+  /* Show bank content */
+  .bank-contentcashbill {
+    display: block !important;
+    font-size: 10px !important;
+    color: #000 !important;
+  }
+
+  .bank-contentcashbill p {
+    margin: 3px 0 !important;
+    color: #000 !important;
+  }
+
+  /* Basic page setup */
+  body, html, #root {
+    background: #fff !important;
+    color: #000 !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 12px !important;
+  }
+
+  /* Force all divs to be visible */
+  div {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Specific override for bill content */
+  .cashbill-page-wrapper *,
+  .cashbillinvoice-container *,
+  .print-content * {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #000 !important;
+  }
+
+  /* Single page layout - Force everything on one page */
+  .cashbill-page-wrapper {
+    max-height: 297mm !important; /* A4 height */
+    overflow: visible !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    background: white !important;
+    color: black !important;
+    height: 297mm !important;
+  }
+
+  .cashbillinvoice-container {
+    max-height: 287mm !important;
+    overflow: visible !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    background: white !important;
+    color: black !important;
+    height: 287mm !important;
+  }
+
+  /* Force all sections to be compact */
+  .bill-header,
+  .customer-details,
+  .cash-bill-items,
+  .totals-section,
+  .remarks-section,
+  .futerr {
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+  }
+
+  /* Remove all watermark references */
+  .cashwatermark,
+  .cashcancelled-watermark,
+  .watermark,
+  .secondary-logo-center,
+  .secondary-logo-img {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+  }
+
+  /* Ensure all content is visible */
+  .cashbill-page-wrapper *,
+  .cashbillinvoice-container *,
+  .print-content * {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Prevent page breaks */
+  * {
+    page-break-inside: avoid !important;
+  }
+
+  /* Basic page setup - Ultra compact for single page */
+  body, html, #root {
+    background: white !important;
+    color: black !important;
+    height: 297mm !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10px !important;
+  }
+
+  /* Force ultra compact spacing - Match PDF Structure */
+  * {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .bill-header {
+    margin-bottom: 3px !important;
+    padding-bottom: 2px !important;
+  }
+
+  .customer-details {
+    margin: 3px 0 !important;
+    padding: 2px !important;
+  }
+
+  .cash-bill-items {
+    margin: 3px 0 !important;
+  }
+
+  .totals-section {
+    margin: 3px 0 !important;
+    padding: 2px !important;
+  }
+
+  .futerr {
+    margin-top: 3px !important;
+    padding-top: 2px !important;
+  }
+
+  /* Force single page layout */
+  .cashbill-page-wrapper {
+    height: 297mm !important;
+    max-height: 297mm !important;
+    overflow: hidden !important;
+  }
+
+  .cashbillinvoice-container {
+    height: 287mm !important;
+    max-height: 287mm !important;
+    overflow: hidden !important;
+  }
+
+  /* Print test element - hide in final version */
+  .print-test {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Force all text to be visible */
+  p, span, h1, h2, h3, h4, h5, h6, label, input, textarea, select {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #000 !important;
+  }
+
+  .cashbill-page-wrapper {
+    padding: 0 !important;
+    background: white !important;
+    margin: 0 !important;
+  }
+
+  .cashbillinvoice-container {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 10mm !important;
+    background: white !important;
+    margin: 0 !important;
+  }
+
+  /* Remove shadows and borders for cleaner print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
   }
 
   /* Hide scrollbars if present */
   ::-webkit-scrollbar {
-    display: none;
+    display: none !important;
   }
 
-  
+  /* Hide watermarks in print to save space */
+  .watermark,
+  .cashcancelled-watermark {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  /* Hide any background watermarks */
+  .watermark img,
+  .cashcancelled-watermark img {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  /* Ensure proper page breaks */
+  .bill-header {
+    page-break-after: avoid !important;
+  }
+
+  .customer-details {
+    page-break-after: avoid !important;
+  }
+
+  .billitems-section {
+    page-break-inside: avoid !important;
+  }
+
+  .totals-section {
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  .futerr {
+    page-break-before: avoid !important;
+  }
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.modal-content p {
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.modal-buttons button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.modal-buttons button:first-child {
+  background-color: #28a745;
+  color: white;
+}
+
+.modal-buttons button:first-child:hover {
+  background-color: #218838;
+}
+
+.modal-buttons button:last-child {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modal-buttons button:last-child:hover {
+  background-color: #c82333;
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from '../../../contexts/AuthContext';
 import Sidebar from './Sidebar';
 import './MarketingAdminPanel.css';
 
@@ -9,59 +10,89 @@ const MarketingAdminPanel = () => {
   const [clients, setClients] = useState([]);
   const [shops, setShops] = useState([]);
   const [staffs, setStaffs] = useState([]);
-  const [error, setError] = useState(''); // Line 12: 'error' declared here
+  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('clients');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [newStaff, setNewStaff] = useState({ name: '', email: '', role: '' });
+  const [newClient, setNewClient] = useState({ name: '', contact: '', address: '' });
+  const [newShop, setNewShop] = useState({ name: '', address: '', gstNumber: '' });
   const [message, setMessage] = useState('');
   const [selectedStaffIds, setSelectedStaffIds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [showShopModal, setShowShopModal] = useState(false);
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { currentUser, userProfile } = useAuth();
+  const navigate = useNavigate();
+
   const [userData, setUserData] = useState({
-    name: user.name || "",
-    email: user.email || "",
-    role: user.role || "Marketing Admin",
-    profilePhoto: user.profilePhoto || "",
+    name: userProfile?.name || "",
+    email: userProfile?.email || "",
+    role: userProfile?.role || "Marketing Admin",
+    profilePhoto: userProfile?.profilePhoto || "",
   });
 
-  const navigate = useNavigate();
+  // Update userData when userProfile changes
+  useEffect(() => {
+    if (userProfile) {
+      setUserData({
+        name: userProfile.name || "",
+        email: userProfile.email || "",
+        role: userProfile.role || "Marketing Admin",
+        profilePhoto: userProfile.profilePhoto || "",
+      });
+    }
+  }, [userProfile]);
 
   const handleUpdateProfile = (updatedUser) => {
     setUserData(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    // This will be handled by the AuthContext
     navigate('/login');
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!currentUser) {
       navigate('/login');
       return;
     }
 
-    const fetchData = async (url, setter) => {
+    const fetchData = async () => {
       try {
-        const res = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to fetch data');
-        setter(data[Object.keys(data)[0]].map(item => ({ ...item, isEditing: false })));
+        setLoading(true);
+        const idToken = await currentUser.getIdToken(true);
+        
+        const fetchDataFromAPI = async (url, setter) => {
+          try {
+            const res = await fetch(url, {
+              headers: { Authorization: `Bearer ${idToken}` },
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to fetch data');
+            setter(data[Object.keys(data)[0]].map(item => ({ ...item, isEditing: false })));
+          } catch (err) {
+            setError(err.message);
+            toast.error(`Error: ${err.message}`);
+          }
+        };
+
+        await Promise.all([
+          fetchDataFromAPI('http://localhost:5000/api/marketing/client-details', setClients),
+          fetchDataFromAPI('http://localhost:5000/api/marketing/shop-details', setShops),
+          fetchDataFromAPI('http://localhost:5000/api/marketing/staff-details', setStaffs)
+        ]);
       } catch (err) {
         setError(err.message);
         toast.error(`Error: ${err.message}`);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData('http://localhost:5000/api/auth/marketing/client-details', setClients);
-    fetchData('http://localhost:5000/api/auth/marketing/shop-details', setShops);
-    fetchData('http://localhost:5000/api/auth/marketing/staff-details', setStaffs);
-  }, [navigate]);
+    fetchData();
+  }, [currentUser, navigate]);
 
   const handleEdit = (type, id) => {
     const list = type === "client" ? clients : type === "shop" ? shops : staffs;
@@ -84,10 +115,10 @@ const MarketingAdminPanel = () => {
     if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
       if (type === 'staff') {
         try {
-          const token = localStorage.getItem('token');
-          const res = await fetch(`http://localhost:5000/api/auth/marketing/staff-details/${id}`, {
+          const idToken = await currentUser.getIdToken(true);
+          const res = await fetch(`http://localhost:5000/api/marketing/staff-details/${id}`, {
             method: 'DELETE',
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${idToken}` },
           });
           if (!res.ok) {
             const data = await res.json();
@@ -120,23 +151,31 @@ const MarketingAdminPanel = () => {
     setNewStaff({ ...newStaff, [e.target.name]: e.target.value });
   };
 
+  const handleClientInputChange = (e) => {
+    setNewClient({ ...newClient, [e.target.name]: e.target.value });
+  };
+
+  const handleShopInputChange = (e) => {
+    setNewShop({ ...newShop, [e.target.name]: e.target.value });
+  };
+
   const handleAddStaff = async () => {
     if (!newStaff.name || !newStaff.email || !newStaff.role) {
       toast.error("All fields are required to add a staff member.");
       return;
     }
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        toast.error("No authentication token found. Please log in again.");
+      if (!currentUser) {
+        toast.error("No authentication found. Please log in again.");
         navigate('/login');
         return;
       }
-      const res = await fetch('http://localhost:5000/api/auth/marketing/staff-details', {
+      const idToken = await currentUser.getIdToken(true);
+      const res = await fetch('http://localhost:5000/api/marketing/staff-details', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify(newStaff),
       });
@@ -147,6 +186,68 @@ const MarketingAdminPanel = () => {
       toast.success("Staff added successfully!");
     } catch (err) {
       console.error("Error adding staff:", err);
+      toast.error(`Error: ${err.message}`);
+    }
+  };
+
+  const handleAddClient = async () => {
+    if (!newClient.name || !newClient.contact || !newClient.address) {
+      toast.error("All fields are required to add a client.");
+      return;
+    }
+    try {
+      if (!currentUser) {
+        toast.error("No authentication found. Please log in again.");
+        navigate('/login');
+        return;
+      }
+      const idToken = await currentUser.getIdToken(true);
+      const res = await fetch('http://localhost:5000/api/marketing/client-details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify(newClient),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to add client');
+      setClients([...clients, { ...data.client, isEditing: false }]);
+      setNewClient({ name: '', contact: '', address: '' });
+      toast.success("Client added successfully!");
+    } catch (err) {
+      console.error("Error adding client:", err);
+      toast.error(`Error: ${err.message}`);
+    }
+  };
+
+  const handleAddShop = async () => {
+    if (!newShop.name || !newShop.address || !newShop.gstNumber) {
+      toast.error("All fields are required to add a shop.");
+      return;
+    }
+    try {
+      if (!currentUser) {
+        toast.error("No authentication found. Please log in again.");
+        navigate('/login');
+        return;
+      }
+      const idToken = await currentUser.getIdToken(true);
+      const res = await fetch('http://localhost:5000/api/marketing/shop-details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify(newShop),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to add shop');
+      setShops([...shops, { ...data.shop, isEditing: false }]);
+      setNewShop({ name: '', address: '', gstNumber: '' });
+      toast.success("Shop added successfully!");
+    } catch (err) {
+      console.error("Error adding shop:", err);
       toast.error(`Error: ${err.message}`);
     }
   };
@@ -167,12 +268,12 @@ const MarketingAdminPanel = () => {
       return;
     }
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/auth/marketing/send-message', {
+      const idToken = await currentUser.getIdToken(true);
+      const res = await fetch('http://localhost:5000/api/marketing/send-message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({ staffIds: selectedStaffIds, message }),
       });
@@ -243,13 +344,30 @@ const MarketingAdminPanel = () => {
         />
         <div className="map-main-panel">
           <h2>Marketing Admin Panel</h2>
-          {error && <div className="map-error-message">{error}</div>} {/* Display the error */}
-          {activeTab === 'clients' && renderTable('client', clients, ['name', 'contact', 'address'])}
-          {activeTab === 'shops' && renderTable('shop', shops, ['name', 'address', 'gstNumber'])}
+          {error && <div className="map-error-message">{error}</div>}
+          {loading && <div className="map-loading-message">Loading data...</div>}
+          {activeTab === 'clients' && (
+            <>
+              {renderTable('client', clients, ['name', 'contact', 'address'])}
+              <div className="map-section add-form">
+                <h4>Add New Client</h4>
+                <button className="action-btn add" onClick={() => setShowClientModal(true)}>Add New Client</button>
+              </div>
+            </>
+          )}
+          {activeTab === 'shops' && (
+            <>
+              {renderTable('shop', shops, ['name', 'address', 'gstNumber'])}
+              <div className="map-section add-form">
+                <h4>Add New Shop</h4>
+                <button className="action-btn add" onClick={() => setShowShopModal(true)}>Add New Shop</button>
+              </div>
+            </>
+          )}
           {activeTab === 'groups' && (
             <>
               {renderTable('staff', staffs, ['name', 'email', 'role'])}
-              <div className="map-section">
+              <div className="map-section add-form">
                 <h4>Add New Staff</h4>
                 <input name="name" placeholder="Name" value={newStaff.name} onChange={handleStaffInputChange} />
                 <input name="email" placeholder="Email" value={newStaff.email} onChange={handleStaffInputChange} />
@@ -259,19 +377,124 @@ const MarketingAdminPanel = () => {
             </>
           )}
           {activeTab === 'messages' && (
-            <div className="map-section">
+            <div className="map-section message-section">
               <h3>Send Message to Selected Staff</h3>
-              <textarea
-                placeholder="Type your message here..."
-                style={{ width: '100%', height: '100px' }}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              ></textarea>
-              <button className="action-btn save" style={{ marginTop: '10px' }} onClick={sendMessageToSelected}>Send</button>
+              
+              {/* Staff Selection Section */}
+              <div className="staff-selection-container">
+                <h4>Select Staff Members to Message:</h4>
+                <div className="staff-list">
+                  {staffs.length > 0 ? staffs.map((staff) => (
+                    <div key={staff._id} className="staff-item">
+                      <input
+                        type="checkbox"
+                        id={`staff-${staff._id}`}
+                        checked={selectedStaffIds.includes(staff._id)}
+                        onChange={() => toggleStaffSelect(staff._id)}
+                      />
+                      <label htmlFor={`staff-${staff._id}`}>
+                        <strong>{staff.name}</strong> - {staff.email} ({staff.role})
+                      </label>
+                    </div>
+                  )) : (
+                    <p>No staff members available. Please add staff members first.</p>
+                  )}
+                </div>
+                
+                {selectedStaffIds.length > 0 && (
+                  <div className="selected-staff-summary">
+                    <strong>Selected Staff ({selectedStaffIds.length}):</strong>
+                    <ul>
+                      {selectedStaffIds.map(id => {
+                        const staff = staffs.find(s => s._id === id);
+                        return staff ? <li key={id}>{staff.name} ({staff.role})</li> : null;
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Message Input */}
+              <div className="message-input-container">
+                <h4>Message:</h4>
+                <textarea
+                  placeholder="Type your message here..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                ></textarea>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="message-actions">
+                <button 
+                  className="action-btn save" 
+                  onClick={sendMessageToSelected}
+                  disabled={selectedStaffIds.length === 0 || !message.trim()}
+                >
+                  Send Message
+                </button>
+                <button 
+                  className="action-btn delete" 
+                  onClick={() => {
+                    setSelectedStaffIds([]);
+                    setMessage('');
+                  }}
+                >
+                  Clear All
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Client Modal */}
+      {showClientModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Add New Client</h3>
+              <button className="modal-close" onClick={() => setShowClientModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <input name="name" placeholder="Client Name" value={newClient.name} onChange={handleClientInputChange} />
+              <input name="contact" placeholder="Contact Number" value={newClient.contact} onChange={handleClientInputChange} />
+              <input name="address" placeholder="Address" value={newClient.address} onChange={handleClientInputChange} />
+            </div>
+            <div className="modal-footer">
+              <button className="action-btn add" onClick={() => {
+                handleAddClient();
+                setShowClientModal(false);
+              }}>Add Client</button>
+              <button className="action-btn delete" onClick={() => setShowClientModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shop Modal */}
+      {showShopModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Add New Shop</h3>
+              <button className="modal-close" onClick={() => setShowShopModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <input name="name" placeholder="Shop Name" value={newShop.name} onChange={handleShopInputChange} />
+              <input name="address" placeholder="Address" value={newShop.address} onChange={handleShopInputChange} />
+              <input name="gstNumber" placeholder="GST Number" value={newShop.gstNumber} onChange={handleShopInputChange} />
+            </div>
+            <div className="modal-footer">
+              <button className="action-btn add" onClick={() => {
+                handleAddShop();
+                setShowShopModal(false);
+              }}>Add Shop</button>
+              <button className="action-btn delete" onClick={() => setShowShopModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

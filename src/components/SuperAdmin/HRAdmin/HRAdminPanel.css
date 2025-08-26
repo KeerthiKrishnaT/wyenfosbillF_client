@@ -160,7 +160,7 @@ color: #000;
   left: 15px;
   z-index: 1100;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .hr-sidebar-menu button {
@@ -390,7 +390,7 @@ color: #000;
   }
   
   .sidebar-toggle {
-    width: 15px;
+    width: 12px;
   }
   
   .crud-form input,

@@ -1,0 +1,5 @@
+# Redirect all traffic to the specific path
+/*    /wyenfos_bills/#/wyenfos/4551    302
+
+# Handle client-side routing
+/wyenfos_bills/*    /wyenfos_bills/index.html   200

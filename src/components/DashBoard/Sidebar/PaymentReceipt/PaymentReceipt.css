@@ -20,7 +20,7 @@
 
 .receipt-container {
   flex: 3;
-  background: white;
+  background: #997a8d;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -41,6 +41,12 @@
 .header-right h1 {
   color: var(--primary-color);
   margin-bottom: 10px;
+}
+
+.receipt-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .header-right input[type="text"],
@@ -84,12 +90,34 @@
   background-color: var(--input-focus-bg);
 }
 
+.detail-item.full-width {
+  flex: 1 1 100%;
+}
+
+.detail-item select {
+  cursor: pointer;
+}
+
+.detail-item select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(179, 158, 181, 0.2);
+}
+
 /* Table Section */
+.payment-table {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
 .payment-table table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
   font-size: 14px;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .payment-table th,
@@ -102,6 +130,182 @@
 .payment-table th {
   background-color: var(--primary-color);
   color: white;
+  font-weight: bold;
+}
+
+.payment-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Payment Status Row Styling */
+.fully-paid-row {
+  background-color: #e8f5e8;
+}
+
+.partially-paid-row {
+  background-color: #fff3cd;
+}
+
+.fully-paid-row:hover {
+  background-color: #d4edda;
+}
+
+.partially-paid-row:hover {
+  background-color: #ffeaa7;
+}
+
+/* Selected Debit Note Styling */
+.selected-debit-note {
+  background-color: #e3f2fd !important;
+  border: 2px solid #2196f3 !important;
+}
+
+.selected-debit-note:hover {
+  background-color: #bbdefb !important;
+}
+
+.selected-indicator {
+  color: #2196f3;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+/* Selected Debit Note Summary Styling */
+.selected-debit-note-summary {
+  background-color: #e3f2fd;
+  border: 2px solid #2196f3;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.selected-debit-note-summary h4 {
+  color: #1976d2;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.debit-note-info p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.debit-note-info strong {
+  color: #1976d2;
+  min-width: 120px;
+  display: inline-block;
+}
+
+.credit-bill-info {
+  background-color: #f3e5f5;
+  border: 2px solid #9c27b0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.credit-bill-info h4 {
+  color: #7b1fa2;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.payment-status-badge {
+  background-color: #4caf50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Debit Note Summary Styling */
+.debit-note-summary {
+  background-color: #fff3e0;
+  border: 2px solid #ff9800;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.debit-note-summary p {
+  margin: 8px 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #e65100;
+}
+
+.debit-note-summary span {
+  color: #d84315;
+  font-weight: bold;
+}
+
+.amount-input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.amount-input-group label {
+  font-weight: bold;
+  min-width: 180px;
+  color: #e65100;
+  font-size: 16px;
+}
+
+.amount-input-group input {
+  flex: 1;
+  max-width: 200px;
+  padding: 8px;
+  border: 1px solid #ff9800;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #fff;
+}
+
+.amount-input-group input:focus {
+  outline: none;
+  border-color: #f57c00;
+  box-shadow: 0 0 5px rgba(255, 152, 0, 0.3);
+}
+
+.amount-input-group span {
+  color: #e65100;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Payment Status Badges */
+.payment-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.payment-status.fully-paid {
+  background-color: #28a745;
+  color: white;
+}
+
+.payment-status.partially-paid {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+/* Amount Styling */
+.fully-paid {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.remaining-balance {
+  color: #dc3545;
+  font-weight: bold;
 }
 
 /* Summary */
@@ -120,6 +324,59 @@
 .amount-to-pay span {
   color: #b30000;
   font-weight: bold;
+}
+
+/* Payment Status Summary */
+.payment-status-summary {
+  margin: 15px 0;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.payment-status-summary p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.fully-paid-count {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.partially-paid-count {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+/* Verification and Outstanding Notes */
+.verification-note {
+  margin: 15px 0;
+  padding: 12px;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 5px;
+  color: #155724;
+}
+
+.verification-note p {
+  margin: 5px 0;
+  font-weight: 500;
+}
+
+.outstanding-note {
+  margin: 15px 0;
+  padding: 12px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  color: #721c24;
+}
+
+.outstanding-note p {
+  margin: 5px 0;
+  font-weight: 500;
 }
 
 /* Remarks and Signature */
@@ -145,6 +402,37 @@
 .signature {
   text-align: right;
   font-weight: bold;
+  min-width: 200px;
+}
+
+.stamp-text {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Thank You Section */
+.thank-you-section {
+  text-align: center;
+  margin: 2rem 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 10px;
+  border: 2px solid var(--primary-color);
+}
+
+.thank-you-section h3 {
+  color: var(--primary-color);
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.thank-you-section p {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+  font-style: italic;
 }
 
 /* Buttons */
@@ -170,6 +458,23 @@
   background-color: var(--button-hover-bg);
 }
 
+.action-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.action-btn.email-btn:disabled {
+  background-color: #ff9800;
+  color: white;
+  cursor: wait;
+  opacity: 0.8;
+}
+
+.action-btn.email-btn:disabled:hover {
+  background-color: #ff9800;
+}
+
 /* Error Banner */
 .error-banner {
   background-color: var(--error-bg);
@@ -181,6 +486,32 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* Success Banner */
+.success-banner {
+  background-color: #e8f5e8;
+  border: 1px solid #4caf50;
+  color: #2e7d32;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.success-banner button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: 15px;
+  flex-shrink: 0;
 }
 
 /* Modal */
@@ -298,6 +629,43 @@
     width: 100%;
   }
 
+  /* Ensure company header is properly displayed in print */
+  .company-header-container,
+  .company-header-modern,
+  .header-content-wrapper,
+  .logo-company-info-row,
+  .company-information,
+  .modern-logo {
+    visibility: visible !important;
+    display: block !important;
+  }
+
+  .header-content-wrapper {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    flex-direction: row !important;
+  }
+
+  .logo-company-info-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .modern-logo {
+    width: 60px !important;
+    height: 60px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .company-information {
+    flex: 1 !important;
+    min-width: 0 !important;
+    margin-left: 5px !important;
+  }
+
   .receipt-actions,
   .download-link,
   .back-btn,
@@ -308,7 +676,252 @@
     display: none !important;
   }
 
+  /* Ensure signature section is visible in print */
+  .signature {
+    display: block !important;
+    visibility: visible !important;
+    text-align: right !important;
+    margin-top: 20px !important;
+    page-break-inside: avoid !important;
+  }
+
+  .signature strong {
+    display: block !important;
+    margin-bottom: 5px !important;
+    color: #000 !important;
+  }
+
+  .stamp-text {
+    display: block !important;
+    color: #000 !important;
+    font-size: 12px !important;
+  }
+
   .side-view {
     display: none;
   }
+
+  .thank-you-section {
+    background: none !important;
+    border: 1px solid #000 !important;
+  }
+
+  /* Hide messages and selectors in print */
+  .email-receipt-banner,
+  .full-payment-message,
+  .customer-selector,
+  .debit-note-selector {
+    display: none !important;
+  }
+
+  /* 2-column layout for customer details in print only */
+  .customer-details {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 20px !important;
+    margin-bottom: 30px !important;
+  }
+
+  /* Arrange customer input fields in 2 columns for print */
+  .customer-details .detail-item:not(.full-width):not(.customer-selector):not(.email-receipt-banner):not(.debit-note-selector) {
+    flex: 1 1 calc(50% - 10px) !important;
+    min-width: 200px !important;
+    margin-bottom: 15px !important;
+  }
+
+  /* Full width for special items */
+  .customer-details .detail-item.full-width,
+  .customer-details .detail-item.customer-selector,
+  .customer-details .detail-item.email-receipt-banner,
+  .customer-details .detail-item.debit-note-selector {
+    flex: 1 1 100% !important;
+    margin-bottom: 15px !important;
+  }
+
+  /* Better spacing for customer information fields */
+  .detail-item {
+    margin-bottom: 15px !important;
+  }
+
+  .detail-item label {
+    display: block !important;
+    margin-bottom: 8px !important;
+    font-weight: bold !important;
+    color: #333 !important;
+    font-size: 14px !important;
+  }
+
+  .detail-item input {
+    width: 100% !important;
+    padding: 12px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    background-color: #fff !important;
+  }
+
+  /* Ensure signature is visible and properly positioned in print */
+  .signature {
+    display: block !important;
+    text-align: right !important;
+    margin-top: 40px !important;
+    margin-bottom: 20px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .signature strong {
+    display: block !important;
+    margin-bottom: 5px !important;
+    font-size: 14px !important;
+    color: #000 !important;
+  }
+
+  .signature .stamp-text {
+    display: block !important;
+    margin-top: 10px !important;
+    font-size: 12px !important;
+    color: #666 !important;
+    font-style: italic !important;
+  }
+
+  /* Payment Receipt Header in Print */
+  .receipt-header {
+    text-align: center !important;
+    margin-bottom: 30px !important;
+    padding: 20px 0 !important;
+    border-bottom: 2px solid #000 !important;
+  }
+
+  .receipt-header h1 {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    color: #000 !important;
+    margin: 0 0 15px 0 !important;
+    text-transform: uppercase !important;
+  }
+
+  .receipt-header .receipt-info {
+    font-size: 14px !important;
+    color: #000 !important;
+    margin: 8px 0 !important;
+  }
+
+  /* Payment Receipt Title in Print */
+  .payment-receipt-title {
+    text-align: center !important;
+    margin: 20px 0 !important;
+  }
+
+  .payment-receipt-title h1 {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    color: #000 !important;
+    margin: 0 0 15px 0 !important;
+    text-transform: uppercase !important;
+  }
+
+  .payment-receipt-title .receipt-info {
+    font-size: 14px !important;
+    color: #000 !important;
+    margin: 8px 0 !important;
+  }
+
+  /* Print-specific date and signature styling */
+  @media print {
+    .header-left {
+      display: block !important;
+      text-align: center !important;
+      margin: 15px 0 !important;
+      padding: 10px !important;
+      background-color: #f9f9f9 !important;
+      border: 1px solid #ddd !important;
+      border-radius: 4px !important;
+    }
+    
+    .header-left strong {
+      font-size: 16px !important;
+      color: #000 !important;
+    }
+  }
+}
+
+/* Better spacing for customer information fields on screen */
+.detail-item {
+  margin-bottom: 15px;
+}
+
+.detail-item label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.detail-item input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.detail-item input:focus {
+  outline: none;
+  border-color: #997a8d;
+  box-shadow: 0 0 5px rgba(153, 122, 141, 0.3);
+}
+
+.detail-item input[readonly] {
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* Payment Receipt Header Styling */
+.receipt-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px 0;
+  border-bottom: 2px solid #997a8d;
+}
+
+.receipt-header h1 {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+}
+
+.receipt-header .receipt-info {
+  font-size: 16px;
+  color: #666;
+  margin: 5px 0;
+}
+
+/* Signature section styling */
+.signature {
+  text-align: right;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  padding: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.signature strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+.signature .stamp-text {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
 }

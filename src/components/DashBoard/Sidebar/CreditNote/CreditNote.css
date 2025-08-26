@@ -13,14 +13,14 @@
 
 body {
   margin: 0;
-  font-family: 'Ethnocentric', sans-serif;
+  font-family: "Ethnocentric", sans-serif !important;
   color: var(--text-color);
 }
 
 .creditnote-page-wrapper {
   position: relative;
   padding: 20px;
-  background-color: #aa98a9;
+  background-color: #b39eb5;
   width: 100%;
   box-sizing: border-box;
 }
@@ -31,7 +31,8 @@ body {
   margin: 0 auto;
   padding: 20px;
   border-radius: 8px;
-  background-color: #c4acc6;
+  background:#c1b8c1;
+
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   box-sizing: border-box;
@@ -90,17 +91,17 @@ body {
 }
 
 .notecancelled-watermark {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(-45deg);
+  transform: translate(-50%, -50%);
   opacity: 0.4;
   z-index: 10;
 }
 
 .notecancelled-watermark img {
-  width: 300px;
-  height: 300px;
+  width: 400px;
+  height: 400px;
 }
 
 .form-grid {
@@ -150,21 +151,21 @@ body {
   margin-top: 4px;
 }
 
-.checkbox-group {
+.checkbox {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 0;
 }
 
-.checkbox-label {
+.checkbox-labell {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
 }
 
-.checkbox-label input {
+.checkbox-labell input {
   margin: 0;
   cursor: pointer;
 }
@@ -280,7 +281,7 @@ body {
 }
 
 .item-table input {
-  width: 100%;
+  width: 90%;
   padding: 6px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
@@ -309,6 +310,46 @@ body {
   justify-content: space-between;
   padding: 4px 0;
   font-size: 14px;
+}
+
+.returned-amount-input {
+  width: 120px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  text-align: right;
+  background-color: #fff;
+  color: #333;
+  cursor: text;
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  position: relative;
+  z-index: 1000;
+  display: inline-block;
+  opacity: 1;
+  visibility: visible;
+}
+
+.returned-amount-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(179, 158, 181, 0.2);
+  background-color: #fff;
+}
+
+.returned-amount-input:disabled {
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.returned-amount-input:hover:not(:disabled) {
+  border-color: var(--primary-color);
 }
 
 .total-amount {
@@ -346,6 +387,259 @@ body {
 
 .bank-details {
   flex: 2;
+}
+
+.bank-details {
+  background: #f8f9fa !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+  border: 1px solid #e9ecef !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  margin-bottom: 20px !important;
+}
+
+.bank-details h4 {
+  margin: 0 0 20px 0 !important;
+  color: #050505 !important;
+
+  border-bottom: 3px solid #b39eb5 !important;
+  padding-bottom: 8px !important;
+  text-transform: uppercase !important;
+  text-align: left !important;
+}
+
+.bank-content p {
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  white-space: nowrap !important;
+}
+
+/* Bank Details Row Layout */
+.bank-details > div:not(:first-child) {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 20px !important;
+  margin-top: 15px !important;
+  width: 100% !important;
+}
+
+.bank-content {
+  flex: 1 !important;
+  padding-left: 5px !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  align-items: flex-start !important;
+}
+
+.bank-content p {
+  margin: 4px 0 !important;
+  line-height: 1.6 !important;
+  font-size: 14px !important;
+  color: #495057 !important;
+  text-align: left !important;
+}
+
+/* Terms Section Styles */
+.terms-section {
+  margin-bottom: 20px !important;
+}
+
+.terms-section h4 {
+  font-family: "Ethnocentric", sans-serif !important;
+  margin-bottom: 10px !important;
+  color: black !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+}
+
+.terms-content {
+  background: white !important;
+  padding: 15px !important;
+  border-radius: 8px !important;
+  border: 1px solid #ddd !important;
+}
+
+.terms-content p {
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: #333 !important;
+}
+
+/* QR Code Section Styles */
+.qr-code-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 15px !important;
+  background: white !important;
+  border-radius: 8px !important;
+  border: 1px solid #b39eb5 !important;
+  min-width: 140px !important;
+  max-width: 160px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+  align-self: flex-start !important;
+}
+
+.qr-code-container {
+  position: relative !important;
+  margin-bottom: 8px !important;
+}
+
+.qr-code-image {
+  width: 120px !important;
+  height: 120px !important;
+  object-fit: contain !important;
+  border-radius: 4px !important;
+}
+
+.qr-code-placeholder {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 120px !important;
+  height: 120px !important;
+}
+
+.qr-placeholder-box {
+  width: 100px !important;
+  height: 100px !important;
+  border: 2px dashed #ccc !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+}
+
+.qr-code-label {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #495057 !important;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+/* Customer Search Section */
+.customer-search-section {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.customer-search-input {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: border 0.3s ease;
+  background-color: #fff;
+}
+
+.customer-search-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+.search-button {
+  background-color: var(--button-bg);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  min-width: 50px;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: var(--button-hover-bg);
+}
+
+.search-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Search Results Styles */
+.search-results {
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-result-item {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+  background-color: #f5f5f5;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.btn-create-customer {
+  margin-top: 10px;
+  background: var(--button-bg);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.btn-create-customer:hover {
+  background: var(--button-hover-bg);
+}
+
+.btn-create-customer:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.loading-message {
+  margin-top: 10px;
+  color: #666;
+  font-style: italic;
+  text-align: center;
 }
 
 .creditnote-delete-btn {
@@ -402,27 +696,51 @@ body {
 }
 
 .action-btn {
-  background: var(--button-bg);
+  background-color: #007bff;
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 5px 10px;
+  margin: 0 2px;
   border-radius: 4px;
   cursor: pointer;
-  margin-right: 5px;
-  font-size: 14px;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
 }
 
 .action-btn:hover {
-  background: var(--button-hover-bg);
+  background-color: #0056b3;
 }
 
 .action-btn.delete {
-  background: var(--error-bg);
-  color: var(--text-color);
+  background-color: #dc3545;
 }
 
 .action-btn.delete:hover {
-  background: #ffd1d1;
+  background-color: #c82333;
+}
+
+.action-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Request button styles */
+.action-btn.request-edit {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.action-btn.request-edit:hover {
+  background-color: #e0a800;
+}
+
+.action-btn.request-delete {
+  background-color: #fd2f14;
+  color: white;
+}
+
+.action-btn.request-delete:hover {
+  background-color: #a8290a;
 }
 
 @media print {
@@ -576,11 +894,536 @@ body {
   }
 
   .signature {
-    text-align: left;
+    text-align: right;
     width: 100%;
   }
 
   .bank-details {
     width: 100%;
   }
+}
+
+/* Credit Bill Specific Input Group Styles */
+.credit-bill-input-group {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.credit-bill-input-group label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #333;
+  font-size: 14px;
+}
+
+.credit-bill-input-group input,
+.credit-bill-input-group select {
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: border 0.3s ease;
+  background-color: #fff;
+}
+
+.credit-bill-input-group input:focus,
+.credit-bill-input-group select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+.credit-bill-input-group input:disabled,
+.credit-bill-input-group select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.credit-bill-input {
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: border 0.3s ease;
+  background-color: #fff;
+}
+
+.credit-bill-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+.credit-bill-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Section Title */
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Customer Details */
+.customer-details {
+  margin-bottom: 20px;
+}
+
+.customer-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+/* Bill Search Section */
+.bill-search-section {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bill-search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bill-search-info {
+  background-color: #e3f2fd;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid #2196f3;
+}
+
+.bill-search-info p {
+  margin: 0;
+  color: #1565c0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.search-button {
+  background-color: var(--button-bg);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: var(--button-hover-bg);
+}
+
+.search-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Tax Options */
+.tax-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  background-color: #f5f0f5;
+  width: 50%;
+  padding: 1rem;
+}
+
+.tax-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Footer Structure like CreditBill */
+.futerr {
+  text-align: left;
+  align-content: left;
+}
+
+.futerr h4, .futerr p {
+  color: black;
+  text-align: left;
+  align-content: left;
+}
+
+.futer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.left-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.terms-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.terms-section h4 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-bottom: 3px solid #b39eb5;
+  padding-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.terms-content {
+  margin-top: 15px;
+  padding-left: 5px;
+}
+
+.terms-content p {
+  margin: 0;
+  line-height: 2.0;
+  font-size: 14px;
+  color: #495057;
+  text-align: justify;
+}
+
+.bank-details-section {
+  background: #f8f9fa !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+  border: 1px solid #e9ecef !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  margin-bottom: 20px !important;
+}
+
+.bank-details-section h4 {
+  margin: 0 0 20px 0 !important;
+  color: #2c3e50 !important;
+  font-size: 1.2rem !important;
+  font-weight: bold !important;
+  border-bottom: 3px solid #b39eb5 !important;
+  padding-bottom: 8px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  text-align: left !important;
+}
+
+.bank-container {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 20px !important;
+  margin-top: 15px !important;
+  width: 100% !important;
+}
+
+.bank-contentcashbill {
+  flex: 1 !important;
+  padding-left: 5px !important;
+  min-width: 0 !important;
+}
+
+.bank-contentcashbill p {
+  margin: 8px 0 !important;
+  line-height: 1.6 !important;
+  font-size: 14px !important;
+  color: #495057 !important;
+  text-align: left !important;
+}
+
+.signaturee {
+  text-align: end;
+  margin-top: 20px;
+}
+
+/* QR Code Styles like CashBill */
+.futerr .qr-code-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 15px !important;
+  background: white !important;
+  border-radius: 8px !important;
+  border: 1px solid #b39eb5 !important;
+  min-width: 140px !important;
+  max-width: 160px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  flex-shrink: 0 !important;
+}
+
+.futerr .qr-code {
+  margin-bottom: 8px !important;
+}
+
+.futerr .qr-code-label {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #495057 !important;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+.futerr .qr-code-placeholder {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 120px !important;
+  height: 120px !important;
+}
+
+.futerr .qr-placeholder-box {
+  width: 100px !important;
+  height: 100px !important;
+  border: 2px dashed #ccc !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+}
+
+/* Message styles */
+.message {
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Print styles - Hide buttons and action elements */
+@media print {
+  .no-print,
+  button,
+  .search-button,
+  .add-item-btn,
+  .remove-item-btn,
+  .action-buttons,
+  .permission-status,
+  .customer-search,
+  .search-results,
+  .btn-create-customer,
+  .bill-search-section,
+  .tax-options,
+  .manual-items-actions {
+    display: none !important;
+  }
+  
+  .creditnote-content-container {
+    background-color: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .creditnote-page-wrapper {
+    background-color: white !important;
+    padding: 0 !important;
+  }
+  
+  .watermark {
+    opacity: 0.1 !important;
+  }
+  
+  .notecancelled-watermark {
+    opacity: 0.3 !important;
+  }
+  
+  /* Ensure all content is visible */
+  .items-section,
+  .customer-details,
+  .totals-section,
+  .bank-details-section {
+    display: block !important;
+    page-break-inside: avoid;
+  }
+  
+  /* Remove shadows and borders for cleaner print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Ensure form elements show their values without borders */
+  input, select, textarea {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    border: none !important;
+    background: transparent !important;
+    color: black !important;
+    font-size: inherit !important;
+  }
+
+  /* Ensure company logo is visible */
+  .modern-logo {
+    display: block !important;
+    visibility: visible !important;
+    max-width: 50px !important;
+    max-height: 50px !important;
+  }
+
+  /* Ensure QR code is visible */
+  .qr-code img {
+    display: block !important;
+    visibility: visible !important;
+    max-width: 80px !important;
+    max-height: 80px !important;
+  }
+
+  /* Ensure signature area is visible */
+  .signaturee {
+    display: block !important;
+    visibility: visible !important;
+    min-height: 60px !important;
+    border-top: 1px solid #333 !important;
+    margin-top: 20px !important;
+    padding-top: 10px !important;
+  }
+
+  /* Match PDF positioning for note number and date */
+  .creditnote-info {
+    margin-right: 20px !important;
+  }
+
+  /* Match PDF column widths for product table */
+  .creditnote-items-section {
+    grid-template-columns: 15px 25px 40px 25px 15px 20px 25px 20px !important;
+    gap: 3px !important;
+    padding: 3px !important;
+    font-size: 8px !important;
+  }
+
+  .creditnote-item-row {
+    grid-template-columns: 15px 25px 40px 25px 15px 20px 25px 20px !important;
+    gap: 3px !important;
+    font-size: 8px !important;
+    padding: 2px 0 !important;
+  }
+
+  .creditnote-item-row input {
+    font-size: 8px !important;
+  }
+
+  /* Match PDF positioning for totals */
+  .creditnote-totals-section {
+    margin-right: 40px !important;
+  }
+}
+
+/* Permission Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.modal-content p {
+  margin: 0 0 20px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.modal-buttons button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.modal-buttons button:first-child {
+  background-color: #28a745;
+  color: white;
+}
+
+.modal-buttons button:first-child:hover {
+  background-color: #218838;
+}
+
+.modal-buttons button:last-child {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modal-buttons button:last-child:hover {
+  background-color: #c82333;
 }

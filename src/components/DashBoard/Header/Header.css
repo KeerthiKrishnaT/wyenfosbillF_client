@@ -5,9 +5,11 @@
 } 
 .dashboard-header {
   padding: 1.5rem 2rem;
-  background-color: transparent;
+  background: linear-gradient(to right, #b39eb9,silver); 
   position: relative;
   z-index: 10;
+  width: 100%;
+  flex-shrink: 0;
 }
 
 .header-content {

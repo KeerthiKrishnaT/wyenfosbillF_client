@@ -1,5 +1,5 @@
 .revenue-card {
-  background: white;
+  background: linear-gradient(to right, #b39eb9,silver); 
   border-radius: 10px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -7,8 +7,7 @@
   min-height: 300px;
   display: flex;
   flex-direction: column;
-  width: 90%; /* Reduced from auto to a percentage */
-  max-width: 500px; /* Explicitly reduced width */
+  max-width: 100%; /* Allow full width */
 }
 
 /* Header Styles */
@@ -26,6 +25,9 @@
   display: flex;
   width: 100%;
   height: 90%;
+  overflow: visible;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Animation for Widget */
@@ -50,17 +52,20 @@
 }
 
 /* Responsive Design */
-@media (max-width: 600px) {
+@media (max-width: 1200px) {
   .revenue-card {
     padding: 1.2rem;
+    width: 100%;
+    max-width: 100%;
   }
 
   .revenue-card h2 {
     font-size: 1.1rem;
   }
 
-  .chart-container {
+  .chartt-container {
     height: 320px;
+    overflow: visible;
   }
 
   .recharts-legend-item-text {
@@ -69,5 +74,33 @@
 
   .recharts-text {
     font-size: 12px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .revenue-card {
+    padding: 1rem;
+  }
+
+  .revenue-card h2 {
+    font-size: 1rem;
+  }
+
+  .chartt-container {
+    height: 280px;
+  }
+}
+
+@media (max-width: 600px) {
+  .revenue-card {
+    padding: 0.8rem;
+  }
+
+  .revenue-card h2 {
+    font-size: 0.9rem;
+  }
+
+  .chartt-container {
+    height: 250px;
   }
 }

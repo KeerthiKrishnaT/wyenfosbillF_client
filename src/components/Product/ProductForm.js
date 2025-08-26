@@ -26,7 +26,7 @@ const ProductForm = ({ onSubmitSuccess, onCancel }) => {
       return updated;
     });
   };
-console.log('Submitting payload:', JSON.stringify({ products: productRows }, null, 2));
+
   const handleAddRow = () => {
     setProductRows(rows => [
       ...rows,
@@ -56,7 +56,15 @@ console.log('Submitting payload:', JSON.stringify({ products: productRows }, nul
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      console.log('Submitting with token:', token); // Debug
+      
+
+      
+      if (!token) {
+        alert('No authentication token found. Please log in.');
+        setLoading(false);
+        return;
+      }
+      
       const res = await axios.post('http://localhost:5000/api/bulk',
         { products: productRows },
         {
@@ -68,6 +76,7 @@ console.log('Submitting payload:', JSON.stringify({ products: productRows }, nul
       );
       setLoading(false);
       
+
       alert('Products added successfully!');
       if (typeof onSubmitSuccess === 'function') {
         onSubmitSuccess(res.data.products);
@@ -78,15 +87,16 @@ console.log('Submitting payload:', JSON.stringify({ products: productRows }, nul
     } catch (err) {
       setLoading(false);
       console.error('Error adding products:', err);
-      console.log('Error details:', {
-        status: err.response?.status,
-        data: err.response?.data,
-        message: err.message,
-        headers: err.response?.headers,
-        config: err.config,
-      });
-      const msg = err.response?.data?.error || err.message;
-      alert(`Error: ${msg} (Status: ${err.response?.status || 'Unknown'})`);
+
+      
+      if (err.response?.status === 401) {
+        alert('Authentication failed. Please log in again.');
+      } else if (err.response?.status === 403) {
+        alert('Access denied. You do not have permission to add products.');
+      } else {
+        const msg = err.response?.data?.error || err.message;
+        alert(`Error: ${msg} (Status: ${err.response?.status || 'Unknown'})`);
+      }
     }
   };
 
@@ -112,7 +122,7 @@ console.log('Submitting payload:', JSON.stringify({ products: productRows }, nul
                 <td><TextField name="itemName" value={row.itemName} onChange={e => handleChange(idx, e)} size="small" required /></td>
                 <td><TextField name="hsn" value={row.hsn} onChange={e => handleChange(idx, e)} size="small" required /></td>
                 <td><TextField name="gst" type="number" inputProps={{ min: 0 }} value={row.gst} onChange={e => handleChange(idx, e)} size="small" required /></td>
-                <td><TextField name="unitPrice" type="number" inputProps={{ min: 0.01 }} value={row.unitPrice} onChange={e => handleChange(idx, e)} size="small" required /></td>
+                <td><TextField name="unitPrice" type="number" inputProps={{ min: 0 }} value={row.unitPrice} onChange={e => handleChange(idx, e)} size="small" required /></td>
                 <td><TextField name="quantity" type="number" inputProps={{ min: 0 }} value={row.quantity} onChange={e => handleChange(idx, e)} size="small" required /></td>
                 <td>
                   <FormControl fullWidth size="small">

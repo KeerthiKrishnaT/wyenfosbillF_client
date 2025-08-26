@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaEdit, FaTrash, FaSave, FaTimes, FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
+
 import './AppointmentsPage.css';
 
 const StaffAppointments = () => {
+  const { currentUser } = useAuth();
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -21,30 +24,41 @@ const StaffAppointments = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const API_URL = 'http://localhost:5000/api';
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const [appointmentsRes, companiesRes] = await Promise.all([
-          axios.get('/api/appointments', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('/api/companies', { headers: { Authorization: `Bearer ${token}` } })
-        ]);
-        
-        console.log('Fetched appointments:', appointmentsRes.data);
-        setAppointments(appointmentsRes.data || []);
-        setCompanies(companiesRes.data || []);
-      } catch (err) {
-        setError('Failed to load data');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (currentUser) {
+      fetchData();
+    }
+  }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    fetchData();
-  }, [token]);
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const idToken = await currentUser.getIdToken(true);
+      const headers = { Authorization: `Bearer ${idToken}` };
+
+      // Fetch companies and appointments from API
+      const [companiesRes, appointmentsRes] = await Promise.all([
+        axios.get(`${API_URL}/companies`, { headers }),
+        axios.get(`${API_URL}/appointments`, { headers })
+      ]);
+      
+      // Extract company names from API data
+      const companyNames = companiesRes.data.map(company => ({
+        _id: company._id || company.id,
+        name: company.name || company.companyName || 'Unknown Company'
+      }));
+      
+      setCompanies(companyNames);
+      setAppointments(Array.isArray(appointmentsRes.data) ? appointmentsRes.data : []);
+    } catch (err) {
+      setError('Failed to load data');
+      console.error('Error fetching data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,13 +78,11 @@ const StaffAppointments = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      console.log('Submitting form:', form);
-      const res = await axios.post('/api/appointments', form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const idToken = await currentUser.getIdToken(true);
+      const headers = { Authorization: `Bearer ${idToken}` };
       
-      console.log('Response data:', res.data);
+      const res = await axios.post(`${API_URL}/appointments`, form, { headers });
+      
       setAppointments(prev => [...prev, res.data]);
       setForm({
         name: '',
@@ -124,13 +136,13 @@ const StaffAppointments = () => {
     }
 
     try {
-      console.log('Sending update payload:', editForm);
-      const res = await axios.put(`/api/appointments/${editingId}`, {
+      const idToken = await currentUser.getIdToken(true);
+      const headers = { Authorization: `Bearer ${idToken}` };
+      
+      const res = await axios.put(`${API_URL}/appointments/${editingId}`, {
         ...editForm,
         company: editForm.company || null
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      }, { headers });
       
       setAppointments(prev => 
         prev.map(app => app._id === editingId ? res.data : app)
@@ -153,9 +165,10 @@ const StaffAppointments = () => {
     if (!window.confirm('Are you sure you want to delete this appointment?')) return;
     
     try {
-      await axios.delete(`/api/appointments/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const idToken = await currentUser.getIdToken(true);
+      const headers = { Authorization: `Bearer ${idToken}` };
+      
+      await axios.delete(`${API_URL}/appointments/${id}`, { headers });
       
       setAppointments(prev => prev.filter(app => app._id !== id));
     } catch (err) {
@@ -167,6 +180,10 @@ const StaffAppointments = () => {
   const handleBack = () => {
     navigate(-1);
   };
+
+  if (!currentUser) {
+    return <div className="appointments-page">Loading...</div>;
+  }
 
   if (isLoading) return <div className="loading-indicator">Loading appointments...</div>;
 
@@ -243,8 +260,8 @@ const StaffAppointments = () => {
             required
           >
             <option value="">Select Company*</option>
-            {companies.map(company => (
-              <option key={company._id} value={company._id}>
+            {Array.isArray(companies) && companies.map(company => (
+              <option key={company._id || company.id || `company-${company.name}`} value={company._id || company.id}>
                 {company.name}
               </option>
             ))}
@@ -289,7 +306,7 @@ const StaffAppointments = () => {
                 <td colSpan="8" className="no-data">No appointments found</td>
               </tr>
             ) : (
-              appointments.map(app => (
+              Array.isArray(appointments) && appointments.map(app => (
                 <tr key={app._id}>
                   {editingId === app._id ? (
                     <>
@@ -344,8 +361,8 @@ const StaffAppointments = () => {
                           required
                         >
                           <option value="">Select Company*</option>
-                          {companies.map(company => (
-                            <option key={company._id} value={company._id}>
+                          {Array.isArray(companies) && companies.map(company => (
+                            <option key={company._id || company.id || `company-${company.name}`} value={company._id || company.id}>
                               {company.name}
                             </option>
                           ))}

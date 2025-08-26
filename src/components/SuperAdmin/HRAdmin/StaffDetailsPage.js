@@ -41,14 +41,19 @@ const fetchData = async () => {
       axios.get(`${API_URL}/companies`, { headers }),
       axios.get(`${API_URL}/staff`, { headers }),
     ]);
-    const staffWithCompanies = staffRes.data.map(staffMember => {
-      const company = companiesRes.data.find(c => c._id === staffMember.company?._id || c._id === staffMember.company);
+    
+    // Ensure companies is always an array
+    const companiesData = Array.isArray(companiesRes.data) ? companiesRes.data : [];
+    const staffData = Array.isArray(staffRes.data) ? staffRes.data : [];
+    
+    const staffWithCompanies = staffData.map(staffMember => {
+      const company = companiesData.find(c => c._id === staffMember.company?._id || c._id === staffMember.company);
       return {
         ...staffMember,
         company: company ? { _id: company._id, name: company.name } : null
       };
     });
-    setCompanies(companiesRes.data);
+    setCompanies(companiesData);
     setStaff(staffWithCompanies);
     setError('');
   } catch (err) {
@@ -309,7 +314,7 @@ fetchData();
             required
           >
             <option value="">Select Company</option>
-            {companies.map(company => (
+            {Array.isArray(companies) && companies.map(company => (
               <option key={company._id} value={company._id}>
                 {company.name}
               </option>

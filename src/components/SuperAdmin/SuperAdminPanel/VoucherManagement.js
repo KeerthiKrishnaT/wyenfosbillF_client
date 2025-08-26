@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './VoucherManagement.css'
 
 const VoucherManagement = () => {
+  const navigate = useNavigate();
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,34 +20,67 @@ const VoucherManagement = () => {
   });
 
   // Fetch all vouchers
-  const fetchVouchers = async () => {
+  const fetchVouchers = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('No authentication token found');
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
       const [pettyResponse, cashResponse] = await Promise.all([
-        axios.get('http://localhost:5000/petty-vouchers', {
+        axios.get('http://localhost:5000/api/digital-marketing/petty-vouchers', {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get('http://localhost:5000/petty-cash-vouchers', {
+        axios.get('http://localhost:5000/api/digital-marketing/petty-cash-vouchers', {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
 
+      const pettyVouchers = pettyResponse.data || [];
+      const cashVouchers = cashResponse.data || [];
+
+      // Combine and format vouchers
       const combinedVouchers = [
-        ...pettyResponse.data.map((v) => ({ ...v, type: 'Petty Voucher', _id: v._id })),
-        ...cashResponse.data.map((v) => ({ ...v, type: 'Petty Cash Voucher', _id: v._id })),
+        ...pettyVouchers.map(v => ({
+          ...v,
+          type: 'Petty Voucher',
+          voucherType: 'petty'
+        })),
+        ...cashVouchers.map(v => ({
+          ...v,
+          type: 'Cash Voucher',
+          voucherType: 'cash'
+        }))
       ];
 
+      // Sort by date (newest first)
+      combinedVouchers.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+
       setVouchers(combinedVouchers);
-      setLoading(false);
     } catch (err) {
-      setError('Failed to fetch vouchers: ' + (err.response?.data?.error || err.message));
+      console.error('VoucherManagement: Fetch vouchers error:', err);
+      console.error('VoucherManagement: Error response:', err.response?.data);
+      setError(err.response?.data?.message || 'Failed to fetch vouchers');
+    } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = (localStorage.getItem('role') || '').toLowerCase();
+    
+    if (!token || role !== 'superadmin') {
+      setError('Access denied. Super Admin privileges required.');
+      return;
+    }
+
     fetchVouchers();
-  }, []);
+  }, [fetchVouchers]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -58,7 +93,7 @@ const VoucherManagement = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const endpoint = formData.type === 'Petty Voucher' ? '/petty-vouchers' : '/petty-cash-vouchers';
+      const endpoint = formData.type === 'Petty Voucher' ? '/api/digital-marketing/petty-vouchers' : '/api/digital-marketing/petty-cash-vouchers';
       const payload = {
         date: formData.date,
         amount: parseFloat(formData.amount),
@@ -85,8 +120,8 @@ const VoucherManagement = () => {
       const token = localStorage.getItem('token');
       const endpoint =
         selectedVoucher.type === 'Petty Voucher'
-          ? `/petty-vouchers/${selectedVoucher._id}`
-          : `/petty-cash-vouchers/${selectedVoucher._id}`;
+          ? `/api/digital-marketing/petty-vouchers/${selectedVoucher._id}`
+          : `/api/digital-marketing/petty-cash-vouchers/${selectedVoucher._id}`;
       const payload = {
         voucherId: selectedVoucher.voucherId,
         date: formData.date,
@@ -115,7 +150,7 @@ const VoucherManagement = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/petty-cash-vouchers/${voucher._id}`, {
+      await axios.delete(`http://localhost:5000/api/digital-marketing/petty-cash-vouchers/${voucher._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchVouchers();
@@ -142,7 +177,15 @@ const VoucherManagement = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Voucher Management</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Voucher Management</h2>
+        <button
+          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
+      </div>
       <button
         className="mb-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         onClick={() => setIsCreateModalOpen(true)}
@@ -167,7 +210,7 @@ const VoucherManagement = () => {
           </thead>
           <tbody>
             {vouchers.map((voucher, index) => (
-              <tr key={voucher._id} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+              <tr key={voucher._id || voucher.id || `voucher-${index}`} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
                 <td className="py-2 px-4 border-b">{voucher.voucherId}</td>
                 <td className="py-2 px-4 border-b">{voucher.type}</td>
                 <td className="py-2 px-4 border-b">{new Date(voucher.date).toLocaleDateString()}</td>

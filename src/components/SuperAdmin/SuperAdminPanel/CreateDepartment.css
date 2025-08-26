@@ -35,6 +35,56 @@
         .bk-button:hover {
           background-color: #5a6268;
         }
+        
+        .refresh-button {
+          padding: 8px 15px;
+          background-color: #17a2b8;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: background-color 0.3s;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          margin-left: auto;
+        }
+        
+        .refresh-button:hover {
+          background-color: #138496;
+        }
+        
+        .refresh-button:disabled {
+          background-color: #6c757d;
+          cursor: not-allowed;
+        }
+        
+
+        
+        .remove-problematic-button {
+          padding: 8px 15px;
+          background-color: #fd7e14;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: background-color 0.3s;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          margin-left: 10px;
+        }
+        
+        .remove-problematic-button:hover {
+          background-color: #e8690b;
+        }
+        
+        .remove-problematic-button:disabled {
+          background-color: #6c757d;
+          cursor: not-allowed;
+        }
         .btn-primary{
           background-color: #2ecc71;
           color: white;       
@@ -85,8 +135,8 @@
           margin-bottom: 30px;
         }
         
-        input {
-          width: 100%;
+       .form-section input {
+          width:97%;
           padding: 10px;
           margin-bottom: 15px;
           border: 1px solid #ddd;

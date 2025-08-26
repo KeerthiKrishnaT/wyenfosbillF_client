@@ -70,7 +70,7 @@
   text-transform: uppercase;
   text-align:center ;
   background: linear-gradient(to right, #997a8d, silver);
-  width: 82%;
+  width: auto;
   border-radius: 12px;
 }
 
@@ -91,7 +91,6 @@
   border-radius: 8px;
 
 }
-/* SideBar.css (add or modify these styles) */
 .accounts-sidebar {
   block-size: 100%;
   display: flex;
@@ -156,6 +155,13 @@
 .logoutbtn:hover{
  background: #b12b38 
 }
+.calcculate-buttons:hover{
+  background-color:white;
+  }
+.calcculate-buttons:hover{
+background-color: #5a6268;
+}
+
 @media (max-width: 768px) {
   .accounts-sidebar-wrapper.open {
     inline-size: 250px;
@@ -164,7 +170,6 @@
     inline-size: 250px;
   }
 }
-.accounts-sidebar li:hover,
 .accounts-sidebar li.active {
   background-color:#b39eb5;
   color: white;
@@ -178,4 +183,155 @@
     inline-size: 250px;
     padding: 15px;
   }
+}
+
+.mini-calculator {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.calc-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.calcculate-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  color: #000;
+}
+
+.calcculate-buttons button {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+  color: #000;
+
+}
+
+.calcculate-buttons button:hover {
+  background: #e9ecef;
+}
+
+.calcculate-buttons .clear-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.calcculate-buttons .clear-btn:hover {
+  background: #c82333;
+}
+
+.calc-result {
+  margin-top: 10px;
+  padding: 8px;
+  background: #d4edda;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+  color: #155724;
+}
+
+/* Message Box Modal Styles */
+.message-box-modal {
+  max-width: 500px;
+  width: 90%;
+}
+
+.message-box-section {
+  margin-bottom: 20px;
+}
+
+.message-box-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.staff-selection {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  background: #f8f9fa;
+}
+
+.staff-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.staff-checkbox input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.message-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.message-box-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.send-message-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.send-message-btn:hover:not(:disabled) {
+  background: #218838;
+}
+
+.send-message-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancel-message-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cancel-message-btn:hover {
+  background: #5a6268;
+}
+
+/* Loading Staff */
+.loading-staff {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
 }

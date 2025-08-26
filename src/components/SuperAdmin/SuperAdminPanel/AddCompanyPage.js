@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './AddCompanyPage.css';
-import { jwtDecode } from 'jwt-decode';
+// Removed jwt-decode to align with normalized localStorage-based auth
 
 const AddCompanyPage = ({ refreshCompanies }) => {
   const [companies, setCompanies] = useState([]);
@@ -29,33 +29,37 @@ const AddCompanyPage = ({ refreshCompanies }) => {
   const navigate = useNavigate();
 
   const validateToken = (token) => {
-    try {
-      const payload = jwtDecode(token);
-      return payload && payload.role === 'super_admin' && payload.exp > Math.floor(Date.now() / 1000);
-    } catch (error) {
-      return false;
-    }
+    if (!token) return false;
+    const role = (localStorage.getItem('role') || '').toLowerCase();
+    return role === 'super_admin' || role === 'superadmin';
   };
 
   const fetchCompanies = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token || !validateToken(token)) {
-        localStorage.removeItem('token');
-        navigate('/login');
-        return;
-      }
+    const token = localStorage.getItem('token');
+    if (!token || !validateToken(token)) {
+      return;
+    }
 
+    try {
       const response = await axios.get('http://localhost:5000/api/companies', {
         headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000
       });
-      console.log('Fetched companies:', response.data.companies);
       setCompanies(response.data.companies || response.data);
       if (refreshCompanies) refreshCompanies();
     } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to load companies' });
+      if (error.code === 'ECONNREFUSED') {
+        setMessage({ type: 'error', text: 'Server is not running. Please start the server first.' });
+      } else if (error.response?.status === 404) {
+        setMessage({ type: 'error', text: 'API endpoint not found. Please check server configuration.' });
+      } else if (error.response?.status === 401) {
+        setMessage({ type: 'error', text: 'Authentication failed. Please login again.' });
+        // Don't redirect automatically, let the auth context handle it
+      } else {
+        setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to load companies' });
+      }
     }
-  }, [refreshCompanies, navigate]);
+  }, [refreshCompanies]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -83,7 +87,6 @@ const AddCompanyPage = ({ refreshCompanies }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('handleSubmit triggered', { isEditing, editingId, formData });
 
     if (!formData.prefix.trim()) {
       setMessage({ type: 'error', text: 'Company prefix is required and cannot be empty' });
@@ -92,8 +95,7 @@ const AddCompanyPage = ({ refreshCompanies }) => {
 
     const token = localStorage.getItem('token');
     if (!token || !validateToken(token)) {
-      localStorage.removeItem('token');
-      navigate('/login');
+      // Don't redirect automatically, let the auth context handle it
       return;
     }
 
@@ -105,15 +107,14 @@ const AddCompanyPage = ({ refreshCompanies }) => {
     });
 
     try {
-      if (isEditing) {
-        console.log('Sending PUT request to', `/api/companies/${editingId}`);
-        const response = await axios.put(`http://localhost:5000/api/companies/${editingId}`, formDataToSend, {
+      if (isEditing && editingId) {
+        await axios.put(`http://localhost:5000/api/companies/${editingId}`, formDataToSend, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
           },
+          timeout: 15000
         });
-        console.log('Update response:', response.data);
         setMessage({ type: 'success', text: `Company "${formData.name}" updated successfully on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}!` });
       } else {
         await axios.post('http://localhost:5000/api/companies', formDataToSend, {
@@ -121,6 +122,7 @@ const AddCompanyPage = ({ refreshCompanies }) => {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
           },
+          timeout: 15000
         });
         setMessage({ type: 'success', text: `Company "${formData.name}" added successfully on ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}!` });
       }
@@ -128,13 +130,23 @@ const AddCompanyPage = ({ refreshCompanies }) => {
       resetForm();
       fetchCompanies();
     } catch (error) {
-      console.error('Error in handleSubmit:', error.response?.data || error.message);
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to save company' });
+      if (error.code === 'ECONNREFUSED') {
+        setMessage({ type: 'error', text: 'Server is not running. Please start the server first.' });
+      } else if (error.response?.status === 404) {
+        setMessage({ type: 'error', text: 'API endpoint not found. Please check server configuration.' });
+      } else if (error.response?.status === 401) {
+        setMessage({ type: 'error', text: 'Authentication failed. Please login again.' });
+        localStorage.removeItem('token');
+        navigate('/login');
+      } else if (error.response?.status === 403) {
+        setMessage({ type: 'error', text: 'Permission denied. You need super admin access.' });
+      } else {
+        setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to save company' });
+      }
     }
   };
 
   const handleEdit = (company) => {
-    console.log('Editing company:', company);
     setFormData({
       name: company.name,
       prefix: company.prefix || '',
@@ -152,7 +164,7 @@ const AddCompanyPage = ({ refreshCompanies }) => {
     setLogoPreview(company.logoUrl ? `http://localhost:5000${company.logoUrl}` : '');
     setSecondaryLogoPreview(company.secondaryLogoUrl ? `http://localhost:5000${company.secondaryLogoUrl}` : '');
     setIsEditing(true);
-    setEditingId(company._id);
+    setEditingId(company.id || company._id);
   };
 
   const handleDelete = async (id) => {
@@ -259,6 +271,7 @@ const AddCompanyPage = ({ refreshCompanies }) => {
             <option value="GOLD">GOLD</option>
             <option value="ADS">ADS</option>
             <option value="CASH">CASH</option>
+            <option value="PURE_DROPS">PURE_DROPS</option>
           </select>
         </div>
 
@@ -298,9 +311,8 @@ const AddCompanyPage = ({ refreshCompanies }) => {
             </thead>
             <tbody>
               {companies.map((company) => {
-                console.log('Company data in table:', company);
                 return (
-                  <tr key={company._id}>
+                  <tr key={company.id || company._id}>
                     <td>
                       {company.logoUrl && <img src={`http://localhost:5000${company.logoUrl}`} alt="Logo" className="company-logo-img" />}
                       <br />
@@ -318,7 +330,7 @@ const AddCompanyPage = ({ refreshCompanies }) => {
                     </td>
                     <td>
                       <button className="edit-btn" onClick={() => handleEdit(company)}>Edit</button>
-                      <button className="delete-btn" onClick={() => handleDelete(company._id)}>Delete</button>
+                      <button className="delete-btn" onClick={() => handleDelete(company.id || company._id)}>Delete</button>
                     </td>
                   </tr>
                 );

@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HRAdminPanel.css';
 import Sidebar from './Sidebar.js';
-import axios from 'axios';
+// import axios from 'axios';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { FaBars } from 'react-icons/fa';
+// import { FaBars } from 'react-icons/fa';
 import PunchingTimePage from './PunchingTimePage.js';
 import TerminatedStaffPage from './TerminatedStaffPage.js';
 import LeavePermissionPage from './LeaveRequestsPage.js';
 import StaffAppoiments from './StaffAppoiments.js';
 import StaffDetailsPage from './StaffDetailsPage.js';
+import DailyAttendancePage from './DailyAttendancePage.js';
 
 const HRAdminPanel = () => {
   const [activeTab, setActiveTab] = useState('staff-details');
@@ -24,8 +25,6 @@ const HRAdminPanel = () => {
         const token = localStorage.getItem('token');
         if (!token) navigate('/login');
 
-        const headers = { Authorization: `Bearer ${token}` };
-
         const storedUser = JSON.parse(localStorage.getItem('user')) || {};
         setUser(storedUser);
       } catch (err) {
@@ -36,9 +35,9 @@ const HRAdminPanel = () => {
     fetchData();
   }, [navigate]);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(prev => !prev);
-  };
+  // const toggleSidebar = () => {
+  //   setSidebarOpen(prev => !prev);
+  // };
 
   const handlePrint = () => {
     window.print();
@@ -84,7 +83,7 @@ const HRAdminPanel = () => {
         <h2>HR Admin Panel</h2>
 
         <div className="tabs">
-          {['staff-details', 'appointments', 'punching-time', 'terminated-staff', 'leave-permission'].map(tab => (
+          {['staff-details', 'appointments', 'punching-time', 'daily-attendance', 'terminated-staff', 'leave-permission'].map(tab => (
             <button
               key={tab}
               className={activeTab === tab ? 'active-tab' : 'tab'}
@@ -99,6 +98,7 @@ const HRAdminPanel = () => {
           {activeTab === 'appointments' && <StaffAppoiments />}
           {activeTab === 'staff-details' && <StaffDetailsPage />}
           {activeTab === 'punching-time' && <PunchingTimePage />}
+          {activeTab === 'daily-attendance' && <DailyAttendancePage />}
           {activeTab === 'terminated-staff' && <TerminatedStaffPage />}
           {activeTab === 'leave-permission' && <LeavePermissionPage />}
           <div className="action-buttons">

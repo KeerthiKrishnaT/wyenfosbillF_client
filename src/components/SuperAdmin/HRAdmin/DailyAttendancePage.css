@@ -1,0 +1,450 @@
+:root {
+  --primary-color: #b39eb5;
+  --primary-hover: #aa98a9;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+  --light-gray: #f8f9fa;
+  --border-color: #dee2e6;
+}
+
+.daily-attendance-page {
+  padding: 20px;
+  background: linear-gradient(to right, #b39eb9, silver);
+  color: #333;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.header-left h2 {
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  font-size: 24px;
+}
+
+.working-hours {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.refresh-btn, .export-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn {
+  background: #007bff;
+  color: white;
+}
+
+.refresh-btn:hover {
+  background: #0056b3;
+}
+
+.export-btn {
+  background: #28a745;
+  color: white;
+}
+
+.export-btn:hover {
+  background: #218838;
+}
+
+.refresh-btn:disabled, .export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+}
+
+.controls-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.date-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-control label {
+  font-weight: bold;
+  color: #333;
+}
+
+.date-control input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.filter-group select {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+}
+
+.summary-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #666;
+}
+
+.summary-card .count {
+  font-size: 32px;
+  font-weight: bold;
+  display: block;
+}
+
+.summary-card.total .count {
+  color: #333;
+}
+
+.summary-card.present .count {
+  color: var(--success-color);
+}
+
+.summary-card.late .count {
+  color: var(--warning-color);
+}
+
+.summary-card.absent .count {
+  color: var(--danger-color);
+}
+
+.table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table-header h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+}
+
+.record-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-style: italic;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.attendance-table th {
+  background: #f8f9fa;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: bold;
+  color: #333;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.attendance-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.attendance-table tr:hover {
+  background: #f8f9fa;
+}
+
+.attendance-row.present {
+  background: rgba(40, 167, 69, 0.05);
+}
+
+.attendance-row.late {
+  background: rgba(255, 193, 7, 0.05);
+}
+
+.attendance-row.absent {
+  background: rgba(220, 53, 69, 0.05);
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-icon {
+  font-size: 16px;
+}
+
+.status-icon.present {
+  color: var(--success-color);
+}
+
+.status-icon.late {
+  color: var(--warning-color);
+}
+
+.status-icon.absent {
+  color: var(--danger-color);
+}
+
+.status-text {
+  font-weight: bold;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.login-type {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.login-type.automatic {
+  background: #d4edda;
+  color: #155724;
+}
+
+.login-type.manual {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.login-type.none {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.mark-present-btn, .mark-absent-btn {
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.mark-present-btn {
+  background: var(--success-color);
+  color: white;
+}
+
+.mark-present-btn:hover {
+  background: #218838;
+}
+
+.mark-absent-btn {
+  background: var(--danger-color);
+  color: white;
+}
+
+.mark-absent-btn:hover {
+  background: #c82333;
+}
+
+.mark-present-btn:disabled, .mark-absent-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.no-data {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 40px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .attendance-table {
+    font-size: 12px;
+  }
+  
+  .attendance-table th,
+  .attendance-table td {
+    padding: 8px 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .controls-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-controls {
+    justify-content: center;
+  }
+  
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .table-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .attendance-table {
+    font-size: 11px;
+  }
+  
+  .attendance-table th,
+  .attendance-table td {
+    padding: 6px 4px;
+  }
+  
+  .status-cell {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .attendance-table {
+    font-size: 10px;
+  }
+}

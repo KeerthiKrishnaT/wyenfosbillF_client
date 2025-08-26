@@ -38,7 +38,7 @@
   left: 15px;
   z-index: 1100;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .hr-sidebar-menu button {
@@ -146,7 +146,7 @@
   position: fixed;
   left: 0;
   top: 0;
-  width: 20px;
+  width: 16px;
   height: 100vh;
   z-index: 99;
   cursor: pointer;

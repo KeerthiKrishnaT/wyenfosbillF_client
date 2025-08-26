@@ -6,10 +6,11 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode'; 
+import { useAuth } from '../../../contexts/AuthContext';
 
 const FinancialPage = () => {
   const navigate = useNavigate();
+  const { currentUser, userProfile } = useAuth();
   const [cashBills, setCashBills] = useState([]);
   const [creditBills, setCreditBills] = useState([]);
   const [creditNotes, setCreditNotes] = useState([]);
@@ -17,90 +18,80 @@ const FinancialPage = () => {
   const [filter, setFilter] = useState({ customer: '', from: '', to: '' });
   const [downloadingExcel, setDownloadingExcel] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
-  const [user, setUser] = useState(null); 
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null); 
   
   const currency = (value) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value || 0);
 
-   useEffect(() => {
-  const token = localStorage.getItem('token');
-  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-  console.log('Token:', token);
-  console.log('Stored user:', storedUser);
-  if (!token || !storedUser) {
-    console.error('Missing auth data, redirecting to login');
-    setError('Missing authentication data');
-    navigate('/login');
-    return;
-  }
+  useEffect(() => {
+    const fetchFinancialData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  try {
-    const decoded = jwtDecode(token);
-    console.log('Decoded token:', decoded);
+        if (!currentUser || !userProfile) {
+          console.log('No current user or user profile, cannot fetch financial data');
+          setError('Authentication required');
+          return;
+        }
 
-    if (!decoded || decoded.exp < Date.now() / 1000) {
-      console.warn('Token expired, redirecting to login');
-      setError('Token expired');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      navigate('/login');
-      return;
-    }
+        // Check if user has permission to access financial data
+        const allowedRoles = ['super_admin', 'superadmin', 'admin'];
+        const userRole = userProfile.role?.toLowerCase();
+        
+        console.log('User role:', userRole);
+        console.log('User profile:', userProfile);
 
-    const storedId = storedUser.id || storedUser._id || storedUser.email;
-    const decodedId = decoded.id || decoded._id || decoded.email;
+        if (!allowedRoles.includes(userRole)) {
+          console.warn('Access denied: User role is', userRole);
+          setError('Access denied: Insufficient permissions');
+          return;
+        }
 
-    if (!storedId || !decodedId || storedId !== decodedId) {
-      console.warn('User data mismatch, redirecting to login');
-      setError('User data mismatch');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      navigate('/login');
-      return;
-    }
+        // For admin role, check if they have access to financial sections
+        if (userRole === 'admin') {
+          const accessibleSections = userProfile.accessibleSections || [];
+          const hasFinancialAccess = accessibleSections.some(section => 
+            ['financials', 'billing', 'accounts', 'dashboard'].includes(section.toLowerCase())
+          );
+          
+          if (!hasFinancialAccess) {
+            console.warn('Admin does not have financial access');
+            setError('Access denied: No financial permissions');
+            return;
+          }
+        }
 
-    if (storedUser.role !== 'super_admin') {
-      console.warn('Access denied: User role is', storedUser.role);
-      setError('Access denied: Not Super Admin');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      navigate('/login');
-      return;
-    }
+        console.log('Fetching financial data...');
+        const idToken = await currentUser.getIdToken(true);
+        
+        const res = await axios.get('http://localhost:5000/api/finance/all', {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
 
-    setUser(storedUser);
-
-    console.log('Fetching financial data with token:', token);
-    axios
-      .get('http://localhost:5000/api/finance/all', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
         const { cashBills, creditBills, creditNotes, debitNotes } = res.data;
         setCashBills(cashBills || []);
         setCreditBills(creditBills || []);
         setCreditNotes(creditNotes || []);
         setDebitNotes(debitNotes || []);
-        localStorage.setItem('financialData', JSON.stringify(res.data));
-      })
-      .catch((err) => {
+        
+        console.log('Financial data loaded successfully');
+      } catch (err) {
         console.error('Error fetching financial data:', err.response?.data || err.message);
         setError(err.response?.data?.message || 'Failed to fetch financial data');
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          navigate('/login');
-        }
-      });
-  } catch (err) {
-    console.error('Initialization error:', err.message);
-    setError('Invalid token');
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
-  }
-  }, [navigate]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUser && userProfile) {
+      fetchFinancialData();
+    } else if (!currentUser) {
+      setLoading(false);
+      setError('Authentication required');
+    }
+  }, [currentUser, userProfile, navigate]);
 
   const filterData = (data) => {
     if (!Array.isArray(data)) return [];
@@ -226,14 +217,35 @@ const FinancialPage = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="financial-page">
+        <div className="loading-message">Loading financial data...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="financial-page">
+        <div className="error-message">
+          <h2>Error</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="financial-page">
-      {error && <div className="error-message">{error}</div>} {/* Display error */}
-      <h2>Financial Documents</h2>
-      <p>
-        You can filter and export <strong>Cash Bills</strong>, <strong>Credit Bills</strong>,{' '}
-        <strong>Credit Notes</strong>, and <strong>Debit Notes</strong>.
-      </p>
+      <div className="financial-header">
+        <h2>Financial Documents</h2>
+        <p>
+          Welcome, {userProfile?.name || 'User'}! You can filter and export <strong>Cash Bills</strong>, <strong>Credit Bills</strong>,{' '}
+          <strong>Credit Notes</strong>, and <strong>Debit Notes</strong>.
+        </p>
+      </div>
 
       <div className="filters">
         <input

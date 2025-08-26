@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Products.css';
@@ -13,39 +13,65 @@ const ProductList = ({ userId }) => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchProducts();
-  }, [userId]);
+  // Debug function to check authentication
+  const checkAuth = () => {
+    const token = localStorage.getItem('token');
+    return !!token;
+  };
 
- const fetchProducts = async () => {
+ const fetchProducts = useCallback(async () => {
   try {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    
+    // Check authentication first
+    const auth = checkAuth();
+    if (!auth) {
+      setError('No authentication token found. Please log in.');
+      setLoading(false);
+      return;
+    }
+    
     const url = userId
       ? `http://localhost:5000/api/products/by-creator/${userId}`
       : 'http://localhost:5000/api/products';
+
+    
     const res = await axios.get(url, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     const fetchedProducts = res.data;
-    console.log('Fetched products:', fetchedProducts); 
-    const validProducts = fetchedProducts.filter(product => product._id && Object.keys(product).length > 1);
-    if (validProducts.length !== fetchedProducts.length) {
-      console.warn('Some products were filtered out due to missing _id or data:', fetchedProducts);
+    // Check if the response is an array or has a data property
+    const productsArray = Array.isArray(fetchedProducts) ? fetchedProducts : (fetchedProducts.data || fetchedProducts);
+    
+    const validProducts = productsArray.filter(product => product.id && Object.keys(product).length > 1);
+    if (validProducts.length !== productsArray.length) {
+      console.warn('Some products were filtered out due to missing id or data');
     }
     setProducts(validProducts);
     setLoading(false);
   } catch (err) {
     console.error('Fetch error:', err.response?.data || err);
-    setError('Error fetching products.');
+    console.error('Error status:', err.response?.status);
+    console.error('Error headers:', err.response?.headers);
+    
+    if (err.response?.status === 401) {
+      setError('Authentication failed. Please log in again.');
+    } else if (err.response?.status === 403) {
+      setError('Access denied. You do not have permission to view products.');
+    } else {
+      setError('Error fetching products: ' + (err.response?.data?.error || err.message));
+    }
     setLoading(false);
   }
-};
+}, [userId]);
+
+useEffect(() => {
+  fetchProducts();
+}, [fetchProducts]);
 
 const handleEditClick = (index) => {
   const product = products[index];
-  console.log('Editing product:', product); 
-  if (!product || !product._id) {
+  if (!product || !product.id) {
     alert('Error: Cannot edit product with missing or invalid ID.');
     return;
   }
@@ -62,20 +88,38 @@ const handleEditClick = (index) => {
   };
 
   const handleSave = async () => {
-    if (!editedProduct._id) {
+    if (!editedProduct.id) {
       alert('Error: Product ID is missing.');
-      console.error('Missing _id in editedProduct:', editedProduct);
+      console.error('Missing id in editedProduct:', editedProduct);
       return;
     }
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put(
-        `http://localhost:5000/api/products/${editedProduct._id}`,
+
+      
+      await axios.put(
+        `http://localhost:5000/api/products/${editedProduct.id}`,
         editedProduct,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
+
+      
+      // Update the product in the list with the edited data
       const updated = [...products];
-      updated[editIndex] = res.data;
+      const updatedProduct = {
+        ...editedProduct,
+        // Ensure all required fields are present
+        itemCode: editedProduct.itemCode || '',
+        itemName: editedProduct.itemName || '',
+        hsn: editedProduct.hsn || '',
+        gst: editedProduct.gst || 0,
+        unitPrice: editedProduct.unitPrice || 0,
+        quantity: editedProduct.quantity || 0
+      };
+      
+
+      updated[editIndex] = updatedProduct;
       setProducts(updated);
       setEditIndex(null);
       setSaveMessage('Product updated successfully');
@@ -104,6 +148,7 @@ const handleEditClick = (index) => {
         <h2>{userId ? 'Products Added by Purchase Admin' : 'All Products'}</h2>
         {saveMessage && <div className="success-message">{saveMessage}</div>}
       </div>
+      
       <table className="product-list-table">
         <thead>
           <tr>
@@ -123,7 +168,7 @@ const handleEditClick = (index) => {
             </tr>
           ) : (
             products.map((product, idx) => (
-              <tr key={product._id} className="product-row">
+              <tr key={product.id} className="product-row">
                 {editIndex === idx ? (
                   <>
                     <td><input name="itemCode" value={editedProduct.itemCode ?? ''} onChange={handleChange} /></td>

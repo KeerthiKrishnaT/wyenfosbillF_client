@@ -11,7 +11,9 @@ import PurchaseReceiptDetails from './PurchaseRescipt';
 import AddPriceList from './AddPriceList.js';
 import PriceListView from './PriceListView.js';
 import PurchaseReceiptList from './PurchaseReceiptList.js';
+import ProductReturns from './ProductReturns.js';
 import axios from 'axios';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const PurchasingAdminPanel = () => {
   const [user, setUser] = useState(null);
@@ -22,8 +24,19 @@ const PurchasingAdminPanel = () => {
   const [showInventoryMenu, setShowInventoryMenu] = useState(false);
   const [showProductsMenu, setShowProductsMenu] = useState(false);
   const [showPurchaseMenu, setShowPurchaseMenu] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
+  const { currentUser, userProfile } = useAuth();
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+  // Get Firebase ID token for API calls
+  const getAuthToken = useCallback(async () => {
+    if (!currentUser) {
+      throw new Error('No authenticated user');
+    }
+    return await currentUser.getIdToken(true);
+  }, [currentUser]);
 
   const calculateInventory = useCallback(() => {
     const monthlySales = {};
@@ -49,55 +62,103 @@ const PurchasingAdminPanel = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!currentUser) return;
+      
       try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('No authentication token found.');
+        const token = await getAuthToken();
         const headers = { Authorization: `Bearer ${token}` };
 
-        const userResponse = await axios.get('http://localhost:5000/api/auth/user-role', { headers });
-        const userData = userResponse.data;
-        localStorage.setItem('user', JSON.stringify(userData));
+        // Use userProfile from Firebase Auth context instead of API call
+        if (!userProfile) {
+          throw new Error('User profile not found.');
+        }
 
-if (!['super_admin', 'purchasing_admin'].includes(userData.role) && !(userData.role === 'admin' && userData.department.toLowerCase() === 'purchase')) {
-  console.warn('User role is not allowed:', userData.role, userData.department);
-  throw new Error('Insufficient permissions.');
-}
+        // Check permissions - use both userProfile and localStorage
+        const userRole = userProfile?.role?.toLowerCase() || localStorage.getItem('role')?.toLowerCase();
+        const userDept = userProfile?.department?.toLowerCase() || localStorage.getItem('dept')?.toLowerCase();
+        
+        if (!['super_admin', 'superadmin', 'purchasing_admin', 'purchase_admin', 'purchaseadmin'].includes(userRole) &&
+            !(userRole === 'admin' && ['purchase', 'purchasing'].includes(userDept))) {
+          console.warn('User role is not allowed:', userRole, userDept);
+          throw new Error('Insufficient permissions.');
+        }
+        
+        setUser(userProfile);
 
-        setUser(userData);
+        await fetchPurchases(token);
 
-        await fetchPurchases();
+        try {
+          const inventoryResponse = await axios.get(`${API_BASE_URL}/api/inventory`, { headers });
+          setInventory(inventoryResponse.data.data || []);
+        } catch (inventoryError) {
+          console.error('Failed to fetch inventory:', inventoryError);
+          setInventory([]);
+          setMessage({ type: 'warning', text: 'Inventory data unavailable. Panel will load with empty inventory.' });
+          // Don't block the entire panel for inventory error
+        }
 
-        const inventoryResponse = await axios.get('http://localhost:5000/api/inventory', { headers });
-        setInventory(inventoryResponse.data.data || []);
-
-        const soldProductsResponse = await axios.get('http://localhost:5000/api/sold-products', { headers });
-        setSoldProducts(soldProductsResponse.data.data || []);
+        try {
+          const soldProductsResponse = await axios.get(`${API_BASE_URL}/api/sold-products`, { headers });
+          setSoldProducts(soldProductsResponse.data.data || []);
+        } catch (soldProductsError) {
+          console.error('Failed to fetch sold products:', soldProductsError);
+          setSoldProducts([]);
+          setMessage({ type: 'warning', text: 'Sold products data unavailable. Panel will load with empty data.' });
+          // Don't block the entire panel for sold products error
+        }
       } catch (err) {
         console.error('Fetch error:', err);
         setMessage({ type: 'error', text: err.message || 'Failed to fetch data' });
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
-  }, [navigate]);
+  }, [navigate, currentUser, userProfile, getAuthToken, API_BASE_URL]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('darkMode');
+    localStorage.removeItem('role');
+    localStorage.removeItem('dept');
+    localStorage.removeItem('email');
+    localStorage.removeItem('userId');
     navigate('/login');
   };
 
   const handlePurchaseOption = (option) => {
     setShowPurchaseMenu(false);
-    if (option === 'list') navigate('/purchasing-admin-panel/purchases/product');
-    else if (option === 'form') navigate('/purchasing-admin-panel/purchases/rescipt');
-    else if (option === 'receiptList') navigate('/purchasing-admin-panel/purchases/rescipt-List');
+    if (option === 'list') navigate('/purchasing-admin/purchases/product');
+    else if (option === 'form') navigate('/purchasing-admin/purchases/rescipt');
+    else if (option === 'receiptList') navigate('/purchasing-admin/purchases/rescipt-List');
   };
 
-  if (!user) return <Navigate to="/purchasing-admin-panel" replace />;
+  // Show loading while fetching user data
+  if (isLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#666'
+      }}>
+        Loading Purchasing Admin Panel...
+      </div>
+    );
+  }
+
+  // Check for either user state or userProfile from auth context
+  if (!user && !userProfile) {
+    console.log('No user found, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
+  
+
 const handleCancelProductForm = () => {
-    navigate('/purchasing-admin-panel/products/list');
- 
+    navigate('/purchasing-admin/products/list');
 };
   return (
     <div className='purchasing-admin-panel'>
@@ -115,9 +176,10 @@ const handleCancelProductForm = () => {
               <button className="btn-3d" onClick={() => setShowProductsMenu(!showProductsMenu)}>Products</button>
               {showProductsMenu && (
                 <div className="dropdown-menu">
-                  <button onClick={() => navigate('/purchasing-admin-panel/products/add')}>Add Product</button>
-                  <button onClick={() => navigate('/purchasing-admin-panel/products/list')}>Product List</button>
-                  <button onClick={() => navigate('/purchasing-admin-panel/products/sold')}>Sold Product</button>
+                  <button onClick={() => navigate('/purchasing-admin/products/add')}>Add Product</button>
+                  <button onClick={() => navigate('/purchasing-admin/products/list')}>Product List</button>
+                  <button onClick={() => navigate('/purchasing-admin/products/sold')}>Sold Product</button>
+                  <button onClick={() => navigate('/purchasing-admin/products/returns')}>Product Returns</button>
                 </div>
               )}
             </div>
@@ -151,7 +213,7 @@ const handleCancelProductForm = () => {
               )}
               {showInventoryMenu && (
                 <div className="dropdown-menu">
-                  <button onClick={() => navigate('/purchasing-admin-panel/inventory/list')}>Inventory List</button>
+                  <button onClick={() => navigate('/purchasing-admin/inventory/list')}>Inventory List</button>
                 </div>
               )}
             </div>
@@ -161,8 +223,8 @@ const handleCancelProductForm = () => {
               <button className="btn-3d" onClick={() => setShowPriceMenu(!showPriceMenu)}>Price List</button>
               {showPriceMenu && (
                 <div className="dropdown-menu">
-                  <button onClick={() => navigate('/purchasing-admin-panel/price-list/add')}>Add Price</button>
-                  <button onClick={() => navigate('/purchasing-admin-panel/price-list/view')}>Price Lists</button>
+                  <button onClick={() => navigate('/purchasing-admin/add-price-list')}>Add Price List</button>
+                  <button onClick={() => navigate('/purchasing-admin/price-lists')}>View Price Lists</button>
                 </div>
               )}
             </div>
@@ -173,15 +235,66 @@ const handleCancelProductForm = () => {
       <main className="panel-content">
         {message && <div className={`message ${message.type}`} role="alert">{message.text}</div>}
         <Routes>
-          <Route path="/products/add" element={<ProductForm onCancel={handleCancelProductForm} />} />
-          <Route path="/products/list" element={<ProductList />} />
-          <Route path="/products/sold" element={<SoldProductForm />} />
-          <Route path="/purchases/product" element={<PurchaseProductList />} />
-          <Route path="/purchases/rescipt" element={<PurchaseReceiptDetails onSubmit={(data) => console.log(data)} onCancel={() => navigate(-1)} />} />
-          <Route path='/purchases/rescipt-List' element={<PurchaseReceiptList/>}/>
-          <Route path="/inventory/list" element={<InventoryList />} />
-          <Route path="/price-list/add" element={<AddPriceList/>} />
-          <Route path="/price-list/view" element={<PriceListView />} />
+          <Route path="/products/add" element={
+            <div>
+              <h2 className="page-heading">📦 Add New Product</h2>
+              <ProductForm onCancel={handleCancelProductForm} onSubmitSuccess={() => navigate('/purchasing-admin/products/list')} />
+            </div>
+          } />
+          <Route path="/products/list" element={
+            <div>
+              <h2 className="page-heading">📋 Product List</h2>
+              <ProductList />
+            </div>
+          } />
+          <Route path="/products/sold" element={
+            <div>
+              <h2 className="page-heading">💰 Sold Products</h2>
+              <SoldProductForm />
+            </div>
+          } />
+          <Route path="/products/returns" element={
+            <div>
+              <h2 className="page-heading">🔄 Product Returns</h2>
+              <ProductReturns />
+            </div>
+          } />
+          <Route path="/purchases/product" element={
+            <div>
+              <h2 className="page-heading">🛒 Purchase Product List</h2>
+              <PurchaseProductList />
+            </div>
+          } />
+          <Route path="/purchases/rescipt" element={
+            <div>
+              <h2 className="page-heading">🧾 Purchase Receipt</h2>
+              <PurchaseReceiptDetails onSubmit={(data) => console.log(data)} onCancel={() => navigate(-1)} />
+            </div>
+          } />
+          <Route path='/purchases/rescipt-List' element={
+            <div>
+              <h2 className="page-heading">📄 Purchase Receipt List</h2>
+              <PurchaseReceiptList/>
+            </div>
+          }/>
+          <Route path="/inventory/list" element={
+            <div>
+              <h2 className="page-heading">📦 Inventory Management</h2>
+              <InventoryList />
+            </div>
+          } />
+          <Route path="/price-list/add" element={
+            <div>
+              <h2 className="page-heading">💲 Add Price List</h2>
+              <AddPriceList/>
+            </div>
+          } />
+          <Route path="/price-list/view" element={
+            <div>
+              <h2 className="page-heading">📊 Price Lists</h2>
+              <PriceListView />
+            </div>
+          } />
         </Routes>
       </main>
     </div>

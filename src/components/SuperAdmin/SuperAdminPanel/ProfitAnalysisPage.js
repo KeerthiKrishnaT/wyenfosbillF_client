@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import './ProfitAnalysisPage.css';
 import { useCallback } from 'react';
 import { Pie, Line } from 'react-chartjs-2';
@@ -15,7 +15,7 @@ import {
 } from 'chart.js';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaSpinner } from 'react-icons/fa';
 
 ChartJS.register(
@@ -48,8 +48,11 @@ const ProfitAnalysisPage = () => {
   const [loading, setLoading] = useState(true);
   const [downloadingImage, setDownloadingImage] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
-  const location = useLocation();
-  const { cashBills = [], creditBills = [], creditNotes = [], debitNotes = [] } = location.state || {};
+  const [cashBills, setCashBills] = useState([]);
+  const [creditBills, setCreditBills] = useState([]);
+  const [creditNotes, setCreditNotes] = useState([]);
+        const [debitNotes, setDebitNotes] = useState([]);
+  const [error, setError] = useState(null);
 
   const filterByMonth = useCallback((bills) => {
     if (selectedMonth === 'all') return bills;
@@ -59,24 +62,185 @@ const ProfitAnalysisPage = () => {
     });
   }, [selectedMonth]);
 
-  useEffect(() => {
-    const filteredCash = selectedType === 'all' || selectedType === 'cash' ? filterByMonth(cashBills) : [];
-    const filteredCredit = selectedType === 'all' || selectedType === 'credit' ? filterByMonth(creditBills) : [];
-    const filteredCreditNotes = selectedType === 'all' || selectedType === 'creditNote' ? filterByMonth(creditNotes) : [];
-    const filteredDebitNotes = selectedType === 'all' || selectedType === 'debitNote' ? filterByMonth(debitNotes) : [];
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setError('Request timeout. Please try again.');
+    }, 10000); // 10 seconds timeout
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required. Please log in again.');
+        setLoading(false);
+        return;
+      }
+      
+      // Fetch all data in parallel
+      const [cashResponse, creditResponse, creditNotesResponse, debitNotesResponse] = await Promise.all([
+        fetch('http://localhost:5000/api/cashbills', {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch('http://localhost:5000/api/creditbills', {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch('http://localhost:5000/api/creditnotes', {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch('http://localhost:5000/api/debitnotes', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
 
-    const totalCash = filteredCash.reduce((sum, bill) => sum + (bill.subtotal || 0), 0);
-    const totalCredit = filteredCredit.reduce((sum, bill) => sum + (bill.totals?.subtotal || 0), 0);
-    const totalCreditNotes = filteredCreditNotes.reduce((sum, note) => sum + (note.subtotal || 0), 0);
-    const totalDebitNotes = filteredDebitNotes.reduce((sum, note) => {
+      // Check if responses are ok
+      if (!cashResponse.ok) {
+        throw new Error(`Cash bills API error: ${cashResponse.status} ${cashResponse.statusText}`);
+      }
+      if (!creditResponse.ok) {
+        throw new Error(`Credit bills API error: ${creditResponse.status} ${creditResponse.statusText}`);
+      }
+      if (!creditNotesResponse.ok) {
+        throw new Error(`Credit notes API error: ${creditNotesResponse.status} ${creditNotesResponse.statusText}`);
+      }
+      if (!debitNotesResponse.ok) {
+        throw new Error(`Debit notes API error: ${debitNotesResponse.status} ${debitNotesResponse.statusText}`);
+      }
+      
+      const cashData = await cashResponse.json();
+      const creditData = await creditResponse.json();
+      const creditNotesData = await creditNotesResponse.json();
+      const debitNotesData = await debitNotesResponse.json();
+      
+      // Handle different response structures
+      const safeCashData = Array.isArray(cashData) ? cashData : (cashData?.data ? cashData.data : []);
+      const safeCreditData = Array.isArray(creditData) ? creditData : (creditData?.data ? creditData.data : []);
+      const safeCreditNotesData = Array.isArray(creditNotesData) ? creditNotesData : (creditNotesData?.data ? creditNotesData.data : []);
+      const safeDebitNotesData = Array.isArray(debitNotesData) ? debitNotesData : (debitNotesData?.data ? debitNotesData.data : []);
+      
+      setCashBills(safeCashData);
+      setCreditBills(safeCreditData);
+      setCreditNotes(safeCreditNotesData);
+      setDebitNotes(safeDebitNotesData);
+      
+      // Clear timeout and set loading to false after successful data fetch
+      clearTimeout(timeoutId);
+      setLoading(false);
+
+    } catch (error) {
+      clearTimeout(timeoutId);
+      setError(`Failed to fetch data: ${error.message}. Please try again.`);
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    // Check if we have any data to work with
+    if (!cashBills.length && !creditBills.length && !creditNotes.length && !debitNotes.length) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Ensure all data is arrays before processing
+    const safeCashBills = Array.isArray(cashBills) ? cashBills : [];
+    const safeCreditBills = Array.isArray(creditBills) ? creditBills : [];
+    const safeCreditNotes = Array.isArray(creditNotes) ? creditNotes : [];
+    const safeDebitNotes = Array.isArray(debitNotes) ? debitNotes : [];
+
+
+
+    const filteredCash = selectedType === 'all' || selectedType === 'cash' ? filterByMonth(safeCashBills) : [];
+    const filteredCredit = selectedType === 'all' || selectedType === 'credit' ? filterByMonth(safeCreditBills) : [];
+    const filteredCreditNotes = selectedType === 'all' || selectedType === 'creditNote' ? filterByMonth(safeCreditNotes) : [];
+    const filteredDebitNotes = selectedType === 'all' || selectedType === 'debitNote' ? filterByMonth(safeDebitNotes) : [];
+
+    // Calculate totals from the actual data structure
+    const totalCash = (Array.isArray(filteredCash) ? filteredCash : []).reduce((sum, bill) => {
+      // Check for different possible field structures
+      if (bill.subtotal) return sum + bill.subtotal;
+      if (bill.total) return sum + bill.total;
+      if (bill.amount) return sum + bill.amount;
+      if (bill.totals && bill.totals.subtotal) return sum + bill.totals.subtotal;
+      if (bill.totals && bill.totals.total) return sum + bill.totals.total;
+      // Calculate from items array if available
+      if (bill.items && Array.isArray(bill.items)) {
+        const itemsTotal = bill.items.reduce((itemSum, item) => {
+          const itemAmount = item.amount || item.total || (item.quantity * item.rate) || 0;
+          return itemSum + itemAmount;
+        }, 0);
+        return sum + itemsTotal;
+      }
+      return sum;
+    }, 0);
+
+    const totalCredit = (Array.isArray(filteredCredit) ? filteredCredit : []).reduce((sum, bill) => {
+      // Check for different possible field structures
+      if (bill.subtotal) return sum + bill.subtotal;
+      if (bill.total) return sum + bill.total;
+      if (bill.amount) return sum + bill.amount;
+      if (bill.totals && bill.totals.subtotal) return sum + bill.totals.subtotal;
+      if (bill.totals && bill.totals.total) return sum + bill.totals.total;
+      // Calculate from items array if available
+      if (bill.items && Array.isArray(bill.items)) {
+        const itemsTotal = bill.items.reduce((itemSum, item) => {
+          const itemAmount = item.amount || item.total || (item.quantity * item.rate) || 0;
+          return itemSum + itemAmount;
+        }, 0);
+        return sum + itemsTotal;
+      }
+      return sum;
+    }, 0);
+
+    const totalCreditNotes = (Array.isArray(filteredCreditNotes) ? filteredCreditNotes : []).reduce((sum, note) => {
+      // Check for different possible field structures
       if (note.subtotal) return sum + note.subtotal;
-      if (note.items && note.items[0]?.amount) return sum + note.items[0].amount;
+      if (note.total) return sum + note.total;
+      if (note.amount) return sum + note.amount;
+      if (note.totals && note.totals.subtotal) return sum + note.totals.subtotal;
+      if (note.totals && note.totals.total) return sum + note.totals.total;
+      // Calculate from items array if available
+      if (note.items && Array.isArray(note.items)) {
+        const itemsTotal = note.items.reduce((itemSum, item) => {
+          const itemAmount = item.amount || item.total || (item.quantity * item.rate) || 0;
+          return itemSum + itemAmount;
+        }, 0);
+        return sum + itemsTotal;
+      }
+      return sum;
+    }, 0);
+
+    const totalDebitNotes = (Array.isArray(filteredDebitNotes) ? filteredDebitNotes : []).reduce((sum, note) => {
+      // Check for different possible field structures
+      if (note.subtotal) return sum + note.subtotal;
+      if (note.total) return sum + note.total;
+      if (note.amount) return sum + note.amount;
+      if (note.totals && note.totals.subtotal) return sum + note.totals.subtotal;
+      if (note.totals && note.totals.total) return sum + note.totals.total;
+      // Calculate from items array if available
+      if (note.items && Array.isArray(note.items)) {
+        const itemsTotal = note.items.reduce((itemSum, item) => {
+          const itemAmount = item.amount || item.total || (item.quantity * item.rate) || 0;
+          return itemSum + itemAmount;
+        }, 0);
+        return sum + itemsTotal;
+      }
       return sum;
     }, 0);
 
     const totalSales = totalCash + totalCredit;
     const totalReturns = totalCreditNotes + totalDebitNotes;
     const profit = totalSales - totalReturns;
+
+
 
     setTotals({
       totalCash,
@@ -110,11 +274,15 @@ const ProfitAnalysisPage = () => {
       ]
     });
 
+    } catch (error) {
+      setError(`Error processing data: ${error.message}`);
+    }
+
     setLoading(false);
 
   }, [cashBills, creditBills, creditNotes, debitNotes, selectedType, selectedMonth, filterByMonth]);
 
-  const pieChartOptions = {
+  const pieChartOptions = useMemo(() => ({
     responsive: true,
     plugins: {
       legend: { position: 'top' },
@@ -132,7 +300,18 @@ const ProfitAnalysisPage = () => {
         },
       },
     },
-  };
+  }), []);
+
+  const lineChartOptions = useMemo(() => ({
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: {
+        display: true,
+        text: 'Profit Trend Overview'
+      }
+    }
+  }), []);
 
   const exportAsImage = async () => {
     setDownloadingImage(true);
@@ -164,19 +343,26 @@ const ProfitAnalysisPage = () => {
   };
 
   const handleBack = () => {
-    navigate('/super-admin-panel');
+    navigate('/super-admin');
   };
 
   return (
     <div className="profit-analysis-page">
       <h2>Profit Analysis</h2>
+      
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={() => setError(null)}>Dismiss</button>
+        </div>
+      )}
 
       <div className="filter-row">
         <label>Bill Type:</label>
         <select value={selectedType} onChange={e => setSelectedType(e.target.value)}>
           <option value="all">All</option>
           <option value="cash">Cash Bills</option>
-          <option value="creditFiles">Credit Bills</option>
+          <option value="credit">Credit Bills</option>
           <option value="creditNote">Credit Notes</option>
           <option value="debitNote">Debit Notes</option>
         </select>
@@ -192,7 +378,14 @@ const ProfitAnalysisPage = () => {
       </div>
 
       {loading ? (
-        <p>Loading profit data...</p>
+        <div>
+          <p>Loading profit data...</p>
+        </div>
+      ) : !cashBills.length && !creditBills.length && !creditNotes.length && !debitNotes.length ? (
+        <div className="no-data-message">
+          <p>No profit data available in the system.</p>
+          <button className="back-btn" onClick={handleBack}>Back to Super Admin Panel</button>
+        </div>
       ) : (
         <>
           <div className="chart-wrapper">
@@ -200,7 +393,7 @@ const ProfitAnalysisPage = () => {
               {chartData && <Pie data={chartData} options={pieChartOptions} />}
             </div>
             <div className="trend-chart-container">
-              {trendData && <Line data={trendData} options={{ responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Profit Trend Overview' } } }} />}
+              {trendData && <Line data={trendData} options={lineChartOptions} />}
             </div>
           </div>
 
@@ -210,8 +403,16 @@ const ProfitAnalysisPage = () => {
             <p><strong>Net Profit:</strong> ₹{totals.profit}</p>
           </div>
 
+          <div className="data-summary">
+            <p><strong>Data Summary:</strong></p>
+            <p>Cash Bills: {cashBills.length} | Credit Bills: {creditBills.length} | Credit Notes: {creditNotes.length} | Debit Notes: {debitNotes.length}</p>
+          </div>
+
           <div className="button-row">
             <button className="back-btn" onClick={handleBack}>Back</button>
+            <button onClick={fetchData} disabled={loading} className="export-button refresh">
+              {loading ? <><FaSpinner className="spinner" /> Loading...</> : 'Refresh Data'}
+            </button>
             <button onClick={exportAsImage} disabled={downloadingImage} className="export-button">{downloadingImage ? <><FaSpinner className="spinner" /> Exporting...</> : 'Export as Image'}</button>
             <button onClick={exportAsPDF} disabled={downloadingPDF} className="export-button pdf">{downloadingPDF ? <><FaSpinner className="spinner" /> Exporting...</> : 'Export as PDF'}</button>
             <button className="export-button delete">Delete Report</button>

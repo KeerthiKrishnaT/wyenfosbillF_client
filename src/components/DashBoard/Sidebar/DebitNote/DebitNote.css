@@ -20,17 +20,18 @@ body {
   padding: 20px;
   background-color: #b39eb5;
   width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
 .content-container {
-  inline-size: 100%;
-  width: 98%;
+  width: 100%;
   margin: 0 auto;
   position: relative;
   background-color: #b39eb5;
-  padding: 20px;
   border-radius: 12px;
   box-sizing: border-box;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .watermark {
@@ -57,16 +58,20 @@ body {
 }
 
 .cancelled-watermark img {
-  width: 200px;
-  height: 200px;
+  width: 400px;
+  height: 400px;
 }
 
 .note-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
   flex-wrap: wrap;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
 }
 
 .company-header-wrapper {
@@ -119,8 +124,9 @@ body {
 
 .divider {
   border: 0;
-  border-top: 1px solid var(--text-color);
-  margin: 5px 0;
+  border-top: 2px solid var(--text-color);
+  margin: 30px 0;
+  opacity: 0.3;
 }
 
 .invoice-heading {
@@ -135,14 +141,19 @@ body {
 }
 
 .Debitsection-title {
-  font-size: 20px; 
+  font-size: 22px; 
   font-weight: bold;
   color: black;
-  margin: 10px 0;
+  margin: 25px 0 15px 0;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #997a8d;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .customer-info-group {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .info-row {
@@ -197,9 +208,14 @@ body {
 
 .tax-options {
   display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
+  gap: 20px;
+  margin-bottom: 25px;
   flex-wrap: wrap;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .tax-options label {
@@ -212,6 +228,114 @@ body {
 .items-sectionn {
   width: 100%;
   overflow-x: auto; /* Enable horizontal scrolling on small screens */
+  margin-bottom: 30px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+@media print {
+  .page-wrapper {
+    background-color: #fff;
+    padding: 10mm;
+  }
+
+  .content-container {
+    background-color: #fff;
+    padding: 0;
+    border-radius: 0;
+    min-width: 0;
+    max-width: 190mm; /* Fit A4 */
+  }
+
+  .watermark {
+    opacity: 0.2;
+  }
+
+  .watermark img {
+    width: 150mm;
+    height: 150mm;
+  }
+
+  .cancelled-watermark {
+    opacity: 0.4;
+  }
+
+  .cancelled-watermark img {
+    width: 100mm;
+    height: 100mm;
+  }
+
+  /* ✅ Hide all buttons, search, saved bills */
+  .button-group,
+  .note-list,
+  .search-container,
+  .saved-bills-section,
+  .add-item-btn,
+  .remove-item-btn,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Hide input boxes but show their values as plain text */
+  input.input-field,
+  textarea.input-field,
+  select.input-field,
+  .search-input,
+  .credit-bill-select {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    padding: 0 !important;
+    font-size: 11pt !important;
+  }
+
+  .item-row div,
+  .credit-bill-row div,
+  .item-subheader div {
+    border: 0.5pt solid #000;
+    padding: 1mm;
+  }
+
+  .totals-section {
+    justify-content: flex-end;
+    font-size: 10pt;
+  }
+
+  .footer {
+    page-break-before: avoid;
+  }
+
+  .footer p,
+  .company-name-wrapper p {
+    font-size: 9pt;
+  }
+}
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1400px) {
+  .item-headerr,
+  .item-row,
+  .credit-bill-row,
+  .item-subheader {
+    grid-template-columns: 70px 200px 150px 350px 130px 130px 130px 70px;
+    min-width: 1230px;
+    gap: 10px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .item-headerr,
+  .item-row,
+  .credit-bill-row,
+  .item-subheader {
+    grid-template-columns: 60px 180px 130px 300px 110px 110px 110px 60px;
+    min-width: 1060px;
+    gap: 8px;
+    padding: 8px;
+  }
 }
 
 .items-sectionn h3 {
@@ -224,24 +348,35 @@ body {
 .item-row,
 .credit-bill-row {
   display: grid;
-  grid-template-columns:  80px 300px 250px 250px 200px 200px 200px;
-  gap: 8px;
+  grid-template-columns: 80px 250px 180px 400px 150px 150px 150px 80px;
+  gap: 12px;
   align-items: center;
-  padding: 8px;
+  padding: 12px;
   background-color: #9b778e;
   color: white;
-  /* min-width: 748px; */
+  min-width: 1370px;
+}
+
+/* Specific styles for manual items table */
+.manual-items-table .item-headerr,
+.manual-items-table .credit-bill-row {
+  display: grid;
+  grid-template-columns: 80px 250px 180px 400px 150px 150px 150px 80px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  min-width: 1370px;
 }
 
 .item-subheader {
   display: grid;
-  grid-template-columns: 80px 180px 100px 100px 100px 100px 80px;
-  gap: 8px;
+  grid-template-columns: 80px 250px 180px 400px 150px 150px 150px 80px;
+  gap: 12px;
   align-items: center;
-  padding: 8px;
+  padding: 12px;
   background-color: #f9f9f9;
   font-weight: bold;
-  min-width: 748px;
+  min-width: 1370px;
 }
 
 .search-container {
@@ -286,47 +421,118 @@ body {
 .item-row input,
 .item-row select {
   width: 100%;
-  padding: 8px;
+  padding: 10px 12px;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
   box-sizing: border-box;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+}
+
+.item-row input:focus,
+.item-row select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Manual items specific input styles */
+.manual-items-table .credit-bill-row input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+}
+
+.manual-items-table .credit-bill-row input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
 }
 
 .add-item-btn {
-  padding: 8px 16px;
+  padding: 10px 20px;
   background-color: #28a745;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  margin-top: 10px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  min-width: 120px;
 }
 
 .add-item-btn:hover {
   background-color: #218838;
 }
 
+.add-item-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Manual items action buttons container */
+.manual-items-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.manual-items-total {
+  flex: 1;
+  padding: 8px 12px;
+  background-color: #e8f5e8;
+  border: 1px solid #28a745;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #155724;
+}
+
 .remove-item-btn {
-  padding: 6px 10px;
-  background-color: #ff4444;
+  padding: 8px 12px;
+  background-color: #dc3545;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
-  width: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .remove-item-btn:hover {
-  background-color: #cc0000;
+  background-color: #c82333;
+}
+
+.remove-item-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
 }
 
 .totals-heading,
 .remaining-amount-heading,
 .remaining-balance-section {
-  margin-top: 20px;
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .totals-heading h3,
@@ -345,9 +551,14 @@ body {
 .totals-section {
   display: flex;
   justify-content: flex-end;
-  gap: 15px;
-  margin-top: 15px;
+  gap: 20px;
+  margin-top: 20px;
   flex-wrap: wrap;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .amount-details {
@@ -385,7 +596,12 @@ body {
 }
 
 .remarks-section {
-  margin-top: 20px;
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .remarks-section label {
@@ -409,11 +625,16 @@ body {
 }
 
 .button-group {
-  margin-top: 20px;
+  margin-top: 30px;
   display: flex;
-  gap: 10px;
+  gap: 15px;
   justify-content: center;
   flex-wrap: wrap;
+  padding: 25px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .debitsave-btn,
@@ -443,7 +664,7 @@ body {
 }
 
 .note-list {
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
 .note-list h3 {
@@ -748,83 +969,1053 @@ body {
   }
 }
 
+/* Print-specific styles when printing class is active */
+body.printing {
+  background-color: white !important;
+}
+
+body.printing .page-wrapper {
+  background-color: white !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body.printing .content-container {
+  background-color: white !important;
+  padding: 10mm !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  max-width: 190mm !important;
+}
+
+/* Ensure all content is visible when printing class is active */
+body.printing .no-print {
+  display: none !important;
+}
+
+body.printing .customer-details,
+body.printing .credit-bill-selection,
+body.printing .items-sectionn,
+body.printing .futerr,
+body.printing .signaturee,
+body.printing .remaining-amount-heading,
+body.printing .note-header,
+body.printing .company-header-container,
+body.printing .bank-details-section {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.printing input,
+body.printing select,
+body.printing textarea {
+  color: black !important;
+  background-color: transparent !important;
+  border: none !important;
+  font-size: inherit !important;
+}
+
+body.printing .credit-bill-input {
+  color: black !important;
+  background-color: transparent !important;
+  border: none !important;
+  font-size: inherit !important;
+}
+
+/* Additional print styles for specific elements */
+@media print {
+  /* Ensure proper spacing and layout for print */
+  .divider {
+    border: none !important;
+    height: 1pt !important;
+    background-color: #000 !important;
+    margin: 5mm 0 !important;
+  }
+  
+  /* Ensure company header displays properly */
+  .company-header {
+    display: block !important;
+    margin-bottom: 5mm !important;
+  }
+  
+  /* Ensure bill details are visible */
+  .bill-details {
+    display: block !important;
+    text-align: right !important;
+    font-size: 10pt !important;
+  }
+  
+  /* Ensure customer information is properly formatted */
+  .customer-form {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 5mm !important;
+  }
+  
+  /* Ensure credit bill information is properly displayed */
+  .credit-bill-row {
+    display: grid !important;
+    grid-template-columns: 15mm 40mm 30mm 50mm 25mm 25mm !important;
+    gap: 2mm !important;
+    padding: 2mm !important;
+    background-color: #f0f0f0 !important;
+    color: black !important;
+    font-size: 9pt !important;
+  }
+  
+  /* Ensure totals are properly displayed */
+  .totals-section {
+    margin-top: 5mm !important;
+    text-align: right !important;
+    font-size: 10pt !important;
+  }
+  
+  /* Ensure bank details are properly formatted */
+  .bank-container {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 5mm !important;
+    align-items: start !important;
+  }
+  
+  /* Hide all interactive elements during print */
+  .customer-search-section,
+  .tax-options,
+  .interactive-totals,
+  .manual-items-table,
+  .bill-search-section,
+  .payment-summary,
+  .remaining-amount-heading,
+  .remaining-balance-section,
+  .remarks-section,
+  .futerr,
+  .signaturee {
+    display: none !important;
+  }
+  
+  /* Ensure proper page breaks */
+  .page-break {
+    page-break-before: always !important;
+  }
+  
+  /* Ensure proper table formatting for print */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin-bottom: 10mm !important;
+  }
+  
+  th, td {
+    border: 1px solid #000 !important;
+    padding: 2mm !important;
+    text-align: left !important;
+    font-size: 9pt !important;
+  }
+  
+  th {
+    background-color: #f0f0f0 !important;
+    font-weight: bold !important;
+  }
+  
+  /* Ensure proper text formatting */
+  h1, h2, h3, h4 {
+    margin: 3mm 0 !important;
+    font-weight: bold !important;
+  }
+  
+  h1 { font-size: 16pt !important; }
+  h2 { font-size: 14pt !important; }
+  h3 { font-size: 12pt !important; }
+  h4 { font-size: 10pt !important; }
+  
+  /* Ensure proper spacing */
+  p {
+    margin: 2mm 0 !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Ensure QR code is visible in print */
+  canvas {
+    display: block !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* Credit Bill Input Group Styles */
+.credit-bill-input-group {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.credit-bill-input-group label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #333;
+  font-size: 14px;
+}
+
+.credit-bill-input-group input,
+.credit-bill-input-group select {
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: border 0.3s ease;
+  background-color: #fff;
+}
+
+.credit-bill-input-group input:focus,
+.credit-bill-input-group select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+.credit-bill-input-group input:disabled,
+.credit-bill-input-group select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.credit-bill-input {
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: border 0.3s ease;
+  background-color: #fff;
+}
+
+.credit-bill-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+.credit-bill-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Customer Information Form Styles */
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin: 30px 0 20px 0;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #997a8d;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.customer-details {
+  background-color: #f8f9fa;
+  padding: 25px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.customer-info-heading {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #b39eb5;
+  text-align: center;
+}
+
+.customer-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.customer-id-display {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.error-field {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 5px rgba(220, 53, 69, 0.25) !important;
+}
+
+.error-border {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 5px rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Bill Search Section */
+.bill-search-section {
+  margin: 25px 0;
+  padding: 25px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bill-search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bill-search-info {
+  background-color: #e3f2fd;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid #2196f3;
+}
+
+.bill-search-info p {
+  margin: 0;
+  color: #1565c0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.search-button {
+  background-color: var(--button-bg);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: var(--button-hover-bg);
+}
+
+.search-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Error Styles */
+.error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.error-border {
+  border-color: #dc3545 !important;
+}
+
+/* Customer Search Section */
+.customer-search-section {
+  margin: 25px 0;
+  padding: 25px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.customer-search-input {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: border 0.3s ease;
+  background-color: #fff;
+}
+
+.customer-search-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Search Results Styles */
+.search-results {
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-result-item {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+  background-color: #f5f5f5;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.btn-create-customer {
+  margin-top: 10px;
+  background: var(--button-bg);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.btn-create-customer:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.btn-create-customer:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Footer Structure like CreditBill */
+.futerr {
+  text-align: left;
+  align-content: left;
+  margin-top: 30px;
+  padding: 25px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.futerr h4, .futerr p {
+  color: black;
+  text-align: left;
+  align-content: left;
+}
+
+.futer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.left-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.terms-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.terms-section h4 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-bottom: 3px solid #b39eb5;
+  padding-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.terms-content {
+  margin-top: 15px;
+  padding-left: 5px;
+}
+
+.terms-content p {
+  margin: 0;
+  line-height: 2.0;
+  font-size: 14px;
+  color: #495057;
+  text-align: justify;
+}
+
+.bank-details-section {
+  background: #f8f9fa !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+  border: 1px solid #e9ecef !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  margin-bottom: 20px !important;
+}
+
+.bank-details-section h4 {
+  margin: 0 0 20px 0 !important;
+  color: #2c3e50 !important;
+  font-size: 1.2rem !important;
+  font-weight: bold !important;
+  border-bottom: 3px solid #b39eb5 !important;
+  padding-bottom: 8px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  text-align: left !important;
+}
+
+.bank-container {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 20px !important;
+  margin-top: 15px !important;
+  width: 100% !important;
+}
+
+.bank-contentcashbill {
+  flex: 1 !important;
+  padding-left: 5px !important;
+  min-width: 0 !important;
+}
+
+.bank-contentcashbill p {
+  margin: 8px 0 !important;
+  line-height: 1.6 !important;
+  font-size: 14px !important;
+  color: #495057 !important;
+  text-align: left !important;
+}
+
+.signaturee {
+  text-align: end;
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* QR Code Styles like CashBill */
+.futerr .qr-code-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 15px !important;
+  background: white !important;
+  border-radius: 8px !important;
+  border: 1px solid #b39eb5 !important;
+  min-width: 140px !important;
+  max-width: 160px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  flex-shrink: 0 !important;
+}
+
+.futerr .qr-code {
+  margin-bottom: 8px !important;
+}
+
+.futerr .qr-code-label {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #495057 !important;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+.futerr .qr-code-placeholder {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 120px !important;
+  height: 120px !important;
+}
+
+.futerr .qr-placeholder-box {
+  width: 100px !important;
+  height: 100px !important;
+  border: 2px dashed #ccc !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+}
+
+/* Add Installment Button Container */
+.add-installment-btn-container {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Payment Summary Styles */
+.payment-summary {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.summary-value {
+  font-weight: 700;
+  font-size: 16px;
+  color: #212529;
+}
+
+.summary-value.paid {
+  color: #28a745;
+}
+
+.summary-value.pending {
+  color: #dc3545;
+}
+
+/* Print styles for normal print dialog */
+body.printing {
+  background-color: white !important;
+  color: black !important;
+}
+
+body.printing .page-wrapper {
+  background-color: white !important;
+  padding: 20px !important;
+  box-shadow: none !important;
+}
+
+body.printing .content-container {
+  background-color: white !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  max-width: none !important;
+}
+
+body.printing .no-print {
+  display: none !important;
+}
+
+body.printing .watermark {
+  opacity: 0.1 !important;
+}
+
+body.printing .cancelled-watermark {
+  opacity: 0.3 !important;
+}
+
+body.printing input,
+body.printing select,
+body.printing textarea {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+  padding: 0 !important;
+  font-size: 11pt !important;
+  color: black !important;
+}
+
+body.printing .button-group,
+body.printing .saved-bills-section,
+body.printing .search-container {
+  display: none !important;
+}
+
+body.printing .note-header,
+body.printing .customer-details,
+body.printing .credit-bill-selection,
+body.printing .futerr,
+body.printing .signaturee,
+body.printing .remaining-amount-heading {
+  display: block !important;
+  page-break-inside: avoid !important;
+}
+
+body.printing .bank-details-section {
+  display: block !important;
+  page-break-inside: avoid !important;
+  margin-top: 20px !important;
+}
+
+body.printing .bank-container {
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  gap: 20px !important;
+  align-items: start !important;
+}
+
+body.printing .qr-code-section {
+  display: block !important;
+}
+
+body.printing .qr-code-container {
+  display: block !important;
+}
+
+/* Print-specific styles to match PDF format */
+@media print {
+  /* Ensure the print version matches PDF format exactly */
+  body.printing {
+    background: white !important;
+    color: black !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Hide all non-essential elements during print */
+  .printing .no-print,
+  .printing .customer-search-section,
+  .printing .tax-options,
+  .printing .interactive-totals,
+  .printing .manual-items-table,
+  .printing .bill-search-section,
+  .printing .payment-summary,
+  .printing .remaining-amount-heading,
+  .printing .remaining-balance-section,
+  .printing .remarks-section,
+  .printing .futerr,
+  .printing .signaturee,
+  .printing .button-group,
+  .printing .saved-bills-section {
+    display: none !important;
+  }
+  
+  /* Ensure proper page layout for print */
+  .printing .page-wrapper {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .printing .content-container {
+    background: white !important;
+    padding: 20px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Ensure proper table formatting */
+  .printing table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .printing th,
+  .printing td {
+    border: 1px solid #000 !important;
+    padding: 8px !important;
+    text-align: left !important;
+    font-size: 12px !important;
+  }
+  
+  .printing th {
+    background-color: #f0f0f0 !important;
+    font-weight: bold !important;
+  }
+  
+  /* Ensure proper text formatting */
+  .printing h1 { font-size: 20px !important; margin: 0 0 10px 0 !important; }
+  .printing h2 { font-size: 18px !important; margin: 0 0 10px 0 !important; }
+  .printing h3 { font-size: 16px !important; margin: 0 0 10px 0 !important; }
+  .printing h4 { font-size: 14px !important; margin: 0 0 15px 0 !important; }
+  
+  /* Ensure proper spacing */
+  .printing p {
+    margin: 5px 0 !important;
+    font-size: 12px !important;
+  }
+  
+  /* Ensure QR code is visible */
+  .printing canvas {
+    display: block !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Ensure page breaks work properly */
+  .printing .page-break {
+    page-break-before: always !important;
+    margin-top: 40px !important;
+  }
+}
+
+/* Payment History Table Styles */
+.payment-history-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border: 2px solid #28a745;
+  border-radius: 8px;
+}
+
+.payment-history-section h4 {
+  margin: 0 0 15px 0;
+  color: #28a745;
+  font-weight: bold;
+  text-align: center;
+}
+
+.payment-history-table {
+  overflow-x: auto;
+  margin-bottom: 15px;
+}
+
+.payment-history-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background-color: white;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.payment-history-table th {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+  background-color:#b39eb5;
+  color: white;
+  font-weight: bold;
+}
+
+.payment-history-table td {
+  padding: 8px;
+  border: 1px solid #ddd;
+  vertical-align: middle;
+}
+
+.payment-history-table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.payment-history-table tr:hover {
+  background-color: #e9ecef;
+}
+
+.payment-history-table .bill-type-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+}
+
+.payment-history-table .bill-type-credit {
+  background-color: #007bff;
+}
+
+.payment-history-table .bill-type-debit {
+  background-color: #28a745;
+}
+
+.payment-history-table .bill-type-new {
+  background-color: #ff9800;
+}
+
+.payment-history-table .amount-paid {
+  text-align: right;
+  font-weight: bold;
+}
+
+.payment-history-table .remaining-balance {
+  text-align: right;
+  font-weight: bold;
+}
+
+.payment-history-table .remaining-balance.fully-paid {
+  color: #28a745;
+}
+
+.payment-history-table .remaining-balance.pending {
+  color: #dc3545;
+}
+
+.payment-history-table .date {
+  text-align: center;
+}
+
+.payment-history-table .new-payment-row {
+  background-color: #e3f2fd !important;
+  border-top: 2px solid #2196f3;
+  font-weight: bold;
+}
+
+.payment-history-table .new-payment-row input {
+  width: 100%;
+  padding: 4px;
+  border: 1px solid #2196f3;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.payment-history-table .new-payment-row input[type="number"] {
+  text-align: right;
+}
+
+/* Payment Summary Styles */
+.payment-summary-box {
+  padding: 12px;
+  background-color: #e8f5e8;
+  border-radius: 6px;
+  border: 1px solid #28a745;
+}
+
+.payment-summary-box h5 {
+  margin: 0 0 10px 0;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.payment-status-badge {
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: bold;
+  color: white;
+  margin-left: 5px;
+}
+
+.payment-status-badge.fully-paid {
+  background-color: #28a745;
+}
+
+.payment-status-badge.pending {
+  background-color: #ffc107;
+}
+
+/* Toggle Button Styles */
+.toggle-payment-history-btn {
+  margin-left: 10px;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-payment-history-btn:hover {
+  opacity: 0.9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .payment-history-table {
+    font-size: 10px;
+  }
+  
+  .payment-history-table th,
+  .payment-history-table td {
+    padding: 6px 4px;
+  }
+  
+  .payment-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  
+  .payment-history-section {
+    padding: 10px;
+  }
+}
+
 /* Print Styles */
 @media print {
-  .page-wrapper {
-    background-color: #fff;
-    padding: 10mm;
+  .payment-history-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
-
-  .content-container {
-    background-color: #fff;
-    padding: 0;
-    border-radius: 0;
-    min-width: 0;
-    max-width: 190mm; /* Fit A4 */
+  
+  .payment-history-table {
+    font-size: 10px;
   }
-
-  .watermark {
-    opacity: 0.2;
-  }
-
-  .watermark img {
-    width: 150mm;
-    height: 150mm;
-  }
-
-  .cancelled-watermark {
-    opacity: 0.4;
-  }
-
-  .cancelled-watermark img {
-    width: 100mm;
-    height: 100mm;
-  }
-
-  .button-group,
-  .note-list {
-    display: none; /* Hide buttons and saved debit notes */
-  }
-
-  .item-header,
-  .item-row,
-  .credit-bill-row,
-  .item-subheader {
-    grid-template-columns: 20mm 40mm 25mm 25mm 25mm 25mm 20mm; /* Adjusted for A4 */
-    font-size: 10pt;
-    padding: 2mm;
-  }
-
-  .items-section {
-    overflow-x: visible;
-  }
-
-  .input-field,
-  .search-input,
-  .credit-bill-select,
-  .add-item-btn,
-  .remove-item-btn {
-    display: none; /* Hide interactive elements */
-  }
-
-  .item-row div,
-  .credit-bill-row div,
-  .item-subheader div {
-    border: 0.5pt solid #000; /* Add borders for clarity */
-    padding: 1mm;
-  }
-
-  .totals-section {
-    justify-content: flex-end;
-    font-size: 10pt;
-  }
-
-  .footer {
-    page-break-before: avoid;
-  }
-
-  .footer p,
-  .company-name-wrapper p {
-    font-size: 9pt;
+  
+  .toggle-payment-history-btn,
+  .change-credit-bill-btn {
+    display: none !important;
   }
 }

@@ -14,6 +14,7 @@ const AddBankDetails = () => {
     ifscCode: '',
     upiId: ''
   });
+  const [generateQR, setGenerateQR] = useState('combined');
   const [qrCode, setQrCode] = useState(null);
   const [previewQrCode, setPreviewQrCode] = useState('');
   const [existingDetails, setExistingDetails] = useState([]);
@@ -21,13 +22,35 @@ const AddBankDetails = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshingToken, setIsRefreshingToken] = useState(false);
-  const [tokenStatus, setTokenStatus] = useState(null);
   const navigate = useNavigate();
+
+  // Helper function to construct full QR code URL
+  const getFullQrCodeUrl = (qrCodeUrl) => {
+    console.log('🔧 getFullQrCodeUrl input:', qrCodeUrl);
+    if (!qrCodeUrl) return '';
+    if (qrCodeUrl.startsWith('http')) return qrCodeUrl;
+    
+    // Extract filename from the path
+    let filename = '';
+    if (qrCodeUrl.startsWith('/uploads/bank-qr-codes/')) {
+      filename = qrCodeUrl.replace('/uploads/bank-qr-codes/', '');
+    } else if (qrCodeUrl.startsWith('/bank-qr-codes/')) {
+      filename = qrCodeUrl.replace('/bank-qr-codes/', '');
+    } else if (qrCodeUrl.includes('/')) {
+      filename = qrCodeUrl.split('/').pop();
+    } else {
+      filename = qrCodeUrl;
+    }
+    
+    // Use the new API route that handles CORS properly
+    const fullUrl = `http://localhost:5000/api/qr-codes/${filename}`;
+    console.log('🔧 getFullQrCodeUrl output:', fullUrl);
+    return fullUrl;
+  };
 
   const getLocalStorageItem = (key) => {
     try {
       const value = localStorage.getItem(key);
-      console.log(`Retrieved ${key} from localStorage:`, value);
       return value;
     } catch (err) {
       console.error('localStorage access error:', err);
@@ -36,13 +59,43 @@ const AddBankDetails = () => {
     }
   };
 
-  const removeTokens = () => {
+  const removeTokens = useCallback(() => {
     console.log('Removing tokens from localStorage');
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
-  };
+  }, []);
 
-const makeApiRequest = useCallback(async (config, retry = true) => {
+  const refreshAccessToken = useCallback(async () => {
+    if (isRefreshingToken) return;
+    setIsRefreshingToken(true);
+    try {
+      const storedRefreshToken = getLocalStorageItem('refreshToken');
+      if (!storedRefreshToken) {
+        console.error('No refresh token found in localStorage');
+        setMessage({ type: 'error', text: 'No refresh token. Please log in.' });
+        removeTokens();
+        // Don't redirect automatically, let the user handle it
+        throw new Error('No refresh token found');
+      }
+
+      console.log('Sending refresh token request with:', storedRefreshToken);
+      const response = await axios.post('http://localhost:5000/api/auth/refresh-token', { refreshToken: storedRefreshToken });
+      const newToken = response.data.token;
+      if (!newToken) {
+        throw new Error('No new token received from refresh endpoint');
+      }
+      localStorage.setItem('token', newToken);
+      console.log('New access token stored:', newToken);
+      return newToken;
+    } catch (err) {
+      console.error('Token refresh failed:', err.message, err.response?.data);
+      throw err;
+    } finally {
+      setIsRefreshingToken(false);
+    }
+  }, [isRefreshingToken, setMessage, removeTokens]);
+
+  const makeApiRequest = useCallback(async (config, retry = true) => {
     try {
       let token = getLocalStorageItem('token');
       if (!token) {
@@ -58,14 +111,14 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
       if (error.response?.status === 401 && retry) {
         console.log('Received 401, attempting to refresh token');
         try {
-          const newToken = await refreshToken();
+          const newToken = await refreshAccessToken();
           config.headers.Authorization = `Bearer ${newToken}`;
           return await axios(config);
         } catch (refreshError) {
           console.error('Refresh token failed:', refreshError);
           setMessage({ type: 'error', text: 'Session expired. Please log in again.' });
           removeTokens();
-          setTimeout(() => window.location.href = '/login', 2000);
+          // Don't redirect automatically, let the user handle it
           throw refreshError;
         }
       }
@@ -73,37 +126,7 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
       setMessage({ type: 'error', text: error.response?.data?.message || 'API request failed' });
       throw error;
     }
-  }, []);
-
-  const refreshToken = async () => {
-    if (isRefreshingToken) return;
-    setIsRefreshingToken(true);
-    try {
-      const refreshToken = getLocalStorageItem('refreshToken');
-      if (!refreshToken) {
-        console.error('No refresh token found in localStorage');
-        setMessage({ type: 'error', text: 'No refresh token. Please log in.' });
-        removeTokens();
-        setTimeout(() => window.location.href = '/login', 2000);
-        throw new Error('No refresh token found');
-      }
-
-      console.log('Sending refresh token request with:', refreshToken);
-      const response = await axios.post('http://localhost:5000/api/auth/refresh', { refreshToken });
-      const newToken = response.data.token;
-      if (!newToken) {
-        throw new Error('No new token received from refresh endpoint');
-      }
-      localStorage.setItem('token', newToken);
-      console.log('New access token stored:', newToken);
-      return newToken;
-    } catch (err) {
-      console.error('Token refresh failed:', err.message, err.response?.data);
-      throw err;
-    } finally {
-      setIsRefreshingToken(false);
-    }
-  };
+  }, [refreshAccessToken, removeTokens]);
 
   const fetchBankDetails = useCallback(async (companyName = '') => {
     setIsLoading(true);
@@ -132,8 +155,14 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
         method: 'get',
         url: `http://localhost:5000/api/bank-details/${id}`
       });
+      console.log('🔍 Fetched bank detail:', response.data);
+      console.log('🔍 Original QR Code URL:', response.data.qrCodeUrl);
+      
       setBankDetails(response.data);
-      setPreviewQrCode(response.data.qrCodeUrl || '');
+      // Set QR code URL with proper server address
+      const fullQrCodeUrl = getFullQrCodeUrl(response.data.qrCodeUrl);
+      console.log('🔍 Full QR Code URL:', fullQrCodeUrl);
+      setPreviewQrCode(fullQrCodeUrl);
       setIsEditing(true);
     } catch (error) {
       setMessage({ 
@@ -148,15 +177,16 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
 
   useEffect(() => {
     const token = getLocalStorageItem('token');
-    const refreshToken = getLocalStorageItem('refreshToken');
-    console.log('Checking tokens on mount:', { token: !!token, refreshToken: !!refreshToken });
-    setTokenStatus({ token: !!token, refreshToken: !!refreshToken });
-    if (!token || !refreshToken) {
+    const role = (localStorage.getItem('role') || '').toLowerCase();
+    console.log('Checking tokens on mount:', { token: !!token, role });
+    if (!token || role !== 'superadmin') {
       setMessage({ type: 'error', text: 'Please log in to access this page.' });
-      // setTimeout(() => window.location.href = '/login', 2000);
       return;
     }
-    fetchBankDetails();
+    // Only fetch if we have valid authentication
+    if (token && role === 'superadmin') {
+      fetchBankDetails();
+    }
   }, [fetchBankDetails]);
 
   useEffect(() => {
@@ -202,7 +232,7 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
   };
 
   const handleEdit = (detail) => {
-    fetchBankDetailById(detail._id);
+    fetchBankDetailById(detail.id || detail._id);
   };
 
   const handleSubmit = async (e) => {
@@ -216,11 +246,13 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
       if (qrCode) {
         formData.append('qrCode', qrCode);
       }
+      // Add QR code generation preference
+      formData.append('generateQR', generateQR);
 
-      const response = await makeApiRequest({
+      await makeApiRequest({
         method: isEditing ? 'put' : 'post',
         url: isEditing 
-          ? `http://localhost:5000/api/bank-details/${bankDetails._id}`
+          ? `http://localhost:5000/api/bank-details/${bankDetails.id || bankDetails._id}`
           : 'http://localhost:5000/api/bank-details',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -255,6 +287,30 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
       setMessage({ 
         type: 'error', 
         text: error.response?.data?.message || 'Failed to delete bank details' 
+      });
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGenerateQR = async (id, type = 'combined') => {
+    setIsLoading(true);
+    try {
+      await makeApiRequest({
+        method: 'post',
+        url: `http://localhost:5000/api/bank-details/${id}/generate-qr`,
+        data: { type },
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      setMessage({ type: 'success', text: `${type.toUpperCase()} QR code generated successfully!` });
+      fetchBankDetails();
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch (error) {
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || 'Failed to generate QR code' 
       });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } finally {
@@ -313,6 +369,27 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
             <label>UPI ID</label>
             <input type="text" name="upiId" value={bankDetails.upiId} onChange={handleInputChange} />
           </div>
+          <div className="form-group">
+            <label>QR Code Generation</label>
+            <select 
+              value={generateQR} 
+              onChange={(e) => setGenerateQR(e.target.value)}
+              disabled={!!qrCode}
+            >
+              <option value="combined">Auto Generate Combined (UPI + Bank)</option>
+              <option value="upi">Auto Generate UPI Only</option>
+              <option value="bank">Auto Generate Bank Account Only</option>
+              <option value="none">Manual Upload Only</option>
+            </select>
+            {qrCode && (
+              <small style={{ color: '#666', fontSize: '12px' }}>
+                Manual upload selected - auto generation disabled
+              </small>
+            )}
+          </div>
+        </div>
+
+        <div className="input-row">
           <div className="form-group qr-code-upload">
             <label>QR Code for Payments <FaQrcode /></label>
            <div className="qr-code-preview">
@@ -328,7 +405,7 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
           }}
           title="Remove QR"
         >
-<i class="fa-solid fa-xmark"></i>       
+        <i className="fa-solid fa-xmark"></i>       
  </button>
       </div>
       <label className="upload-btn">
@@ -370,16 +447,34 @@ const makeApiRequest = useCallback(async (config, retry = true) => {
             </thead>
             <tbody>
               {existingDetails.map(detail => (
-                <tr key={detail._id}>
+                <tr key={detail.id || detail._id || detail.companyName}>
                   <td>{detail.companyName}</td>
                   <td>{detail.bankName}</td>
                   <td>
                     <button onClick={() => handleEdit(detail)} className="edit-btn" disabled={isLoading}>
                       <FaEdit /> Edit
                     </button>
-                    <button onClick={() => handleDelete(detail._id)} className="delete-btn" disabled={isLoading}>
+                    <button onClick={() => handleDelete(detail.id || detail._id)} className="delete-btn" disabled={isLoading}>
                       <FaTrash /> Delete
                     </button>
+                    <div className="qr-actions">
+                      <button 
+                        onClick={() => handleGenerateQR(detail.id || detail._id, 'combined')} 
+                        className="generate-qr-btn" 
+                        disabled={isLoading}
+                        title="Generate Combined QR"
+                      >
+                        <FaQrcode /> Combined
+                      </button>
+                      <button 
+                        onClick={() => handleGenerateQR(detail.id || detail._id, 'upi')} 
+                        className="generate-qr-btn" 
+                        disabled={isLoading}
+                        title="Generate UPI QR"
+                      >
+                        <FaQrcode /> UPI
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -32,6 +32,11 @@
 .super-admin-panel h2{
   text-align: center;
 }
+.super-admin-dashboard h2,p{
+  text-align: center;
+  color: #000;
+}
+
 .user-info {
   display: flex;
   align-items: center;
@@ -65,7 +70,7 @@
   background-color: #fff; /* Visible background */
   border: 1px solid #ccc;
   border-radius: 4px;
-  padding: 5px;
+  padding: 4px;
 }
 
 .btn-toggle-icon {

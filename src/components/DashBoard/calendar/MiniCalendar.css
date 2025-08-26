@@ -78,15 +78,15 @@
 
 .mini-calend-wrapper {
   width: 100%;
-  max-width: 360px; 
-  min-width: 320px;
+  max-width: 100%; 
+  min-width: auto;
   background: #ffffff;
   padding: 1.2rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   text-align: center;
   box-sizing: border-box;
-  margin: 0 auto;
+  margin: 0;
   overflow: hidden;
 }
 

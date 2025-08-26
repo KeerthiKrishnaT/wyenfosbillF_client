@@ -1,13 +1,12 @@
 /* Container Styles */
 .total-spent {
-  background: #ffffff;
+  background: linear-gradient(to right, #b39eb9,silver); 
   border-radius: 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  padding: 1.8rem;
-  width:80%;
-  max-width: 1000px;
+  width: 100%; /* Use full width */
+  max-width: 100%; /* Allow full width */
   height: 100%;
-  margin-left: 20px;
+  margin: 0; /* Remove margin */
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -155,11 +154,38 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
+.profit-breakdown {
+  margin: 15px 0;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.breakdown-item span {
+  font-weight: 500;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+  font-style: italic;
+}
+
 /* Responsive Design */
 @media (max-width: 600px) {
   .total-spent {
     padding: 1.2rem;
-    width: 90%;
+    width: 100%;
     max-width: 100%;
   }
 

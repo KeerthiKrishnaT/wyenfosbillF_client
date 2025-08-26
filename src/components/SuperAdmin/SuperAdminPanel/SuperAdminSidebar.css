@@ -36,7 +36,8 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: linear-gradient(to right, #b39eb9,silver);  color: #686060;
+  background: linear-gradient(to right, #b39eb9,silver); 
+  color: #686060;
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1rem;
