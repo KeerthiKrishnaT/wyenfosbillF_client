@@ -37,9 +37,13 @@ const PathValidator = ({ children }) => {
   useEffect(() => {
     const currentPath = window.location.pathname + window.location.hash;
     const requiredPath = '/wyenfos_bills/#/wyenfos/4551';
+    const newPath = '/#/wyenfos-bills';
     
-    if (!currentPath.includes('/wyenfos_bills/#/wyenfos/4551')) {
-      window.location.href = requiredPath;
+    // Allow both old and new paths
+    if (!currentPath.includes('/wyenfos_bills/#/wyenfos/4551') && 
+        !currentPath.includes('/#/wyenfos-bills')) {
+      // Redirect to new path instead of old one
+      window.location.href = newPath;
     }
   }, []);
 
@@ -52,7 +56,7 @@ function App() {
 useEffect(() => {
   const socketURL =
     process.env.NODE_ENV === 'production'
-      ? 'wss://wyenfos.in'
+      ? 'wss://wyenfos-in.netlify.app'
       : 'ws://localhost:5000';
 
   socketRef.current = io(socketURL, {
@@ -104,6 +108,7 @@ useEffect(() => {
           <div className="App">
             <Routes>
               <Route path="/" element={<Main />} />
+              <Route path="/wyenfos-bills" element={<Main />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
