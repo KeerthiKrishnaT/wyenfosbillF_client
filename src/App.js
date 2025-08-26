@@ -36,7 +36,6 @@ export const SocketContext = createContext();
 const PathValidator = ({ children }) => {
   useEffect(() => {
     const currentPath = window.location.pathname + window.location.hash;
-    const requiredPath = '/wyenfos_bills/#/wyenfos/4551';
     const newPath = '/#/wyenfos-bills';
     
     // Allow both old and new paths
